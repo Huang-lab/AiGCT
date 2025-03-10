@@ -1,0 +1,22 @@
+aigct.date_util
+===============
+
+.. py:module:: aigct.date_util
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.date_util.now_str_compact
+   aigct.date_util.now_str_basic_format
+
+
+Module Contents
+---------------
+
+.. py:function:: now_str_compact(prefix: str = '')
+
+.. py:function:: now_str_basic_format()
+

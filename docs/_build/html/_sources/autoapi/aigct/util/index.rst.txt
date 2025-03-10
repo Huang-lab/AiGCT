@@ -1,0 +1,53 @@
+aigct.util
+==========
+
+.. py:module:: aigct.util
+
+.. autoapi-nested-parse::
+
+   Utility classes
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.util.ParameterizedSingleton
+   aigct.util.Config
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.util.str_or_list_to_list
+
+
+Module Contents
+---------------
+
+.. py:class:: ParameterizedSingleton
+
+   Classes that wish to behave as threadsafe singletons can inherit from
+   this class. To be used only by classes that have an initialization
+   method that takes parameters. The class must implement an _init_once
+   method instead of the normal __init__ method for initialization.
+   It takes same parameters as __init__ method. By inheriting from this
+   class all instantiations of the subclass will return the same instance.
+
+
+   .. py:attribute:: _instance
+      :value: None
+
+
+
+   .. py:attribute:: _lock
+
+
+.. py:class:: Config(config)
+
+.. py:function:: str_or_list_to_list(str_or_list: str | list[str]) -> list[str]
+

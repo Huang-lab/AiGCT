@@ -1,0 +1,6 @@
+aigct.config
+============
+
+.. py:module:: aigct.config
+
+

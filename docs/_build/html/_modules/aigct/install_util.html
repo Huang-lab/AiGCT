@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.install_util &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aigct.install_util</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aigct.install_util</h1><div class="highlight"><pre>
+<span></span><span class="c1"># import context</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tarfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pkg_resources</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.file_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_folder</span><span class="p">,</span> <span class="n">unique_file_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.container</span><span class="w"> </span><span class="kn">import</span> <span class="n">VEBenchmarkContainer</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">aigct.config</span>
+
+
+<div class="viewcode-block" id="sample_user_scores">
+<a class="viewcode-back" href="../../autoapi/aigct/install_util/index.html#aigct.install_util.sample_user_scores">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_user_scores</span><span class="p">(</span><span class="n">ve_bm_container</span><span class="p">):</span>
+    <span class="n">user_scores_df</span> <span class="o">=</span> <span class="n">ve_bm_container</span><span class="o">.</span><span class="n">_score_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s2">&quot;CANCER&quot;</span><span class="p">,</span> <span class="s2">&quot;REVEL&quot;</span><span class="p">)</span>
+    <span class="n">random_idxs</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">user_scores_df</span><span class="p">))),</span> <span class="mi">2000</span><span class="p">)</span>
+    <span class="n">user_variants</span> <span class="o">=</span> <span class="n">user_scores_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">random_idxs</span><span class="p">]</span>
+    <span class="n">user_variants</span><span class="p">[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_variants</span><span class="p">[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">scor</span><span class="p">:</span> <span class="n">scor</span> <span class="o">+</span> <span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">)</span> <span class="o">*</span>
+                             <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">scor</span> <span class="o">&lt;</span> <span class="mf">0.84</span> <span class="ow">and</span> <span class="n">scor</span> <span class="o">&gt;</span> <span class="mf">0.16</span> <span class="k">else</span> <span class="n">scor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">user_variants</span></div>
+
+
+
+<div class="viewcode-block" id="get_sample_config">
+<a class="viewcode-back" href="../../autoapi/aigct/install_util/index.html#aigct.install_util.get_sample_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_sample_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">open_text</span><span class="p">(</span><span class="n">aigct</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s1">&#39;aigct.yaml.sample&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sample</span><span class="p">:</span>
+    <span class="c1"># with open(&quot;./config/aigct.yaml.sample&quot;) as sample:</span>
+        <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="init_config_file">
+<a class="viewcode-back" href="../../autoapi/aigct/install_util/index.html#aigct.install_util.init_config_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">init_config_file</span><span class="p">(</span><span class="n">config_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+                     <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./analysis_output&quot;</span><span class="p">,</span>
+                     <span class="n">log_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./log&quot;</span><span class="p">):</span>
+    <span class="c1"># create_folder(config_dir)</span>
+    <span class="n">config_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_dir</span><span class="p">,</span> <span class="s2">&quot;aigct.yaml&quot;</span><span class="p">)</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">get_sample_config</span><span class="p">()</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;repository&quot;</span><span class="p">][</span><span class="s2">&quot;root_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_dir</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;output_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_dir</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;log&quot;</span><span class="p">][</span><span class="s2">&quot;dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">log_dir</span>
+    <span class="k">with</span> <span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span>
+            <span class="n">conf_file</span><span class="p">):</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">conf_file</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="init_db">
+<a class="viewcode-back" href="../../autoapi/aigct/install_util/index.html#aigct.install_util.init_db">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">init_db</span><span class="p">(</span><span class="n">conf_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./config&quot;</span><span class="p">):</span>
+    <span class="n">container</span> <span class="o">=</span> <span class="n">VEBenchmarkContainer</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">conf_dir</span><span class="p">,</span> <span class="s2">&quot;aigct.yaml&quot;</span><span class="p">))</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">config</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">source_url</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">version</span>
+    <span class="nb">dir</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">root_dir</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;content-disposition&quot;</span><span class="p">]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;.+filename=((.+).tar.gz)&quot;</span><span class="p">)</span>
+        <span class="n">tar_file</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">header</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">tar_file</span> <span class="o">=</span> <span class="s2">&quot;repo_&quot;</span> <span class="o">+</span> <span class="n">version</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.tar.gz&quot;</span>
+    <span class="n">tar_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">tar_file</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tar_file</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">chunk</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tar_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">archive</span><span class="p">:</span>
+        <span class="n">archive</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="check_install">
+<a class="viewcode-back" href="../../autoapi/aigct/install_util/index.html#aigct.install_util.check_install">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_install</span><span class="p">(</span><span class="n">conf_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./config&quot;</span><span class="p">):</span>
+    <span class="n">container</span> <span class="o">=</span> <span class="n">VEBenchmarkContainer</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">conf_dir</span><span class="p">,</span> <span class="s2">&quot;aigct.yaml&quot;</span><span class="p">))</span>
+    <span class="n">outdir</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">output_dir</span>
+    <span class="n">user_test_vep_scores</span> <span class="o">=</span> <span class="n">sample_user_scores</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
+    <span class="n">analyzer</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">analyzer</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="n">analyzer</span><span class="o">.</span><span class="n">compute_metrics</span><span class="p">(</span>
+                <span class="s2">&quot;CANCER&quot;</span><span class="p">,</span> <span class="n">user_test_vep_scores</span><span class="p">,</span> <span class="n">vep_min_overlap_percent</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">variant_vep_retention_percent</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">list_variants</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">container</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">write_summary</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+    <span class="n">container</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_results</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+    <span class="n">container</span><span class="o">.</span><span class="n">exporter</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">outdir</span><span class="p">)</span></div>
+
+
+
+
+
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

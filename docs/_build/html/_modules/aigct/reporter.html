@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.reporter &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aigct.reporter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aigct.reporter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">VEAnalysisResult</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.repository</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+     <span class="n">VariantEffectScoreRepository</span><span class="p">,</span>
+     <span class="n">VariantEffectLabelRepository</span><span class="p">,</span>
+     <span class="n">VariantEffectSourceRepository</span><span class="p">,</span>
+     <span class="n">VARIANT_PK_COLUMNS</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.date_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">now_str_basic_format</span><span class="p">,</span> <span class="n">now_str_compact</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.file_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">new_line</span>
+
+<div class="viewcode-block" id="VARIANT_EFFECT_SCORE_COLS">
+<a class="viewcode-back" href="../../autoapi/aigct/reporter/index.html#aigct.reporter.VARIANT_EFFECT_SCORE_COLS">[docs]</a>
+<span class="n">VARIANT_EFFECT_SCORE_COLS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">]</span> <span class="o">+</span>\
+    <span class="n">VARIANT_PK_COLUMNS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="VEAnalysisReporter">
+<a class="viewcode-back" href="../../autoapi/aigct/reporter/index.html#aigct.reporter.VEAnalysisReporter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VEAnalysisReporter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Report analysis results&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VEAnalysisReporter._write_metric_dataframe">
+<a class="viewcode-back" href="../../autoapi/aigct/reporter/index.html#aigct.reporter.VEAnalysisReporter._write_metric_dataframe">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_metric_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">metric_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">metric_df</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalysisReporter._write_summary">
+<a class="viewcode-back" href="../../autoapi/aigct/reporter/index.html#aigct.reporter.VEAnalysisReporter._write_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="n">VEAnalysisResult</span><span class="p">):</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Summary metrics for Variant Effect Prediction Benchmark: &quot;</span> <span class="o">+</span>
+                  <span class="n">now_str_basic_format</span><span class="p">())</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Total number of user supplied variants: &quot;</span> <span class="o">+</span>
+                  <span class="nb">str</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">num_user_variants</span><span class="p">))</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Total number of variants across all VEPs in analysis: &quot;</span> <span class="o">+</span>
+                  <span class="nb">str</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">num_variants_included</span><span class="p">))</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">general_metrics</span><span class="p">)</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ROC Metrics&quot;</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span>
+                <span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_metrics</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;ROC_AUC&#39;</span><span class="p">,</span>
+                                                     <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pr_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Precision/Recall Metrics&quot;</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span>
+                <span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">pr_metrics</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;PR_AUC&quot;</span><span class="p">,</span>
+                                                    <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">mwu_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Mann-Whitney U -log10(P value)&quot;</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span>
+                <span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">mwu_metrics</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;NEG_LOG10_MWU_PVAL&quot;</span><span class="p">,</span>
+                                                     <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalysisReporter.write_summary">
+<a class="viewcode-back" href="../../autoapi/aigct/reporter/index.html#aigct.reporter.VEAnalysisReporter.write_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="n">VEAnalysisResult</span><span class="p">,</span>
+                      <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a report summarizing the results of an analysis. It will</span>
+<span class="sd">        be written either to the screen or to a file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        results : VEAnalysisResult</span>
+<span class="sd">            Object containing the results of an analysis.</span>
+<span class="sd">        dir : str, optional</span>
+<span class="sd">            Directory to place the report file. The file name will</span>
+<span class="sd">            begin with variant_bm_summary and suffixed</span>
+<span class="sd">            by a unique timestamp. If not specified will print to the</span>
+<span class="sd">            screen.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">now_str_compact</span><span class="p">(</span><span class="s2">&quot;variant_bm_summary&quot;</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_summary</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_summary</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span></div>
+</div>
+
+        
+        
+        
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

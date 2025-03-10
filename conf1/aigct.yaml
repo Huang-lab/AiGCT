@@ -1,0 +1,43 @@
+log:
+  dir: ./log1
+output_dir: ./output1
+plot:
+  bbox_inches: tight
+  file_dpi: 300
+  line_style: solid
+  line_width: 2
+  mwu_bar:
+    label_size: 15
+    num_bars_per_plot: 10
+    title: Mann Whitney U
+    title_font_size: 20
+    x_label_font_size: 15
+    xtick_rotation: 60
+    xtick_rotation_mode: anchor
+    y_label_font_size: 15
+  roc_pr_line:
+    label_size: 20
+    legend_font_size: 10
+    legend_line_width: 3.0
+    num_curves_per_plot: 10
+    pr_title: Precision/Recall
+    roc_title: ROC Curve
+    title_font_size: 30
+    x_axis_font_size: 25
+    y_axis_font_size: 25
+  sys_ves_colors:
+  - maroon
+  - darkkhaki
+  - sandybrown
+  - orange
+  - yellow
+  - green
+  - lime
+  - aqua
+  - blue
+  - violet
+  user_ves_color: red
+repository:
+  root_dir: ./data1
+  source_url: https://mtsinai-my.sharepoint.com/:u:/r/personal/kuan-lin_huang_mssm_edu/Documents/Huang_lab/manuscripts/AIPrecisionGenomics/demo/aigct-0.1a1.dev3.tar.gz?csf=1&web=1&e=Wenb4L
+  version: 0.1.0.dev1

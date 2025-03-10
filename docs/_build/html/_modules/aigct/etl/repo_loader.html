@@ -1,0 +1,643 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.etl.repo_loader &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aigct.etl.repo_loader</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aigct.etl.repo_loader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module description here</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..file_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_folder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..date_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">now_str_compact</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pd_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">filter_dataframe_by_list</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..repository</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DATA_FOLDER</span><span class="p">,</span>
+    <span class="n">TASK_FOLDERS</span><span class="p">,</span>
+    <span class="n">TABLE_DEFS</span><span class="p">,</span>
+    <span class="n">RepoSessionContext</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..util</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+
+<span class="c1"># DATA_FOLDER = &quot;data1&quot;</span>
+<span class="c1"># TASK_FOLDERS = [os.path.join(DATA_FOLDER, task) for task in [&quot;CANCER&quot;, &quot;ADRD&quot;,</span>
+<span class="c1">#                                                              &quot;CHD&quot;, &quot;DDD&quot;]]</span>
+
+
+<div class="viewcode-block" id="COLUMN_NAME_MAP">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.COLUMN_NAME_MAP">[docs]</a>
+<span class="n">COLUMN_NAME_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;chr&quot;</span><span class="p">:</span> <span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="s2">&quot;POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="s2">&quot;REFERENCE_NUCLEOTIDE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;alt&quot;</span><span class="p">:</span> <span class="s2">&quot;ALTERNATE_NUCLEOTIDE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aaref&quot;</span><span class="p">:</span> <span class="s2">&quot;REFERENCE_AMINO_ACID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aaalt&quot;</span><span class="p">:</span> <span class="s2">&quot;ALTERNATE_AMINO_ACID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aapos&quot;</span><span class="p">:</span> <span class="s2">&quot;AMINO_ACID_POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rs_dbSNP&quot;</span><span class="p">:</span> <span class="s2">&quot;RS_DBSNP&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hg19_chr&quot;</span><span class="p">:</span> <span class="s2">&quot;PRIOR_CHROMOSOME&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hg19_pos&quot;</span><span class="p">:</span> <span class="s2">&quot;PRIOR_POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hg18_chr&quot;</span><span class="p">:</span> <span class="s2">&quot;PRIOR_PRIOR_CHROMOSOME&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;hg18_pos&quot;</span><span class="p">:</span> <span class="s2">&quot;PRIOR_PRIOR_POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;genename&quot;</span><span class="p">:</span> <span class="s2">&quot;GENE_SYMBOL&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Ensembl_geneid&quot;</span><span class="p">:</span> <span class="s2">&quot;ENSEMBL_GENE_ID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Ensembl_transcriptid&quot;</span><span class="p">:</span> <span class="s2">&quot;ENSEMBL_TRANSCRIPT_ID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Ensembl_proteinid&quot;</span><span class="p">:</span> <span class="s2">&quot;ENSEMBL_PROTEIN_ID&quot;</span>
+<span class="p">}</span></div>
+
+<div class="viewcode-block" id="VEP_COLUMN_LIST">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.VEP_COLUMN_LIST">[docs]</a>
+<span class="n">VEP_COLUMN_LIST</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;REVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;REVEL_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;REVEL_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;GMVP&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;gMVP_score&quot;</span><span class="p">,</span> 
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;gMVP_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;VAR_R&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_R_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_R_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;VAR_ER&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_ER_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_ER_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;VAR_RL&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_R_LOO_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_R_LOO_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;VAR_ERL&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_ER_LOO_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VARITY_ER_LOO_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;ESM1B&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;ESM1b_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;ESM1b_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;EVE&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;EVE_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;EVE_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;ALPHAM&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;AlphaMissense_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;AlphaMissense_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;SIFT&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;SIFT_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;SIFT_converted_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;SIFT4G&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;SIFT4G_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;SIFT4G_converted_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;POLYP2HDIV&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Polyphen2_HDIV_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Polyphen2_HDIV_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;POLYP2HVAR&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Polyphen2_HVAR_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Polyphen2_HVAR_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;LRT&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;LRT_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;LRT_converted_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;MUTTASTE&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MutationTaster_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MutationTaster_converted_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;MUTASSESS&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MutationAssessor_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MutationAssessor_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;FATHMM&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;FATHMM_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;FATHMM_converted_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PROVEAN&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;PROVEAN_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;PROVEAN_converted_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;VEST4&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VEST4_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;VEST4_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;METASVM&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MetaSVM_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MetaSVM_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;METALR&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MetaLR_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MetaLR_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;METARNN&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MetaRNN_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MetaRNN_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;MCAP&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;M_CAP_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;M_CAP_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;MUTPRED&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MutPred_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MutPred_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;MVP&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MVP_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MVP_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;MPC&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MPC_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;MPC_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PRIMAI&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;PrimateAI_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;PrimateAI_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;DEOGEN2&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;DEOGEN2_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;DEOGEN2_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;BAYESDAAF&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;BayesDel_addAF&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;BayesDel_addAF_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;BAYESDNAF&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;BayesDel_noAF_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;BayesDel_noAF_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;CLINPRED&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;ClinPred_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;ClinPred_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;LISTS2&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;LIST_S2_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;LIST_S2_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;CADD&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;CADD_raw&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;CADD_raw_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;DANN&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;DANN_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;DANN_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;FATHMMMLK&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;fathmm_MKL_coding_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;fathmm_MKL_coding_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;FATHMMXF&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;fathmm_XF_coding_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;fathmm_XF_coding_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;EIGEN&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Eigen_raw_coding&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Eigen_raw_coding_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;EIGENPC&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Eigen_PC_raw_coding&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Eigen_PC_raw_coding_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;GENCANYON&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;GenoCanyon_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;GenoCanyon_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;INTFITCONS&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Integrated_fitCons_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;Integrated_fitCons_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;GM12878FC&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;GM12878_fitCons_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;GM12878_fitCons_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;H1HESCFC&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;H1_hESC_fitCons_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;H1_hESC_fitCons_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;HUVECFC&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;HUVEC_fitCons_score&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;HUVEC_fitCons_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;LINSIGHT&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;LINSIGHT&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;LINSIGHT_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;GERPRS&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;GERP_RS&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;GERP_RS_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PHP100VERT&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phyloP100way_vertebrate&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phyloP100way_vertebrate_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PHP470MAM&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phyloP470way_mammalian&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phyloP470way_mammalian_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PHP17PRI&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phyloP17way_primate&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phyloP17way_primate_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PHC100VERT&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phastCons100way_vertebrate&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phastCons100way_vertebrate_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PHC470MAM&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phastCons470way_mammalian&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phastCons470way_mammalian_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;PHC17PRI&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phastCons17way_primate&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;phastCons17way_primate_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;SIPHY29LO&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;SiPhy_29way_logOdds&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;SiPhy_29way_logOdds_rankscore&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;CODE&quot;</span><span class="p">:</span> <span class="s2">&quot;BSTAT&quot;</span><span class="p">,</span> <span class="s2">&quot;raw_score&quot;</span><span class="p">:</span> <span class="s2">&quot;bStatistic&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;rank_score&quot;</span><span class="p">:</span> <span class="s2">&quot;bStatistic_converted_rankscore&quot;</span><span class="p">}</span>
+<span class="p">]</span></div>
+
+<div class="viewcode-block" id="VARIANT_EFFECT_SOURCE_DATA">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.VARIANT_EFFECT_SOURCE_DATA">[docs]</a>
+<span class="n">VARIANT_EFFECT_SOURCE_DATA</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s2">&quot;REVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;REVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;REVEL&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;GVMP&quot;</span><span class="p">,</span> <span class="s2">&quot;gVMP&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;gVMP&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;VAR_R&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_R&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_R&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;VAR_ER&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_ER&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_ER&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;VAR_RL&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_R_LOO&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_R_LOO&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;VAR_ERL&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_ER_LOO&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;VARITY_ER_LOO&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;ESM1b&quot;</span><span class="p">,</span> <span class="s2">&quot;ESM1b&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;ESM1b&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;EVE&quot;</span><span class="p">,</span> <span class="s2">&quot;EVE&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;EVE&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;ALPHAM&quot;</span><span class="p">,</span> <span class="s2">&quot;AlphaMissense&quot;</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="s2">&quot;AlphaMissense&quot;</span><span class="p">],</span>
+<span class="p">]</span></div>
+
+<div class="viewcode-block" id="VARIANT_DATA_SOURCE_DATA">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.VARIANT_DATA_SOURCE_DATA">[docs]</a>
+<span class="n">VARIANT_DATA_SOURCE_DATA</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s2">&quot;GNOMGE&quot;</span><span class="p">,</span> <span class="s2">&quot;GNOMAD_GENOMES&quot;</span><span class="p">,</span> <span class="s2">&quot;GNOMAD GENOMES&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;GNOMEX&quot;</span><span class="p">,</span> <span class="s2">&quot;GNOMAD_EXOMES&quot;</span><span class="p">,</span> <span class="s2">&quot;GNOMAD EXOMES&quot;</span><span class="p">]</span>
+<span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="RepositoryLoader">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RepositoryLoader</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+                 <span class="n">repo_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">):</span>
+<div class="viewcode-block" id="RepositoryLoader._log_folder">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._log_folder">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_folder</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">dir</span></div>
+
+<div class="viewcode-block" id="RepositoryLoader._repo_context">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._repo_context">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repo_context</span> <span class="o">=</span> <span class="n">repo_context</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader._convert_dot_to_nan">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._convert_dot_to_nan">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_convert_dot_to_nan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">return</span> <span class="n">val</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader._derive_variant_effect_source_columns">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._derive_variant_effect_source_columns">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_derive_variant_effect_source_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+        <span class="n">source_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;(.+)_rankscore&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;rank_score&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">],</span> <span class="n">source_name</span><span class="p">,</span> <span class="s2">&quot;VEP&quot;</span><span class="p">,</span> <span class="n">source_name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader._task_full_path_name">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._task_full_path_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_task_full_path_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader.init_variant_task">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader.init_variant_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_variant_task</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">create_folder</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">task_folder</span> <span class="ow">in</span> <span class="n">TASK_FOLDERS</span><span class="p">:</span>
+            <span class="n">create_folder</span><span class="p">(</span><span class="n">task_folder</span><span class="p">)</span>
+
+        <span class="n">variant_effect_task_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="s1">&#39;CANCER&#39;</span><span class="p">,</span> <span class="s1">&#39;CANCER&#39;</span><span class="p">,</span> <span class="s1">&#39;Cancer&#39;</span><span class="p">,</span> <span class="s1">&#39;Cancer&#39;</span><span class="p">]]),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_TASK&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span>
+            <span class="p">)</span>
+        <span class="n">variant_effect_task_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                      <span class="s2">&quot;variant_task.csv&quot;</span><span class="p">),</span>
+                                      <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader.init_variant_effect_source">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader.init_variant_effect_source">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_variant_effect_source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">variant_effect_source_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">VEP_COLUMN_LIST</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            columns=[&#39;VEP&#39;, &#39;RAW_SCORE&#39;, &#39;RANK_SCORE&#39;]</span>
+<span class="sd">        )</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ves_columns</span> <span class="o">=</span> <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_SOURCE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">ves_file_name</span> <span class="o">=</span> <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_SOURCE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">file_name</span>
+        <span class="n">variant_effect_source_df</span><span class="p">[</span><span class="n">ves_columns</span><span class="p">]</span> <span class="o">=</span>\
+            <span class="n">variant_effect_source_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_derive_variant_effect_source_columns</span><span class="p">,</span>
+                                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;expand&quot;</span><span class="p">)</span>
+
+        <span class="n">variant_effect_source_df</span><span class="p">[</span><span class="n">ves_columns</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+                         <span class="s2">&quot;variant_effect_source.csv&quot;</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">vds_columns</span> <span class="o">=</span> <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_DATA_SOURCE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">vds_file_name</span> <span class="o">=</span> <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_DATA_SOURCE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">file_name</span>
+        <span class="n">variant_data_source_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">VARIANT_DATA_SOURCE_DATA</span><span class="p">),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">vds_columns</span>
+            <span class="p">)</span>
+        <span class="n">variant_data_source_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                      <span class="n">vds_file_name</span><span class="p">),</span>
+                                      <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader._build_excep_where_clause">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._build_excep_where_clause">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_excep_where_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                                  <span class="n">suffixes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a where clause to be used in a DataFrame.query method</span>
+<span class="sd">        where it checks for inequality between any of the columns</span>
+<span class="sd">        in the dataframe. For each column in column_list it constructs</span>
+<span class="sd">        a comparison clause where suffixes[0] is appended to the column</span>
+<span class="sd">        name on the left side of the comparison and suffixes[1] is</span>
+<span class="sd">        appended to the column name on the right side of the comparison.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column_list : list(str)</span>
+<span class="sd">            List of column names to compare.</span>
+<span class="sd">        suffixes : list(str)</span>
+<span class="sd">            A list of 2 suffixes with first suffix to be appended to each column</span>
+<span class="sd">            for left side of comparison and second suffix to be appended to</span>
+<span class="sd">            column name on right side</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">where_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;((&quot;</span> <span class="o">+</span> <span class="n">col</span> <span class="o">+</span> <span class="n">suffixes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.notna() or &quot;</span> <span class="o">+</span>
+                      <span class="n">col</span> <span class="o">+</span> <span class="n">suffixes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.notna()) &amp; &quot;</span> <span class="o">+</span>
+                      <span class="n">col</span> <span class="o">+</span> <span class="n">suffixes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; != &quot;</span> <span class="o">+</span> <span class="n">col</span> <span class="o">+</span> <span class="n">suffixes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                      <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">column_list</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot; or &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">where_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader._excep_file_full_path_name">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._excep_file_full_path_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_excep_file_full_path_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">repo_file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_folder</span><span class="p">,</span> <span class="n">task</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span>
+                     <span class="n">repo_file_name</span><span class="o">.</span><span class="n">removesuffix</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span>
+                     <span class="n">now_str_compact</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader._upsert_repository_file">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._upsert_repository_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_upsert_repository_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">repo_file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">pk_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        General function for updating one of the repository data files</span>
+<span class="sd">        with new data.</span>
+
+<span class="sd">        To update the files we call the _upsert_repository_file method.</span>
+<span class="sd">        This method first checks if the row already exists in the file.</span>
+<span class="sd">        If it doesn&#39;t exist it adds the row. If it does exist it updates</span>
+<span class="sd">        the existing row with the new values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_data : pd.DataFrame</span>
+<span class="sd">            DataFrame containing new data to be loaded.</span>
+<span class="sd">        task : str</span>
+<span class="sd">        columns : list(str)</span>
+<span class="sd">            List of columns in new_data dataframe and in repository data</span>
+<span class="sd">            file. The columns in the data file are inserted into or updated</span>
+<span class="sd">            from the columns in the new_data dataframe.</span>
+<span class="sd">        repo_file_name : str</span>
+<span class="sd">            Name of repository data file to be inserted/updated.</span>
+<span class="sd">        pk_columns: list(str)</span>
+<span class="sd">            List of column names in both new_data and repo_file_name that</span>
+<span class="sd">            uniquely identify a row. We determine if a row in new_data</span>
+<span class="sd">            already exists in repo_file_name by using the values in this</span>
+<span class="sd">            combination of columns to look up a row in repo file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">repo_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_full_path_name</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">repo_file_name</span><span class="p">)</span>
+        <span class="c1"># Create a new dataframe selecting only the required columns</span>
+        <span class="n">new_data_df</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span>
+        <span class="c1"># If the repo file doesn&#39;t exist we simply populate it from</span>
+        <span class="c1"># the new_data_df and return.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">repo_file</span><span class="p">):</span>
+            <span class="n">new_data_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">repo_file</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="c1"># Read repository file into a dataframe</span>
+        <span class="n">repo_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">repo_file</span><span class="p">)</span>
+
+        <span class="c1"># Do a merge between data in repo data frame and new data</span>
+        <span class="c1"># to find what rows already exist in the repo file using the</span>
+        <span class="c1"># pk_columns</span>
+        <span class="n">df_merge</span> <span class="o">=</span> <span class="n">repo_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">new_data_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+                                 <span class="n">on</span><span class="o">=</span><span class="n">pk_columns</span><span class="p">)</span>
+        <span class="n">non_pk_columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">))</span>
+
+        <span class="c1"># Build a where clause to find existing rows in repo file</span>
+        <span class="c1"># where the values of the non pk columns in new data differ</span>
+        <span class="c1"># from the values in the repo file. We then write these</span>
+        <span class="c1"># records to an exceptions file.</span>
+        <span class="n">exception_where</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_excep_where_clause</span><span class="p">(</span><span class="n">non_pk_columns</span><span class="p">,</span>
+                                                         <span class="p">[</span><span class="s2">&quot;_x&quot;</span><span class="p">,</span> <span class="s2">&quot;_y&quot;</span><span class="p">])</span>
+        <span class="n">exception_df</span> <span class="o">=</span> <span class="n">df_merge</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">exception_where</span><span class="p">)</span>
+        <span class="n">exception_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_excep_file_full_path_name</span><span class="p">(</span>
+                <span class="n">task</span><span class="p">,</span> <span class="s2">&quot;upsert_&quot;</span> <span class="o">+</span> <span class="n">repo_file_name</span> <span class="o">+</span> <span class="s2">&quot;_exceptions&quot;</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Another less concise way to do an upsert</span>
+
+<span class="sd">        repo_df.update(repo_df[pk_columns]</span>
+<span class="sd">                        .merge(new_data_df, on=pk_columns, how=&quot;left&quot;))</span>
+<span class="sd">        left_join_df = new_data_df.merge(repo_df, how=&quot;left&quot;,</span>
+<span class="sd">                                on=pk_columns,</span>
+<span class="sd">                                indicator=True, suffixes=[None, &quot;_yyyy&quot;])</span>
+<span class="sd">        repo_df = pd.concat(repo_df,</span>
+<span class="sd">                            left_join_df[left_join_df[&quot;_merge&quot;] == &quot;left_only&quot;]</span>
+<span class="sd">                            [columns])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># The combine_first method will do following:</span>
+        <span class="c1"># For each row in new_data_df that doesn&#39;t exist in repo_df based</span>
+        <span class="c1"># upon the values in pk_columns, it will insert that row into</span>
+        <span class="c1"># repo_df. For each row in new_data_df that does exist in repo_df</span>
+        <span class="c1"># based on matching values in pk_columns, it will update the</span>
+        <span class="c1"># row in repo_df with the values from new_data_df.</span>
+        <span class="c1"># The pk_columns must be the index of both data frames.</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;here&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">repo_file_name</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">repo_df</span><span class="p">[</span><span class="n">pk_columns</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+
+        <span class="n">neg</span> <span class="o">=</span> <span class="n">new_data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">[</span><span class="n">reg</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neg</span><span class="p">[</span><span class="n">neg</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">new_data_df</span> <span class="o">=</span> <span class="n">new_data_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+        <span class="n">new_data_df_grouped</span> <span class="o">=</span> <span class="n">new_data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="n">new_data_dup_pks</span> <span class="o">=</span> <span class="n">new_data_df_grouped</span><span class="p">[</span><span class="n">new_data_df_grouped</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_data_dup_pks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">new_data_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span>
+                <span class="n">new_data_df</span><span class="p">,</span> <span class="n">new_data_dup_pks</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span>
+                <span class="n">pk_columns</span><span class="p">,</span> <span class="n">in_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">neg</span> <span class="o">=</span> <span class="n">new_data_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">neg</span><span class="p">[</span><span class="n">neg</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">repo_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">new_data_df</span> <span class="o">=</span> <span class="n">new_data_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span>
+        <span class="n">repo_df</span> <span class="o">=</span> <span class="n">repo_df</span><span class="o">.</span><span class="n">combine_first</span><span class="p">(</span><span class="n">new_data_df</span><span class="p">)</span>
+
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">repo_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[</span><span class="n">pk_columns</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">pk_columns</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reg</span><span class="p">[</span><span class="n">reg</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">repo_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">repo_file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RepositoryLoader.load_variant_file">
+<a class="viewcode-back" href="../../../autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader.load_variant_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_variant_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">genome_assembly</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">data_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">file_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">binary_label</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prior_genome_assembly</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                          <span class="n">prior_prior_genome_assembly</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function for loading data from a data file containing data as it is</span>
+<span class="sd">        downloaded from a source data site into our platform repository data</span>
+<span class="sd">        files. The input data_file is assumed to contain one row per variant</span>
+<span class="sd">        along with the label. There will be separate column in that row for</span>
+<span class="sd">        each vep score. For each row in the input data_file we populate</span>
+<span class="sd">        the following files:</span>
+
+<span class="sd">        - variant.csv - We create one row.</span>
+<span class="sd">        - variant_effect_label.csv - We create one row with the label and</span>
+<span class="sd">            other informational columns.</span>
+<span class="sd">        - variant_effect_score.csv - We create one row for each vep score</span>
+<span class="sd">            column. So if we have 5 vep score columns we would create 5</span>
+<span class="sd">            rows in this file.</span>
+
+<span class="sd">        To update the files we call the _upsert_repository_file method.</span>
+<span class="sd">        This method first checks if the row already exists in the file.</span>
+<span class="sd">        If it doesn&#39;t exist it adds the row. If it does exist it updates</span>
+<span class="sd">        the existing row with the new values.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        genome_assembly : str</span>
+<span class="sd">            Genome assembly, typically hg38</span>
+<span class="sd">        task : str</span>
+<span class="sd">            task code</span>
+<span class="sd">        data_file : str</span>
+<span class="sd">            File containing data to be loaded.</span>
+<span class="sd">        file_folder : str</span>
+<span class="sd">            Location of data_file</span>
+<span class="sd">        data_source: str</span>
+<span class="sd">            Source of the input data_file. i.e. HOTSPOT</span>
+<span class="sd">        binary_label: int</span>
+<span class="sd">            1 or 0. This is the binary label to be assigned to all the</span>
+<span class="sd">            variants in the data_file. The assumption is that all of the</span>
+<span class="sd">            variants in the file have the same label.</span>
+<span class="sd">        prior_genome_assembly : str</span>
+<span class="sd">            Genome assembly prior to genome_assembly that we have chromosome,</span>
+<span class="sd">            position data for. typically hg19</span>
+<span class="sd">        prior_prior_genome_assembly : str</span>
+<span class="sd">            Genome assembly prior to prior_genome_assembly that we have,</span>
+<span class="sd">            chromsome position data for. typically hg18</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">variant_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_folder</span><span class="p">,</span> <span class="n">data_file</span><span class="p">))</span>
+        <span class="n">variant_df</span><span class="p">[</span><span class="s1">&#39;GENOME_ASSEMBLY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">genome_assembly</span>
+        <span class="n">variant_df</span><span class="p">[</span><span class="s2">&quot;RAW_LABEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">variant_df</span><span class="p">[</span><span class="s2">&quot;LABEL_SOURCE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_source</span>
+        <span class="n">variant_df</span><span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">binary_label</span>
+        <span class="k">if</span> <span class="s2">&quot;gnomAD_exomes_AF&quot;</span> <span class="ow">in</span> <span class="n">variant_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">variant_df</span><span class="p">[[</span><span class="s2">&quot;ALLELE_FREQUENCY&quot;</span><span class="p">,</span> <span class="s2">&quot;ALLELE_FREQUENCY_SOURCE&quot;</span><span class="p">]]</span>\
+                <span class="o">=</span> <span class="n">variant_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;gnomAD_exomes_AF&quot;</span><span class="p">],</span> <span class="s2">&quot;GNOMEX&quot;</span><span class="p">]</span> <span class="k">if</span>
+                <span class="ow">not</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;gnomAD_exomes_AF&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span> <span class="k">else</span>
+                <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;gnomAD_genomes_AF&quot;</span><span class="p">],</span> <span class="s2">&quot;GNOMGE&quot;</span><span class="p">]</span> <span class="k">if</span>
+                <span class="ow">not</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;gnomAD_genomes_AF&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span> <span class="k">else</span>
+                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;expand&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">variant_df</span><span class="p">[[</span><span class="s2">&quot;ALLELE_FREQUENCY&quot;</span><span class="p">,</span> <span class="s2">&quot;ALLELE_FREQUENCY_SOURCE&quot;</span><span class="p">]]</span>\
+                <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span>
+
+        <span class="n">variant_df</span> <span class="o">=</span> <span class="n">variant_df</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_convert_dot_to_nan</span><span class="p">)</span>
+        <span class="n">variant_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">COLUMN_NAME_MAP</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">variant_df</span><span class="p">[</span><span class="s2">&quot;PRIOR_GENOME_ASSEMBLY&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">variant_df</span><span class="p">[</span><span class="s1">&#39;PRIOR_CHROMOSOME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">(),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">prior_genome_assembly</span><span class="p">)</span>
+        <span class="n">variant_df</span><span class="p">[</span><span class="s2">&quot;PRIOR_PRIOR_GENOME_ASSEMBLY&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">variant_df</span><span class="p">[</span><span class="s1">&#39;PRIOR_PRIOR_CHROMOSOME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">(),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">prior_prior_genome_assembly</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upsert_repository_file</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># task,</span>
+                                     <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+                                     <span class="s2">&quot;variant.csv&quot;</span><span class="p">,</span>
+                                     <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pk_columns</span><span class="p">)</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create dataframe for populating variant_effect_score.csv file.</span>
+<span class="sd">        For each vep column we create a row in the variant_effect_score_df</span>
+<span class="sd">        dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">variant_effect_score_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_SCORE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vep_columns</span> <span class="ow">in</span> <span class="n">VEP_COLUMN_LIST</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">vep_columns</span><span class="p">[</span><span class="s2">&quot;raw_score&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">variant_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">vep_df</span> <span class="o">=</span> <span class="n">variant_df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">vep_columns</span><span class="p">[</span><span class="s2">&quot;rank_score&quot;</span><span class="p">]</span> <span class="o">+</span>
+                                      <span class="s2">&quot;.notna()&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vep_df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">vep_df</span> <span class="o">=</span> <span class="n">vep_df</span><span class="p">[</span><span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_SCORE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span>
+                            <span class="p">[</span><span class="n">vep_columns</span><span class="p">[</span><span class="s2">&quot;raw_score&quot;</span><span class="p">],</span>
+                             <span class="n">vep_columns</span><span class="p">[</span><span class="s2">&quot;rank_score&quot;</span><span class="p">]]]</span>
+            <span class="n">vep_df</span><span class="p">[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vep_columns</span><span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">]</span>
+            <span class="n">vep_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">vep_columns</span><span class="p">[</span><span class="s2">&quot;raw_score&quot;</span><span class="p">]:</span> <span class="s2">&quot;RAW_SCORE&quot;</span><span class="p">,</span>
+                                   <span class="n">vep_columns</span><span class="p">[</span><span class="s2">&quot;rank_score&quot;</span><span class="p">]:</span> <span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">},</span>
+                          <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">variant_effect_score_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">variant_effect_score_df</span><span class="p">,</span>
+                 <span class="n">vep_df</span><span class="p">[</span><span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_SCORE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upsert_repository_file</span><span class="p">(</span>
+            <span class="n">variant_effect_score_df</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span>
+            <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_SCORE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+            <span class="s2">&quot;variant_effect_score.csv&quot;</span><span class="p">,</span>
+            <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_SCORE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pk_columns</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upsert_repository_file</span><span class="p">(</span>
+            <span class="n">variant_df</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span>
+            <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_LABEL&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+            <span class="s2">&quot;variant_effect_label.csv&quot;</span><span class="p">,</span>
+            <span class="n">TABLE_DEFS</span><span class="p">[</span><span class="s2">&quot;VARIANT_EFFECT_LABEL&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pk_columns</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

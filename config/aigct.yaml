@@ -1,0 +1,55 @@
+---
+
+log:
+  # Log file directory
+  dir: ~/gitrepo/agct_dev/demo/log
+
+# Directory to store output files generated from a benchmark
+# analysis run. For example, the VEAnalysisReporter,
+# VEAnalysisExporter, VEAnalysisPlotter write files there.
+output_dir: ~/gitrepo/agct_dev/demo/output
+
+repository:
+  # Root directory for the repository data .csv files. The
+  # repository "data" directory is a subdirectory off of this directory.
+  # root_dir: ~/gitrepo/agct_dev
+  root_dir: ~/gitrepo/aigct_data1/repo/repo
+  source_url: 
+
+plot:
+  line_width: 2
+  line_style: solid
+  user_ves_color: red
+  sys_ves_colors:
+    - maroon
+    - darkkhaki
+    - sandybrown
+    - orange
+    - yellow
+    - green
+    - lime
+    - aqua
+    - blue
+    - violet
+  file_dpi: 300
+  bbox_inches: tight
+  roc_pr_line:
+    num_curves_per_plot: 10
+    roc_title: ROC Curve
+    pr_title: Precision/Recall
+    x_axis_font_size: 25
+    y_axis_font_size: 25
+    label_size: 20
+    title_font_size: 30
+    legend_font_size: 10
+    legend_line_width: 3.0
+  mwu_bar:
+    num_bars_per_plot: 10
+    title: Mann Whitney U
+    title_font_size: 20
+    y_label_font_size: 15
+    x_label_font_size: 15
+    label_size: 15
+    xtick_rotation: 60
+    xtick_rotation_mode: anchor
+

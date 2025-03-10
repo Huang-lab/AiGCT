@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Dictionary &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="autoapi/index.html" />
+    <link rel="prev" title="Database Query Guide" href="query_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide.html">User Guides</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-task">Table: VARIANT_TASK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-data-source">Table: VARIANT_DATA_SOURCE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-effect-source">Table: VARIANT_EFFECT_SOURCE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant">Table: VARIANT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-effect-label">Table: VARIANT_EFFECT_LABEL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-effect-score">Table: VARIANT_EFFECT_SCORE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-filter">Table: VARIANT_FILTER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-filter-gene">Table: VARIANT_FILTER_GENE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#table-variant-filter-variant">Table: VARIANT_FILTER_VARIANT</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Data Dictionary</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/data_dictionary.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-dictionary">
+<h1>Data Dictionary<a class="headerlink" href="#data-dictionary" title="Link to this heading"></a></h1>
+<p>We describe the logical data model of our database using standard relational
+database terminology such as table, column, and primary key.
+The primary key is the collection of columns in a table that uniquely
+identify a row in that table. Columns tagged with a (PK) symbol are part
+of the primary key of the table.</p>
+<section id="table-variant-task">
+<h2>Table: VARIANT_TASK<a class="headerlink" href="#table-variant-task" title="Link to this heading"></a></h2>
+<p>Master list of tasks (categories of variant effect data).</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>CODE (PK) - Unique code for each task</p></li>
+<li><p>NAME</p></li>
+<li><p>SOURCE_TYPE</p></li>
+<li><p>DESCRIPTION</p></li>
+</ul>
+</section>
+<section id="table-variant-data-source">
+<h2>Table: VARIANT_DATA_SOURCE<a class="headerlink" href="#table-variant-data-source" title="Link to this heading"></a></h2>
+<p>Master list of sources of data.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>CODE (PK) - Unique code for each source</p></li>
+<li><p>NAME</p></li>
+<li><p>DESCRIPTION</p></li>
+</ul>
+</section>
+<section id="table-variant-effect-source">
+<h2>Table: VARIANT_EFFECT_SOURCE<a class="headerlink" href="#table-variant-effect-source" title="Link to this heading"></a></h2>
+<p>Master list of sources of variant effect score data. Currently all score data
+originates from a VEP.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>CODE (PK) - Unique code for each source</p></li>
+<li><p>NAME</p></li>
+<li><p>SOURCE_TYPE - Currently, all values are VEP</p></li>
+<li><p>DESCRIPTION</p></li>
+</ul>
+</section>
+<section id="table-variant">
+<h2>Table: VARIANT<a class="headerlink" href="#table-variant" title="Link to this heading"></a></h2>
+<p>Master list of variants.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>GENOME_ASSEMBLY (PK) - Currently, hg38 for all rows.</p></li>
+<li><p>CHROMOSOME (PK)</p></li>
+<li><p>POSITION (PK)</p></li>
+<li><p>REFERENCE_NUCLEOTIDE (PK)</p></li>
+<li><p>ALTERNATE_NUCLEOTIDE (PK)</p></li>
+<li><p>PRIOR_GENOME_ASSEMBLY</p></li>
+<li><p>PRIOR_CHROMOSOME</p></li>
+<li><p>PRIOR_POSITION</p></li>
+<li><p>PRIOR_PRIOR_GENOME_ASSEMBLY</p></li>
+<li><p>PRIOR_PRIOR_CHROMOSOME</p></li>
+<li><p>PRIOR_PRIOR_POSITION</p></li>
+<li><p>REFERENCE_AMINO_ACID</p></li>
+<li><p>ALTERNATE_AMINO_ACID</p></li>
+<li><p>AMINO_ACID_POSITION</p></li>
+<li><p>RS_DBSNP</p></li>
+<li><p>GENE_SYMBOL</p></li>
+<li><p>ENSEMBL_GENE_ID</p></li>
+<li><p>ENSEMBL_TRANSCRIPT_ID</p></li>
+<li><p>ENSEMBL_PROTEIN_ID</p></li>
+<li><p>ALLELE_FREQUENCY_SOURCE</p></li>
+<li><p>ALLELE_FREQUENCY</p></li>
+</ul>
+</section>
+<section id="table-variant-effect-label">
+<h2>Table: VARIANT_EFFECT_LABEL<a class="headerlink" href="#table-variant-effect-label" title="Link to this heading"></a></h2>
+<p>Variant labels organized by task.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>TASK_CODE (PK)</p></li>
+<li><p>GENOME_ASSEMBLY (PK) - Currently, hg38 for all rows.</p></li>
+<li><p>CHROMOSOME (PK)</p></li>
+<li><p>POSITION (PK)</p></li>
+<li><p>REFERENCE_NUCLEOTIDE (PK)</p></li>
+<li><p>ALTERNATE_NUCLEOTIDE (PK)</p></li>
+<li><p>LABEL_SOURCE</p></li>
+<li><p>RAW_LABEL</p></li>
+<li><p>BINARY_LABEL</p></li>
+</ul>
+</section>
+<section id="table-variant-effect-score">
+<h2>Table: VARIANT_EFFECT_SCORE<a class="headerlink" href="#table-variant-effect-score" title="Link to this heading"></a></h2>
+<p>Variant effect prediction scores organized by task.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>TASK_CODE (PK)</p></li>
+<li><p>GENOME_ASSEMBLY (PK) - Currently, hg38 for all rows.</p></li>
+<li><p>CHROMOSOME (PK)</p></li>
+<li><p>POSITION (PK)</p></li>
+<li><p>REFERENCE_NUCLEOTIDE (PK)</p></li>
+<li><p>ALTERNATE_NUCLEOTIDE (PK)</p></li>
+<li><p>SCORE_SOURCE</p></li>
+<li><p>RAW_SCORE</p></li>
+<li><p>RANK_SCORE - Normalized score, i.e. value between 0-1</p></li>
+</ul>
+</section>
+<section id="table-variant-filter">
+<h2>Table: VARIANT_FILTER<a class="headerlink" href="#table-variant-filter" title="Link to this heading"></a></h2>
+<p>Table of system supplied named filters that can be used by the user to restrict the set
+of variants to be retrieved or to be used in a benchmarking analysis. Filters are
+defined in terms of a list of genes and/or variants to be included or excluded.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>CODE (PK) - Unique code for each filter</p></li>
+<li><p>NAME</p></li>
+<li><p>INCLUDE_GENES - Y/N, include or exclude genes listed in VARIANT_FILTER_GENE table.</p></li>
+<li><p>INCLUDE_VARIANTS - Y/N, include or exclude variants listed in VARIANT_FILTER_VARIANT table.</p></li>
+</ul>
+</section>
+<section id="table-variant-filter-gene">
+<h2>Table: VARIANT_FILTER_GENE<a class="headerlink" href="#table-variant-filter-gene" title="Link to this heading"></a></h2>
+<p>Lists the set of genes to be included or excluded by a filter in the
+VARIANT_FILTER table.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>FILTER_CODE (PK) - Refers to a CODE in the variant_filter table.</p></li>
+<li><p>GENE_SYMBOL (PK)</p></li>
+</ul>
+</section>
+<section id="table-variant-filter-variant">
+<h2>Table: VARIANT_FILTER_VARIANT<a class="headerlink" href="#table-variant-filter-variant" title="Link to this heading"></a></h2>
+<p>Lists the set of variants to be included or excluded by a filter in the
+VARIANT_FILTER table.</p>
+<p>Columns:</p>
+<ul class="simple">
+<li><p>FILTER_CODE (PK) - Refers to a CODE in the variant_filter table.</p></li>
+<li><p>GENOME_ASSEMBLY (PK)</p></li>
+<li><p>CHROMOSOME (PK)</p></li>
+<li><p>POSITION (PK)</p></li>
+<li><p>REFERENCE_NUCLEOTIDE (PK)</p></li>
+<li><p>ALTERNATE_NUCLEOTIDE (PK)</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="query_guide.html" class="btn btn-neutral float-left" title="Database Query Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="autoapi/index.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

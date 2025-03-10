@@ -1,0 +1,187 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.pd_util &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="aigct.plot_util" href="../plot_util/index.html" />
+    <link rel="prev" title="aigct.model" href="../model/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">aigct</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../analyzer/index.html">aigct.analyzer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../check_install/index.html">aigct.check_install</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../config/index.html">aigct.config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../container/index.html">aigct.container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../context/index.html">aigct.context</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../date_util/index.html">aigct.date_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../etl/index.html">aigct.etl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../exporter/index.html">aigct.exporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../file_util/index.html">aigct.file_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../init_app/index.html">aigct.init_app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../install_db/index.html">aigct.install_db</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../install_util/index.html">aigct.install_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../model/index.html">aigct.model</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aigct.pd_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plot_util/index.html">aigct.plot_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plotter/index.html">aigct.plotter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../query/index.html">aigct.query</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../repo_qc/index.html">aigct.repo_qc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reporter/index.html">aigct.reporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../repository/index.html">aigct.repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../util/index.html">aigct.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">aigct</a></li>
+      <li class="breadcrumb-item active">aigct.pd_util</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/aigct/pd_util/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-aigct.pd_util">
+<span id="aigct-pd-util"></span><h1>aigct.pd_util<a class="headerlink" href="#module-aigct.pd_util" title="Link to this heading"></a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.pd_util.RELATIONAL_OPERATORS" title="aigct.pd_util.RELATIONAL_OPERATORS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RELATIONAL_OPERATORS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.pd_util.filter_dataframe_by_list" title="aigct.pd_util.filter_dataframe_by_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_dataframe_by_list</span></code></a>(→ pandas.DataFrame)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.pd_util.build_dataframe_where_clause" title="aigct.pd_util.build_dataframe_where_clause"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_dataframe_where_clause</span></code></a>(→ str)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="aigct.pd_util.RELATIONAL_OPERATORS">
+<span class="sig-prename descclassname"><span class="pre">aigct.pd_util.</span></span><span class="sig-name descname"><span class="pre">RELATIONAL_OPERATORS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['==',</span> <span class="pre">'!=',</span> <span class="pre">'&gt;',</span> <span class="pre">'&lt;',</span> <span class="pre">'&gt;=',</span> <span class="pre">'&lt;=']</span></em><a class="reference internal" href="../../../_modules/aigct/pd_util.html#RELATIONAL_OPERATORS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.pd_util.RELATIONAL_OPERATORS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aigct.pd_util.filter_dataframe_by_list">
+<span class="sig-prename descclassname"><span class="pre">aigct.pd_util.</span></span><span class="sig-name descname"><span class="pre">filter_dataframe_by_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_frame</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_merge_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_col_name_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/pd_util.html#filter_dataframe_by_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.pd_util.filter_dataframe_by_list" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aigct.pd_util.build_dataframe_where_clause">
+<span class="sig-prename descclassname"><span class="pre">aigct.pd_util.</span></span><span class="sig-name descname"><span class="pre">build_dataframe_where_clause</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/aigct/pd_util.html#build_dataframe_where_clause"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.pd_util.build_dataframe_where_clause" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../model/index.html" class="btn btn-neutral float-left" title="aigct.model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../plot_util/index.html" class="btn btn-neutral float-right" title="aigct.plot_util" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

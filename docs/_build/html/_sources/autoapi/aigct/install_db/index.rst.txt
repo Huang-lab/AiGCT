@@ -1,0 +1,19 @@
+aigct.install_db
+================
+
+.. py:module:: aigct.install_db
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.install_db.main
+
+
+Module Contents
+---------------
+
+.. py:function:: main()
+

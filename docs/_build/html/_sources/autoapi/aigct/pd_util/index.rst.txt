@@ -1,0 +1,34 @@
+aigct.pd_util
+=============
+
+.. py:module:: aigct.pd_util
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   aigct.pd_util.RELATIONAL_OPERATORS
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.pd_util.filter_dataframe_by_list
+   aigct.pd_util.build_dataframe_where_clause
+
+
+Module Contents
+---------------
+
+.. py:data:: RELATIONAL_OPERATORS
+   :value: ['==', '!=', '>', '<', '>=', '<=']
+
+
+.. py:function:: filter_dataframe_by_list(data_frame: pandas.DataFrame, filter_list: pandas.DataFrame | list[str] | str | pandas.Series, df_merge_columns: list[str] | str, filter_col_name_map: dict = None, in_list: bool = True) -> pandas.DataFrame
+
+.. py:function:: build_dataframe_where_clause(where_params: dict) -> str
+

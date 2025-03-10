@@ -1,0 +1,38 @@
+aigct.exporter
+==============
+
+.. py:module:: aigct.exporter
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.exporter.VEAnalysisExporter
+
+
+Module Contents
+---------------
+
+.. py:class:: VEAnalysisExporter
+
+   Export results of an analysis to data files
+
+
+   .. py:method:: export_results(results: aigct.model.VEAnalysisResult, dir: str)
+
+      Export the results of an analysis to data files.
+
+      Parameters
+      ----------
+      results : VEAnalysisResult
+          Analysis result object with all relevant metrics
+      dir : str
+          Directory to place the data files. The files will
+          be placed in a subdirectory off of this directory
+          whose name begins with ve_analysis_data and suffixed
+          by a unique timestamp.
+
+
+

@@ -1,0 +1,19 @@
+aigct.init_app
+==============
+
+.. py:module:: aigct.init_app
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.init_app.main
+
+
+Module Contents
+---------------
+
+.. py:function:: main()
+

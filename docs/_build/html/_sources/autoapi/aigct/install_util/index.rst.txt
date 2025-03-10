@@ -1,0 +1,31 @@
+aigct.install_util
+==================
+
+.. py:module:: aigct.install_util
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.install_util.sample_user_scores
+   aigct.install_util.get_sample_config
+   aigct.install_util.init_config_file
+   aigct.install_util.init_db
+   aigct.install_util.check_install
+
+
+Module Contents
+---------------
+
+.. py:function:: sample_user_scores(ve_bm_container)
+
+.. py:function:: get_sample_config() -> dict
+
+.. py:function:: init_config_file(config_dir: str = '.', data_dir: str = '.', output_dir: str = './analysis_output', log_dir: str = './log')
+
+.. py:function:: init_db(conf_dir: str = './config')
+
+.. py:function:: check_install(conf_dir: str = './config')
+

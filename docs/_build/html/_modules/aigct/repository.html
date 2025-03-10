@@ -1,0 +1,878 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.repository &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aigct.repository</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aigct.repository</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Data access layer methods for accessing variant repository.</span>
+<span class="sd">Classes here provide an encapsulation layer to hide the internal</span>
+<span class="sd">details of the repository structure.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterizedSingleton</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pd_util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">filter_dataframe_by_list</span><span class="p">,</span>
+    <span class="n">build_dataframe_where_clause</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">VariantFilter</span><span class="p">,</span> <span class="n">VEQueryCriteria</span>
+
+
+<div class="viewcode-block" id="TASK_SUBFOLDER">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TASK_SUBFOLDER">[docs]</a>
+<span class="n">TASK_SUBFOLDER</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;CANCER&quot;</span><span class="p">:</span> <span class="s2">&quot;CANCER&quot;</span>
+<span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="DATA_FOLDER">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.DATA_FOLDER">[docs]</a>
+<span class="n">DATA_FOLDER</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span></div>
+
+<div class="viewcode-block" id="TASK_FOLDERS">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TASK_FOLDERS">[docs]</a>
+<span class="n">TASK_FOLDERS</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CANCER&quot;</span><span class="p">,</span> <span class="s2">&quot;ADRD&quot;</span><span class="p">,</span>
+                                                             <span class="s2">&quot;CHD&quot;</span><span class="p">,</span> <span class="s2">&quot;DDD&quot;</span><span class="p">]]</span></div>
+
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="TableDef">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TableDef</span><span class="p">:</span>
+<div class="viewcode-block" id="TableDef.folder">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef.folder">[docs]</a>
+    <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="TableDef.file_name">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef.file_name">[docs]</a>
+    <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="TableDef.pk_columns">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef.pk_columns">[docs]</a>
+    <span class="n">pk_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TableDef.non_pk_columns">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef.non_pk_columns">[docs]</a>
+    <span class="n">non_pk_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TableDef.columns">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef.columns">[docs]</a>
+    <span class="n">columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span></div>
+
+<div class="viewcode-block" id="TableDef.full_file_name">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef.full_file_name">[docs]</a>
+    <span class="n">full_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TableDef.__post_init__">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TableDef.__post_init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pk_columns</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">non_pk_columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span></div>
+</div>
+
+    
+
+
+<div class="viewcode-block" id="VARIANT_PK_COLUMNS">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_PK_COLUMNS">[docs]</a>
+<span class="n">VARIANT_PK_COLUMNS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;GENOME_ASSEMBLY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;REFERENCE_NUCLEOTIDE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ALTERNATE_NUCLEOTIDE&quot;</span>
+<span class="p">]</span></div>
+
+<div class="viewcode-block" id="VARIANT_NON_PK_COLUMNS">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_NON_PK_COLUMNS">[docs]</a>
+<span class="n">VARIANT_NON_PK_COLUMNS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;PRIOR_GENOME_ASSEMBLY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PRIOR_CHROMOSOME&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PRIOR_POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PRIOR_PRIOR_GENOME_ASSEMBLY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PRIOR_PRIOR_CHROMOSOME&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PRIOR_PRIOR_POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;REFERENCE_AMINO_ACID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ALTERNATE_AMINO_ACID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AMINO_ACID_POSITION&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RS_DBSNP&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;GENE_SYMBOL&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ENSEMBL_GENE_ID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ENSEMBL_TRANSCRIPT_ID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ENSEMBL_PROTEIN_ID&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ALLELE_FREQUENCY_SOURCE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ALLELE_FREQUENCY&quot;</span>
+<span class="p">]</span></div>
+
+<div class="viewcode-block" id="VARIANT_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_TABLE_DEF</span> <span class="o">=</span> <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span> <span class="s2">&quot;variant.csv&quot;</span><span class="p">,</span>
+                             <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                             <span class="n">VARIANT_NON_PK_COLUMNS</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_LABEL_NON_PK_COLUMNS">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_LABEL_NON_PK_COLUMNS">[docs]</a>
+<span class="n">VARIANT_LABEL_NON_PK_COLUMNS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;LABEL_SOURCE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RAW_LABEL&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BINARY_LABEL&quot;</span>
+<span class="p">]</span></div>
+
+<div class="viewcode-block" id="VARIANT_EFFECT_LABEL_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_EFFECT_LABEL_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_EFFECT_LABEL_TABLE_DEF</span> <span class="o">=</span> <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                          <span class="s2">&quot;variant_effect_label.csv&quot;</span><span class="p">,</span>
+                                          <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                                          <span class="n">VARIANT_LABEL_NON_PK_COLUMNS</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_EFFECT_SCORE_PK_COLUMNS">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_EFFECT_SCORE_PK_COLUMNS">[docs]</a>
+<span class="n">VARIANT_EFFECT_SCORE_PK_COLUMNS</span> <span class="o">=</span> <span class="n">VARIANT_PK_COLUMNS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="VARIANT_EFFECT_SCORE_NON_PK_COLUMNS">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_EFFECT_SCORE_NON_PK_COLUMNS">[docs]</a>
+<span class="n">VARIANT_EFFECT_SCORE_NON_PK_COLUMNS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;RAW_SCORE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RANK_SCORE&quot;</span>
+<span class="p">]</span></div>
+
+<div class="viewcode-block" id="VARIANT_EFFECT_SCORE_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_EFFECT_SCORE_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_EFFECT_SCORE_TABLE_DEF</span> <span class="o">=</span> <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                          <span class="s2">&quot;variant_effect_score.csv&quot;</span><span class="p">,</span>
+                                          <span class="n">VARIANT_EFFECT_SCORE_PK_COLUMNS</span><span class="p">,</span>
+                                          <span class="n">VARIANT_EFFECT_SCORE_NON_PK_COLUMNS</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_TASK_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_TASK_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_TASK_TABLE_DEF</span> <span class="o">=</span> <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                  <span class="s2">&quot;variant_task.csv&quot;</span><span class="p">,</span>
+                                  <span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;DESCRIPTION&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_EFFECT_SOURCE_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_EFFECT_SOURCE_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_EFFECT_SOURCE_TABLE_DEF</span> <span class="o">=</span>\
+    <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+             <span class="s2">&quot;variant_effect_source.csv&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">],</span>
+             <span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;SOURCE_TYPE&quot;</span><span class="p">,</span> <span class="s2">&quot;DESCRIPTION&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_DATA_SOURCE_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_DATA_SOURCE_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_DATA_SOURCE_TABLE_DEF</span> <span class="o">=</span>\
+    <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+             <span class="s2">&quot;variant_data_source.csv&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">],</span>
+             <span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;DESCRIPTION&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_FILTER_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_FILTER_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_FILTER_TABLE_DEF</span> <span class="o">=</span>\
+    <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+             <span class="s2">&quot;variant_filter.csv&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">],</span>
+             <span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;DESCRIPTION&quot;</span><span class="p">,</span> <span class="s2">&quot;INCLUDE_GENES&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;INCLUDE_VARIANTS&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_FILTER_GENE_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_FILTER_GENE_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_FILTER_GENE_TABLE_DEF</span> <span class="o">=</span>\
+    <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+             <span class="s2">&quot;variant_filter_gene.csv&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;FILTER_CODE&quot;</span><span class="p">,</span> <span class="s2">&quot;GENE_SYMBOL&quot;</span><span class="p">],</span>
+             <span class="p">[])</span></div>
+
+
+<div class="viewcode-block" id="VARIANT_FILTER_VARIANT_TABLE_DEF">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VARIANT_FILTER_VARIANT_TABLE_DEF">[docs]</a>
+<span class="n">VARIANT_FILTER_VARIANT_TABLE_DEF</span> <span class="o">=</span>\
+    <span class="n">TableDef</span><span class="p">(</span><span class="n">DATA_FOLDER</span><span class="p">,</span>
+             <span class="s2">&quot;variant_filter_variant.csv&quot;</span><span class="p">,</span>
+             <span class="p">[</span><span class="s2">&quot;FILTER_CODE&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span> <span class="p">[])</span></div>
+
+
+<div class="viewcode-block" id="TABLE_DEFS">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TABLE_DEFS">[docs]</a>
+<span class="n">TABLE_DEFS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;VARIANT_TASK&quot;</span><span class="p">:</span> <span class="n">VARIANT_TASK_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT_EFFECT_SOURCE&quot;</span><span class="p">:</span> <span class="n">VARIANT_EFFECT_SOURCE_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT&quot;</span><span class="p">:</span> <span class="n">VARIANT_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT_EFFECT_LABEL&quot;</span><span class="p">:</span> <span class="n">VARIANT_EFFECT_LABEL_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT_DATA_SOURCE&quot;</span><span class="p">:</span> <span class="n">VARIANT_DATA_SOURCE_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT_EFFECT_SCORE&quot;</span><span class="p">:</span> <span class="n">VARIANT_EFFECT_SCORE_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT_FILTER&quot;</span><span class="p">:</span> <span class="n">VARIANT_FILTER_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT_FILTER_GENE&quot;</span><span class="p">:</span> <span class="n">VARIANT_FILTER_GENE_TABLE_DEF</span><span class="p">,</span>
+    <span class="s2">&quot;VARIANT_FILTER_VARIANT&quot;</span><span class="p">:</span> <span class="n">VARIANT_FILTER_VARIANT_TABLE_DEF</span><span class="p">,</span>
+<span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="RepoSessionContext">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RepoSessionContext</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">table_defs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TableDef</span><span class="p">]):</span>
+<div class="viewcode-block" id="RepoSessionContext._data_folder_root">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext._data_folder_root">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span> <span class="o">=</span> <span class="n">data_folder_root</span></div>
+
+<div class="viewcode-block" id="RepoSessionContext._table_defs">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext._table_defs">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table_defs</span> <span class="o">=</span> <span class="n">table_defs</span></div>
+
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="RepoSessionContext.data_folder_root">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.data_folder_root">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_folder_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span></div>
+
+
+<div class="viewcode-block" id="RepoSessionContext.table_def">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.table_def">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">table_def</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_table_defs</span><span class="p">[</span><span class="n">table_name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="RepoSessionContext.table_file">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.table_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">table_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">task</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span>
+                                <span class="n">DATA_FOLDER</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_table_defs</span><span class="p">[</span><span class="n">table_name</span><span class="p">]</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span>
+                                <span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_table_defs</span><span class="p">[</span><span class="n">table_name</span><span class="p">]</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantEffectLabelCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectLabelCache</span><span class="p">(</span><span class="n">ParameterizedSingleton</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Caches the variant csv file in a dataframe. Implements the singleton</span>
+<span class="sd">    pattern to ensure there is only one instance of the cached dataframe.</span>
+<span class="sd">    We use an _init_once method rather than the normal __init__ method</span>
+<span class="sd">    as required by the ParameterizedSingleton class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VariantEffectLabelCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span> <span class="o">=</span> <span class="n">data_folder_root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectLabelCache.get_data_frame">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelCache.get_data_frame">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_data_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                     <span class="n">task_code</span><span class="p">,</span>
+                                     <span class="n">VARIANT_EFFECT_LABEL_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DataCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.DataCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataCache</span><span class="p">(</span><span class="n">ParameterizedSingleton</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Caches a repository csv file in a dataframe. Implements the singleton</span>
+<span class="sd">    pattern to ensure there is only one instance of the cached dataframe.</span>
+<span class="sd">    We use an _init_once method rather than the normal __init__ method</span>
+<span class="sd">    as required by the ParameterizedSingleton class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DataCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.DataCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table_def</span><span class="p">:</span> <span class="n">TableDef</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span> <span class="o">=</span> <span class="n">data_folder_root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span> <span class="o">=</span> <span class="n">table_def</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DataCache.data_frame">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.DataCache.data_frame">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">full_file_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TaskBasedDataCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TaskBasedDataCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskBasedDataCache</span><span class="p">(</span><span class="n">ParameterizedSingleton</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Caches a repository csv file in a dataframe. Maintains a separate</span>
+<span class="sd">    cache for each task in a dict. Implements the singleton</span>
+<span class="sd">    pattern to ensure there is only one instance of the cached dataframe.</span>
+<span class="sd">    We use an _init_once method rather than the normal __init__ method</span>
+<span class="sd">    as required by the ParameterizedSingleton class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TaskBasedDataCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TaskBasedDataCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table_def</span><span class="p">:</span> <span class="n">TableDef</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span> <span class="o">=</span> <span class="n">data_folder_root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span> <span class="o">=</span> <span class="n">table_def</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TaskBasedDataCache.get_data_frame">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TaskBasedDataCache.get_data_frame">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_data_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                     <span class="n">task_code</span><span class="p">,</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TaskDataCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TaskDataCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskDataCache</span><span class="p">(</span><span class="n">DataCache</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Caches the variant csv file in a dataframe. Implements the singleton</span>
+<span class="sd">    pattern to ensure there is only one instance of the cached dataframe.</span>
+<span class="sd">    We use an _init_once method rather than the normal __init__ method</span>
+<span class="sd">    as required by the ParameterizedSingleton class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TaskDataCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TaskDataCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_once</span><span class="p">(</span><span class="n">data_folder_root</span><span class="p">,</span> <span class="n">VARIANT_TASK_TABLE_DEF</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantEffectScoreCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectScoreCache</span><span class="p">(</span><span class="n">TaskBasedDataCache</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Caches the variant csv file in a dataframe. Implements the singleton</span>
+<span class="sd">    pattern to ensure there is only one instance of the cached dataframe.</span>
+<span class="sd">    We use an _init_once method rather than the normal __init__ method</span>
+<span class="sd">    as required by the ParameterizedSingleton class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VariantEffectScoreCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_once</span><span class="p">(</span><span class="n">data_folder_root</span><span class="p">,</span> <span class="n">VARIANT_EFFECT_SCORE_TABLE_DEF</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantCache</span><span class="p">(</span><span class="n">DataCache</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Caches the variant csv file in a dataframe. Implements the singleton</span>
+<span class="sd">    pattern to ensure there is only one instance of the cached dataframe.</span>
+<span class="sd">    We use an _init_once method rather than the normal __init__ method</span>
+<span class="sd">    as required by the ParameterizedSingleton class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VariantCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_once</span><span class="p">(</span><span class="n">data_folder_root</span><span class="p">,</span> <span class="n">VARIANT_TABLE_DEF</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantTaskCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantTaskCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantTaskCache</span><span class="p">(</span><span class="n">DataCache</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Caches the variant csv file in a dataframe. Implements the singleton</span>
+<span class="sd">    pattern to ensure there is only one instance of the cached dataframe.</span>
+<span class="sd">    We use an _init_once method rather than the normal __init__ method</span>
+<span class="sd">    as required by the ParameterizedSingleton class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VariantTaskCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantTaskCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_once</span><span class="p">(</span><span class="n">data_folder_root</span><span class="p">,</span> <span class="n">VARIANT_TASK_TABLE_DEF</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantEffectSourceCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectSourceCache</span><span class="p">(</span><span class="n">DataCache</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VariantEffectSourceCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_once</span><span class="p">(</span><span class="n">data_folder_root</span><span class="p">,</span> <span class="n">VARIANT_EFFECT_SOURCE_TABLE_DEF</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantFilterCache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterCache">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantFilterCache</span><span class="p">(</span><span class="n">ParameterizedSingleton</span><span class="p">):</span>
+
+<div class="viewcode-block" id="VariantFilterCache._init_once">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterCache._init_once">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span> <span class="o">=</span> <span class="n">data_folder_root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="VariantFilterCache.get_data_frames">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterCache.get_data_frames">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_data_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
+                    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
+                                          <span class="n">task_code</span><span class="p">)</span>
+                    <span class="n">cache_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span>
+                                     <span class="n">VARIANT_FILTER_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_gene_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span>
+                                     <span class="n">VARIANT_FILTER_GENE_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_variant_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="n">folder</span><span class="p">,</span>
+                            <span class="n">VARIANT_FILTER_VARIANT_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache_dict</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantEffectSourceRepository">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceRepository">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectSourceRepository</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">,</span>
+                 <span class="n">variant_effect_score_repo</span><span class="p">):</span>
+<div class="viewcode-block" id="VariantEffectSourceRepository._cache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceRepository._cache">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantEffectSourceCache</span><span class="p">(</span>
+            <span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariantEffectSourceRepository._variant_effect_score_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceRepository._variant_effect_score_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span> <span class="o">=</span> <span class="n">variant_effect_score_repo</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectSourceRepository.get_all">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceRepository.get_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectSourceRepository.get_by_task">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceRepository.get_by_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_by_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">score_sources</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span><span class="o">.</span><span class="n">get_all_by_task</span><span class="p">(</span>
+            <span class="n">task_code</span><span class="p">)[</span><span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="n">source_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">source_df</span><span class="p">[</span><span class="n">source_df</span><span class="p">[</span><span class="s1">&#39;CODE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">score_sources</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectSourceRepository.get_by_code">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectSourceRepository.get_by_code">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_by_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">codes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">data_frame</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span>
+            <span class="n">VARIANT_EFFECT_SOURCE_TABLE_DEF</span><span class="o">.</span><span class="n">pk_columns</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantTaskRepository">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantTaskRepository">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantTaskRepository</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">):</span>
+<div class="viewcode-block" id="VariantTaskRepository._cache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantTaskRepository._cache">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantTaskCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantTaskRepository.get_all">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantTaskRepository.get_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantFilterRepository">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterRepository">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantFilterRepository</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">):</span>
+<div class="viewcode-block" id="VariantFilterRepository._cache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterRepository._cache">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantFilterCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantFilterRepository.get_by_task">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterRepository.get_by_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_by_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">get_data_frames</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantFilterRepository.get_by_task_filter_name">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterRepository.get_by_task_filter_name">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_by_task_filter_name</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VariantFilter</span><span class="p">:</span>
+        <span class="n">filter_dfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">get_data_frames</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span>
+        <span class="nb">filter</span> <span class="o">=</span> <span class="n">filter_dfs</span><span class="p">[</span><span class="s2">&quot;filter_df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;NAME == &#39;</span><span class="si">{</span><span class="n">filter_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">filter</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="nb">filter</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">filter_code</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">]</span>
+        <span class="n">filter_genes</span> <span class="o">=</span> <span class="n">filter_dfs</span><span class="p">[</span><span class="s2">&quot;filter_gene_df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;FILTER_CODE == &#39;</span><span class="si">{</span><span class="n">filter_code</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">filter_variants</span> <span class="o">=</span> <span class="n">filter_dfs</span><span class="p">[</span><span class="s2">&quot;filter_variant_df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;FILTER_CODE == &#39;</span><span class="si">{</span><span class="n">filter_code</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_genes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_variants</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">VariantFilter</span><span class="p">(</span><span class="nb">filter</span><span class="p">,</span> <span class="n">filter_genes</span><span class="p">,</span> <span class="n">filter_variants</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="query_by_filter">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.query_by_filter">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">query_by_filter</span><span class="p">(</span><span class="n">query_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                    <span class="nb">filter</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+                    <span class="n">filter_gene_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                    <span class="n">filter_variant_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_gene_df</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">query_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span><span class="n">query_df</span><span class="p">,</span> <span class="n">filter_gene_df</span><span class="p">,</span>
+                                            <span class="p">[</span><span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span>
+                                            <span class="nb">filter</span><span class="p">[</span><span class="s2">&quot;INCLUDE_GENES&quot;</span><span class="p">]</span> <span class="o">==</span>
+                                            <span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_variant_df</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">query_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span><span class="n">query_df</span><span class="p">,</span> <span class="n">filter_variant_df</span><span class="p">,</span>
+                                            <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
+                                            <span class="nb">filter</span><span class="p">[</span><span class="s2">&quot;INCLUDE_VARIANTS&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">query_df</span></div>
+
+
+
+<div class="viewcode-block" id="VariantRepository">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantRepository">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantRepository</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">):</span>
+<div class="viewcode-block" id="VariantRepository._cache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantRepository._cache">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantRepository.get_all">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantRepository.get_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">data_frame</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantRepository.get">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantRepository.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches variants. The optional parameters are filter criteria used to</span>
+<span class="sd">        limit the set of variants returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">where_clause</span> <span class="o">=</span> <span class="n">build_dataframe_where_clause</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;ALLELE_FREQUENCY&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qry</span><span class="o">.</span><span class="n">allele_frequency_operator</span><span class="p">,</span>
+                                  <span class="n">qry</span><span class="o">.</span><span class="n">allele_frequency</span><span class="p">]})</span>
+        <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">data_frame</span>
+        <span class="k">if</span> <span class="n">where_clause</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">variant_df</span> <span class="o">=</span> <span class="n">variant_df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">where_clause</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span><span class="o">.</span><span class="n">gene_symbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">variant_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">qry</span><span class="o">.</span><span class="n">gene_symbols</span><span class="p">,</span>
+                                                  <span class="p">[</span><span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">],</span>
+                                                  <span class="n">in_list</span><span class="o">=</span><span class="n">qry</span><span class="o">.</span><span class="n">include_genes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span><span class="o">.</span><span class="n">variant_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">variant_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">qry</span><span class="o">.</span><span class="n">variant_ids</span><span class="p">,</span>
+                                                  <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                                                  <span class="n">qry</span><span class="o">.</span><span class="n">column_name_map</span><span class="p">,</span>
+                                                  <span class="n">qry</span><span class="o">.</span><span class="n">include_variant_ids</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">variant_df</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantEffectLabelRepository">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectLabelRepository</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">,</span>
+                 <span class="n">variant_repo</span><span class="p">:</span> <span class="n">VariantRepository</span><span class="p">,</span>
+                 <span class="n">filter_repo</span><span class="p">:</span> <span class="n">VariantFilterRepository</span><span class="p">):</span>
+<div class="viewcode-block" id="VariantEffectLabelRepository._cache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository._cache">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantEffectLabelCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariantEffectLabelRepository._filter_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository._filter_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span> <span class="o">=</span> <span class="n">filter_repo</span></div>
+
+<div class="viewcode-block" id="VariantEffectLabelRepository._variant_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository._variant_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span> <span class="o">=</span> <span class="n">variant_repo</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectLabelRepository.get_all_by_task">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository.get_all_by_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_by_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">label_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">get_data_frame</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span>
+        <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">VEQueryCriteria</span><span class="p">(</span><span class="n">variant_ids</span><span class="o">=</span><span class="n">label_df</span><span class="p">[</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">label_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                              <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectLabelRepository.get">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches variant effect labels.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">label_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">get_data_frame</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">qry</span><span class="o">.</span><span class="n">variant_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">qry</span><span class="o">.</span><span class="n">variant_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">label_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span>
+                    <span class="n">label_df</span><span class="p">,</span> <span class="n">qry</span><span class="o">.</span><span class="n">variant_ids</span><span class="p">,</span>
+                    <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                    <span class="n">in_list</span><span class="o">=</span><span class="n">qry</span><span class="o">.</span><span class="n">include_variant_ids</span><span class="p">)</span>
+            <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
+        <span class="n">merge_df</span> <span class="o">=</span> <span class="n">label_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+                                  <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filter_dfs</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span><span class="o">.</span><span class="n">get_by_task_filter_name</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span>
+                                                          <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filter_dfs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid filter name: &quot;</span> <span class="o">+</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
+            <span class="n">merge_df</span> <span class="o">=</span> <span class="n">query_by_filter</span><span class="p">(</span><span class="n">merge_df</span><span class="p">,</span> <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
+                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">,</span>
+                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_variants</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">merge_df</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VariantEffectScoreRepository">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectScoreRepository</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">,</span>
+                 <span class="n">variant_repo</span><span class="p">:</span> <span class="n">VariantRepository</span><span class="p">,</span>
+                 <span class="n">filter_repo</span><span class="p">:</span> <span class="n">VariantFilterRepository</span><span class="p">):</span>
+<div class="viewcode-block" id="VariantEffectScoreRepository._cache">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository._cache">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantEffectScoreCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariantEffectScoreRepository._filter_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository._filter_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span> <span class="o">=</span> <span class="n">filter_repo</span></div>
+
+<div class="viewcode-block" id="VariantEffectScoreRepository._variant_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository._variant_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span> <span class="o">=</span> <span class="n">variant_repo</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectScoreRepository.get_all_by_task">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository.get_all_by_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_by_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">score_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">get_data_frame</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span>
+        <span class="n">query_criteria</span> <span class="o">=</span> <span class="n">VEQueryCriteria</span><span class="p">(</span><span class="n">variant_ids</span><span class="o">=</span><span class="n">score_df</span><span class="p">[</span>
+            <span class="n">VARIANT_PK_COLUMNS</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(),</span>
+            <span class="n">include_variant_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query_criteria</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">score_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                              <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectScoreRepository.get">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">variant_effect_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+        <span class="n">score_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">get_data_frame</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">variant_effect_sources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">variant_effect_sources</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">score_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span><span class="n">score_df</span><span class="p">,</span>
+                                                <span class="n">variant_effect_sources</span><span class="p">,</span>
+                                                <span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">,</span>
+                                                <span class="kc">None</span><span class="p">,</span>
+                                                <span class="n">include_variant_effect_sources</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">score_df</span>
+        <span class="k">if</span> <span class="n">qry</span><span class="o">.</span><span class="n">variant_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">score_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span><span class="n">score_df</span><span class="p">,</span> <span class="n">qry</span><span class="o">.</span><span class="n">variant_ids</span><span class="p">,</span>
+                                                <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                                                <span class="n">qry</span><span class="o">.</span><span class="n">column_name_map</span><span class="p">,</span>
+                                                <span class="n">qry</span><span class="o">.</span><span class="n">include_variant_ids</span><span class="p">)</span>
+        <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
+        <span class="n">merge_df</span> <span class="o">=</span> <span class="n">score_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+                                  <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filter_dfs</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span><span class="o">.</span><span class="n">get_by_task_filter_name</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span>
+                                                          <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filter_dfs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid filter name: &quot;</span> <span class="o">+</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
+            <span class="n">merge_df</span> <span class="o">=</span> <span class="n">query_by_filter</span><span class="p">(</span><span class="n">merge_df</span><span class="p">,</span> <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
+                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">,</span>
+                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_variants</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">merge_df</span><span class="p">[</span><span class="n">VARIANT_EFFECT_SCORE_TABLE_DEF</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span></div>
+</div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

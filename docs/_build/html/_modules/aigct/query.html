@@ -1,0 +1,446 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.query &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aigct.query</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aigct.query</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes and methods to query the variant repository.</span>
+<span class="sd">This layer provides an abstraction layer that sits on top of the</span>
+<span class="sd">data access layer in the repository module.</span>
+<span class="sd">It uses the repository module to access the raw data and includes</span>
+<span class="sd">methods to optionally transform the data to make it more meaningful</span>
+<span class="sd">or presentation ready to the caller.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.repository</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">VariantEffectLabelRepository</span><span class="p">,</span>
+    <span class="n">VariantRepository</span><span class="p">,</span>
+    <span class="n">VariantTaskRepository</span><span class="p">,</span>
+    <span class="n">VariantEffectSourceRepository</span><span class="p">,</span>
+    <span class="n">VariantEffectScoreRepository</span><span class="p">,</span>
+    <span class="n">VariantFilterRepository</span><span class="p">,</span>
+    <span class="n">VARIANT_PK_COLUMNS</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">VEQueryCriteria</span><span class="p">,</span>
+    <span class="n">VariantFilter</span>
+<span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="cleanup_variant_query_params">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.cleanup_variant_query_params">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cleanup_variant_query_params</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">VEQueryCriteria</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">gene_symbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">gene_symbols</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">gene_symbols</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">gene_symbols</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">gene_symbols</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;GENE_SYMBOL&quot;</span><span class="p">:</span> <span class="n">params</span><span class="o">.</span><span class="n">gene_symbols</span><span class="p">})</span>
+            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">include_genes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">include_genes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">variant_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">variant_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">variant_ids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">include_variant_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">include_genes</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">column_name_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">column_name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">column_name_map</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">allele_frequency_operator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">allele_frequency_operator</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
+    <span class="k">return</span> <span class="n">params</span></div>
+
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VEBenchmarkQueryMgr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Methods to query the variant repository</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">variant_effect_label_repo</span><span class="p">:</span> <span class="n">VariantEffectLabelRepository</span><span class="p">,</span>
+                 <span class="n">variant_repo</span><span class="p">:</span> <span class="n">VariantRepository</span><span class="p">,</span>
+                 <span class="n">variant_task_repo</span><span class="p">:</span> <span class="n">VariantTaskRepository</span><span class="p">,</span>
+                 <span class="n">variant_effect_source_repo</span><span class="p">:</span> <span class="n">VariantEffectSourceRepository</span><span class="p">,</span>
+                 <span class="n">variant_effect_score_repo</span><span class="p">:</span> <span class="n">VariantEffectScoreRepository</span><span class="p">,</span>
+                 <span class="n">variant_filter_repo</span><span class="p">:</span> <span class="n">VariantFilterRepository</span>
+                 <span class="p">):</span>
+<div class="viewcode-block" id="VEBenchmarkQueryMgr._variant_effect_label_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._variant_effect_label_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span> <span class="o">=</span> <span class="n">variant_effect_label_repo</span></div>
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr._variant_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._variant_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span> <span class="o">=</span> <span class="n">variant_repo</span></div>
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr._variant_task_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._variant_task_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_task_repo</span> <span class="o">=</span> <span class="n">variant_task_repo</span></div>
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr._variant_effect_source_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._variant_effect_source_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_source_repo</span> <span class="o">=</span> <span class="n">variant_effect_source_repo</span></div>
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr._variant_effect_score_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._variant_effect_score_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span> <span class="o">=</span> <span class="n">variant_effect_score_repo</span></div>
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr._variant_filter_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._variant_filter_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_filter_repo</span> <span class="o">=</span> <span class="n">variant_filter_repo</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_tasks">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_tasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all tasks&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_task_repo</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_all_variants">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_all_variants">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_variants">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variants">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch variants based on query criteria.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        qry : VEQueryCriteria</span>
+<span class="sd">            See description of VEQueryCriteria in model package.</span>
+<span class="sd">            Specifies criteria that would limit the set of variants</span>
+<span class="sd">            to be retrieved. The filter_name attribute is ignored.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_variant_effect_sources">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_sources">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_effect_sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_source_repo</span><span class="o">.</span><span class="n">get_by_task</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="VEBenchmarkQueryMgr._compute_variant_counts">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._compute_variant_counts">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_variant_counts</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;NUM_VARIANTS&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">),</span>
+             <span class="s2">&quot;NUM_POSITIVE_LABELS&quot;</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+             <span class="s2">&quot;NUM_NEGATIVE_LABELS&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">]</span> <span class="o">^</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+             <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_variant_effect_source_stats">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_source_stats">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_effect_source_stats</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">variant_effect_sources</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all variant effect sources for a task along with the</span>
+<span class="sd">        number of variants, number of positive labels,</span>
+<span class="sd">        number of negative labels for each source.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task_code : str</span>
+
+<span class="sd">        variant_effect_sources : list, optional</span>
+<span class="sd">            If specified it would restrict the results based on</span>
+<span class="sd">            system supplied vep&#39;s in this list.</span>
+<span class="sd">        include_variant_effect_sources : bool, optional</span>
+<span class="sd">            If variant_effect_source is specified, indicates whether to</span>
+<span class="sd">            limit the results to sources in variant_effect_sources or</span>
+<span class="sd">            not in variant_effect_sources.</span>
+<span class="sd">        qry : VEQueryCriteria, optional</span>
+<span class="sd">            See description of VEQueryCriteria in model package.</span>
+<span class="sd">            Specifies criteria that would limit the set of variants</span>
+<span class="sd">            to be retrieved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">variant_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">task_code</span><span class="p">,</span> <span class="n">qry</span><span class="p">)</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">task_code</span><span class="p">,</span> <span class="n">variant_effect_sources</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="p">,</span> <span class="n">qry</span><span class="p">)</span>
+        <span class="n">scores_labels</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_labels</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+                                     <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+        <span class="n">grouped_scores</span> <span class="o">=</span> <span class="n">scores_labels</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grouped_scores</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_variant_counts</span><span class="p">,</span>
+            <span class="n">include_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_variant_effect_scores">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_scores">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_effect_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                  <span class="n">variant_effect_sources</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">include_variant_effect_sources</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches variant effect scores for variant effect sources.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task_code : str</span>
+<span class="sd">            task code</span>
+<span class="sd">        variant_effect_sources : list, optional</span>
+<span class="sd">            If specified it would restrict the results based on</span>
+<span class="sd">            system supplied vep&#39;s in this list.</span>
+<span class="sd">        include_variant_effect_sources : bool, optional</span>
+<span class="sd">            If variant_effect_source is specified, indicates whether to</span>
+<span class="sd">            limit the results to sources in variant_effect_sources or</span>
+<span class="sd">            not in variant_effect_sources.</span>
+<span class="sd">        qry : VEQueryCriteria, optional</span>
+<span class="sd">            See description of VEQueryCriteria in model package.</span>
+<span class="sd">            Specifies criteria that would limit the set of variants</span>
+<span class="sd">            to be retrieved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">task_code</span><span class="p">,</span>
+            <span class="n">variant_effect_sources</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="p">,</span>
+            <span class="n">qry</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_variants_by_task">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variants_by_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variants_by_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                             <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span>
+                             <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches variants by task. The optional parameters are </span>
+<span class="sd">        filter criteria used to limit the set of variants returned.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task_code : str</span>
+
+<span class="sd">        qry : VEQueryCriteria, optional</span>
+<span class="sd">            See description of VEQueryCriteria in model package.</span>
+<span class="sd">            Specifies criteria that would limit the set of variants</span>
+<span class="sd">            to be retrieved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span>
+                                                   <span class="n">qry</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_variant_distribution">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_distribution">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                 <span class="n">by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gene&quot;</span><span class="p">,</span>
+                                 <span class="n">qry</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span>
+                                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetches the distribution of variants by gene or chromsome.</span>
+<span class="sd">        For each gene/chromosome lists number of variants for which we have</span>
+<span class="sd">        labels along with the number of positive and negative label counts.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task_code : str</span>
+<span class="sd">            Task code</span>
+<span class="sd">        by : str</span>
+<span class="sd">            Values are gene or chromosome. Specifies the type of distribution</span>
+<span class="sd">            to return.</span>
+<span class="sd">        qry : VEQueryCriteria, optional</span>
+<span class="sd">            See description of VEQueryCriteria in model package.</span>
+<span class="sd">            Specifies criteria that would limit the set of variants</span>
+<span class="sd">            to be retrieved.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">label_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span> <span class="n">qry</span><span class="p">)[</span>
+            <span class="p">[</span><span class="s1">&#39;CHROMOSOME&#39;</span><span class="p">,</span> <span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">,</span> <span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">]]</span>
+        <span class="n">label_df</span><span class="p">[[</span><span class="s1">&#39;POSITIVE_LABEL&#39;</span><span class="p">,</span> <span class="s1">&#39;NEGATIVE_LABEL&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">label_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">],</span> <span class="mi">1</span> <span class="o">^</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">]],</span>
+            <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;expand&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">by</span> <span class="o">==</span> <span class="s1">&#39;chromosome&#39;</span><span class="p">:</span>
+            <span class="n">grouped</span> <span class="o">=</span> <span class="n">label_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;CHROMOSOME&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">grouped</span> <span class="o">=</span> <span class="n">label_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grouped</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+                <span class="n">NUM_POSITIVE_LABELS</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">NamedAgg</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s1">&#39;POSITIVE_LABEL&#39;</span><span class="p">,</span>
+                                                <span class="n">aggfunc</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">),</span>
+                <span class="n">NUM_NEGATIVE_LABELS</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">NamedAgg</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="s1">&#39;NEGATIVE_LABEL&#39;</span><span class="p">,</span>
+                                                <span class="n">aggfunc</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">)</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_variant_filter">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_filter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_filter</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VariantFilter</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a variant filter for a task by name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        VariantFilter</span>
+<span class="sd">            Object containing list of genes/variant id&#39;s included in the</span>
+<span class="sd">            filter. See description of the object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_filter_repo</span><span class="o">.</span><span class="n">get_by_task_filter_name</span><span class="p">(</span>
+            <span class="n">task_code</span><span class="p">,</span> <span class="n">filter_name</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEBenchmarkQueryMgr.get_all_variant_filters">
+<a class="viewcode-back" href="../../autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_all_variant_filters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variant_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span>\
+            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return basic descriptive information about all variant filters</span>
+<span class="sd">        for a task.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict[str, pd.DataFrame]</span>
+<span class="sd">            A dictionary of 3 data frames with the following keys:</span>
+<span class="sd">            filter_df - Data frame of filters containing CODE, NAME,</span>
+<span class="sd">            DESCRIPTION, etc.</span>
+<span class="sd">            filter_gene_df - Data frame of genes associated with each</span>
+<span class="sd">            filter</span>
+<span class="sd">            filter_variant_df - Data frame of variants associated with</span>
+<span class="sd">            each filter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_filter_repo</span><span class="o">.</span><span class="n">get_by_task</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

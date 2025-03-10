@@ -1,0 +1,134 @@
+aigct.analyzer
+==============
+
+.. py:module:: aigct.analyzer
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   aigct.analyzer.VARIANT_EFFECT_SCORE_COLS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.analyzer.VEAnalyzer
+
+
+Module Contents
+---------------
+
+.. py:data:: VARIANT_EFFECT_SCORE_COLS
+   :value: ['SCORE_SOURCE', 'GENOME_ASSEMBLY', 'CHROMOSOME', 'POSITION', 'REFERENCE_NUCLEOTIDE',...
+
+
+.. py:class:: VEAnalyzer(variant_effect_score_repo: aigct.repository.VariantEffectScoreRepository, variant_effect_label_repo: aigct.repository.VariantEffectLabelRepository, variant_effect_source_repo: aigct.repository.VariantEffectSourceRepository)
+
+   .. py:attribute:: _variant_effect_score_repo
+
+
+   .. py:attribute:: _variant_effect_label_repo
+
+
+   .. py:attribute:: _variant_effect_source_repo
+
+
+   .. py:method:: get_analysis_scores_and_labels(task_code: str, user_ve_scores: pandas.DataFrame = None, user_vep_name: str = 'USER', column_name_map: dict = None, variant_effect_sources: list[str] = None, include_variant_effect_sources: bool = None, variant_query_criteria: aigct.model.VEQueryCriteria = None, vep_min_overlap_percent: float = 0, variant_vep_retention_percent: float = 0) -> pandas.DataFrame
+
+
+   .. py:method:: _compute_pr(grouped_ve_scores_labels) -> tuple[pandas.DataFrame, pandas.DataFrame]
+
+
+   .. py:method:: _compute_roc(grouped_ve_scores_labels) -> tuple[pandas.DataFrame, pandas.DataFrame]
+
+
+   .. py:method:: _compute_general_metrics(group) -> pandas.Series
+      :staticmethod:
+
+
+
+   .. py:method:: _add_info_to_metric_dataframes(*dfs)
+
+
+   .. py:method:: _compute_mwu(grouped_ve_scores_labels) -> pandas.DataFrame
+
+
+   .. py:method:: _compute_metrics(task_code: str, ve_scores_labels_df: pandas.DataFrame, metrics: list[str], list_variants: bool = False)
+
+
+   .. py:method:: compute_metrics(task_code: str, user_ve_scores: pandas.DataFrame = None, user_vep_name: str = 'USER', column_name_map: dict = None, variant_effect_sources: list[str] = None, include_variant_effect_sources: bool = True, variant_query_criteria: aigct.model.VEQueryCriteria = None, vep_min_overlap_percent: float = 0, variant_vep_retention_percent: float = 0, metrics: str | list[str] = ['roc', 'pr', 'mwu'], list_variants: bool = False) -> aigct.model.VEAnalysisResult
+
+      Generates performance metrics for an optional user supplied set of
+      vep scores and for system supplied vep's. If the user doesn't provide
+      vep scores, will only generate metrics for system veps. Returns
+      an object containing all the metrics which can then be used to
+      generate plots, reports, or csv data files.
+
+      Parameters
+      ----------
+      task_code : str
+          Task code
+      user_ve_scores : DataFrame, optional
+          An optional dataframe of user variant effect prediction
+          scores. Expected to have the following columns:
+          GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+          REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE
+      user_vep_name : str, optional
+          If user_ve_scores are provided, then this is the label to
+          be used for them in the analysis output.
+      column_name_map : dict, optional
+          If the column names in user_ve_scores are not the expected
+          names, then this maps the column names to the expected names.
+      variant_effect_sources : list, optional
+          If specified it would restrict the analysis to the
+          system supplied vep's in this list.
+      include_variant_effect_sources : bool, optional
+          If variant_effect_sources is specified, indicates whether to
+          limit the analysis to the system supplied vep's specified or to
+          exclude the system supplied vep's specified.
+          If variant_effect_sources is not specified a value of False
+          indicates that all system variant effect sources should
+          be excluded from the analysis.
+      variant_query_criteria : VEQueryCriteria, optional
+          See description of VEQueryCriteria in model package.
+          Specifies criteria that would limit the set of variants
+          to be included in the analysis.
+      vep_min_overlap_percent : float
+          In order for a system supplied vep to be included in the
+          analysis the set of variants for which it has scores must
+          overlap the variants in user_ve_scores by at least this
+          percentage amount. If the user_ve_scores is not specified,
+          then it must overlap the entire universe of variants in
+          the system for which we have labels by at least this
+          percentage amount. A value of 0 means that it can overlap
+          by any amount to be included.
+      variant_vep_retention_percent : float
+          In order for a variant to be included in the analysis
+          there must exist scores for the variant in at least
+          this percent of the system vep's included in the analysis
+          based on the value of vep_min_overlap_percent. For example,
+          if a value of 50 is specified and 10 system vep's qualified
+          for inclusion, then a variant must be in at least 5 veps
+          to be included in the analysis.
+      metrics : str or list[str]
+          Specifies which metrics to compute. Can be a string
+          indicating a single metric or a list of strings for
+          multiple metrics. The metrics are: roc, pr, mwu.
+      list_variants: bool
+          Include the list of variants
+          that were included in the analysis in the return result
+          object. There is a separate list for the user variants
+          as well as for each system vep.
+
+      Returns
+      -------
+      VEAnalysisResult
+          Object containing computed metrics
+
+
+

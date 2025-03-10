@@ -1,0 +1,222 @@
+aigct.query
+===========
+
+.. py:module:: aigct.query
+
+.. autoapi-nested-parse::
+
+   Classes and methods to query the variant repository.
+   This layer provides an abstraction layer that sits on top of the
+   data access layer in the repository module.
+   It uses the repository module to access the raw data and includes
+   methods to optionally transform the data to make it more meaningful
+   or presentation ready to the caller.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.query.VEBenchmarkQueryMgr
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.query.cleanup_variant_query_params
+
+
+Module Contents
+---------------
+
+.. py:function:: cleanup_variant_query_params(params: aigct.model.VEQueryCriteria)
+
+.. py:class:: VEBenchmarkQueryMgr(variant_effect_label_repo: aigct.repository.VariantEffectLabelRepository, variant_repo: aigct.repository.VariantRepository, variant_task_repo: aigct.repository.VariantTaskRepository, variant_effect_source_repo: aigct.repository.VariantEffectSourceRepository, variant_effect_score_repo: aigct.repository.VariantEffectScoreRepository, variant_filter_repo: aigct.repository.VariantFilterRepository)
+
+   Methods to query the variant repository
+
+
+   .. py:attribute:: _variant_effect_label_repo
+
+
+   .. py:attribute:: _variant_repo
+
+
+   .. py:attribute:: _variant_task_repo
+
+
+   .. py:attribute:: _variant_effect_source_repo
+
+
+   .. py:attribute:: _variant_effect_score_repo
+
+
+   .. py:attribute:: _variant_filter_repo
+
+
+   .. py:method:: get_tasks() -> pandas.DataFrame
+
+      Get all tasks
+
+
+
+   .. py:method:: get_all_variants() -> pandas.DataFrame
+
+
+   .. py:method:: get_variants(qry: aigct.model.VEQueryCriteria) -> pandas.DataFrame
+
+      Fetch variants based on query criteria.
+
+      Parameters
+      ----------
+      qry : VEQueryCriteria
+          See description of VEQueryCriteria in model package.
+          Specifies criteria that would limit the set of variants
+          to be retrieved. The filter_name attribute is ignored.
+
+      Returns
+      -------
+      DataFrame
+
+
+
+   .. py:method:: get_variant_effect_sources(task_code: str) -> pandas.DataFrame
+
+
+   .. py:method:: _compute_variant_counts(group) -> pandas.Series
+      :staticmethod:
+
+
+
+   .. py:method:: get_variant_effect_source_stats(task_code: str, variant_effect_sources=None, include_variant_effect_sources: bool = True, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+
+      Get all variant effect sources for a task along with the
+      number of variants, number of positive labels,
+      number of negative labels for each source.
+
+      Parameters
+      ----------
+      task_code : str
+
+      variant_effect_sources : list, optional
+          If specified it would restrict the results based on
+          system supplied vep's in this list.
+      include_variant_effect_sources : bool, optional
+          If variant_effect_source is specified, indicates whether to
+          limit the results to sources in variant_effect_sources or
+          not in variant_effect_sources.
+      qry : VEQueryCriteria, optional
+          See description of VEQueryCriteria in model package.
+          Specifies criteria that would limit the set of variants
+          to be retrieved.
+
+      Returns
+      -------
+      DataFrame
+
+
+
+   .. py:method:: get_variant_effect_scores(task_code: str, variant_effect_sources=None, include_variant_effect_sources: bool = None, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+
+      Fetches variant effect scores for variant effect sources.
+
+      Parameters
+      ----------
+      task_code : str
+          task code
+      variant_effect_sources : list, optional
+          If specified it would restrict the results based on
+          system supplied vep's in this list.
+      include_variant_effect_sources : bool, optional
+          If variant_effect_source is specified, indicates whether to
+          limit the results to sources in variant_effect_sources or
+          not in variant_effect_sources.
+      qry : VEQueryCriteria, optional
+          See description of VEQueryCriteria in model package.
+          Specifies criteria that would limit the set of variants
+          to be retrieved.
+
+      Returns
+      -------
+      DataFrame
+
+
+
+   .. py:method:: get_variants_by_task(task_code: str, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+
+      Fetches variants by task. The optional parameters are 
+      filter criteria used to limit the set of variants returned.
+
+      Parameters
+      ----------
+      task_code : str
+
+      qry : VEQueryCriteria, optional
+          See description of VEQueryCriteria in model package.
+          Specifies criteria that would limit the set of variants
+          to be retrieved.
+
+      Returns
+      -------
+      DataFrame
+
+
+
+   .. py:method:: get_variant_distribution(task_code: str, by: str = 'gene', qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+
+      Fetches the distribution of variants by gene or chromsome.
+      For each gene/chromosome lists number of variants for which we have
+      labels along with the number of positive and negative label counts.
+
+      Parameters
+      ----------
+      task_code : str
+          Task code
+      by : str
+          Values are gene or chromosome. Specifies the type of distribution
+          to return.
+      qry : VEQueryCriteria, optional
+          See description of VEQueryCriteria in model package.
+          Specifies criteria that would limit the set of variants
+          to be retrieved.
+
+      Returns
+      -------
+      DataFrame
+
+
+
+   .. py:method:: get_variant_filter(task_code: str, filter_name: str) -> aigct.model.VariantFilter
+
+      Return a variant filter for a task by name.
+
+      Returns
+      -------
+      VariantFilter
+          Object containing list of genes/variant id's included in the
+          filter. See description of the object.
+
+
+
+   .. py:method:: get_all_variant_filters(task_code: str) -> dict[str, pandas.DataFrame]
+
+      Return basic descriptive information about all variant filters
+      for a task.
+
+      Returns
+      -------
+      dict[str, pd.DataFrame]
+          A dictionary of 3 data frames with the following keys:
+          filter_df - Data frame of filters containing CODE, NAME,
+          DESCRIPTION, etc.
+          filter_gene_df - Data frame of genes associated with each
+          filter
+          filter_variant_df - Data frame of variants associated with
+          each filter
+
+
+

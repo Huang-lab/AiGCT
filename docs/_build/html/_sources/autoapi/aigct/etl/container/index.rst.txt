@@ -1,0 +1,35 @@
+aigct.etl.container
+===================
+
+.. py:module:: aigct.etl.container
+
+.. autoapi-nested-parse::
+
+   Class to simulate a proper Dependency Injection container.
+   It could be reimplemented in the future if we decide to use
+   a proper one. The interface, however, would remain the same.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.etl.container.VEETLContainer
+
+
+Module Contents
+---------------
+
+.. py:class:: VEETLContainer(config_file: str = './config/config.yaml')
+
+   .. py:attribute:: _repo_session_context
+
+
+   .. py:attribute:: _loader
+
+
+   .. py:property:: loader
+
+

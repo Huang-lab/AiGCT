@@ -1,0 +1,19 @@
+aigct.check_install
+===================
+
+.. py:module:: aigct.check_install
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.check_install.main
+
+
+Module Contents
+---------------
+
+.. py:function:: main()
+

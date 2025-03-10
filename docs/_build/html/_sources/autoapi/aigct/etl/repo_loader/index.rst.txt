@@ -1,0 +1,166 @@
+aigct.etl.repo_loader
+=====================
+
+.. py:module:: aigct.etl.repo_loader
+
+.. autoapi-nested-parse::
+
+   Module description here
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   aigct.etl.repo_loader.COLUMN_NAME_MAP
+   aigct.etl.repo_loader.VEP_COLUMN_LIST
+   aigct.etl.repo_loader.VARIANT_EFFECT_SOURCE_DATA
+   aigct.etl.repo_loader.VARIANT_DATA_SOURCE_DATA
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.etl.repo_loader.RepositoryLoader
+
+
+Module Contents
+---------------
+
+.. py:data:: COLUMN_NAME_MAP
+
+.. py:data:: VEP_COLUMN_LIST
+
+.. py:data:: VARIANT_EFFECT_SOURCE_DATA
+   :value: [['REVEL', 'REVEL', 'VEP', 'REVEL'], ['GVMP', 'gVMP', 'VEP', 'gVMP'], ['VAR_R', 'VARITY_R',...
+
+
+.. py:data:: VARIANT_DATA_SOURCE_DATA
+   :value: [['GNOMGE', 'GNOMAD_GENOMES', 'GNOMAD GENOMES'], ['GNOMEX', 'GNOMAD_EXOMES', 'GNOMAD EXOMES']]
+
+
+.. py:class:: RepositoryLoader(config: aigct.util.Config, repo_context: aigct.repository.RepoSessionContext)
+
+   .. py:attribute:: _log_folder
+
+
+   .. py:attribute:: _repo_context
+
+
+   .. py:method:: _convert_dot_to_nan(val)
+
+
+   .. py:method:: _derive_variant_effect_source_columns(row)
+
+
+   .. py:method:: _task_full_path_name(task: str, file_name: str)
+
+
+   .. py:method:: init_variant_task()
+
+
+   .. py:method:: init_variant_effect_source()
+
+
+   .. py:method:: _build_excep_where_clause(column_list: list[str], suffixes: list[str])
+
+      Builds a where clause to be used in a DataFrame.query method
+      where it checks for inequality between any of the columns
+      in the dataframe. For each column in column_list it constructs
+      a comparison clause where suffixes[0] is appended to the column
+      name on the left side of the comparison and suffixes[1] is
+      appended to the column name on the right side of the comparison.
+
+      Parameters
+      ----------
+      column_list : list(str)
+          List of column names to compare.
+      suffixes : list(str)
+          A list of 2 suffixes with first suffix to be appended to each column
+          for left side of comparison and second suffix to be appended to
+          column name on right side
+
+
+
+   .. py:method:: _excep_file_full_path_name(task: str, repo_file_name: str)
+
+
+   .. py:method:: _upsert_repository_file(new_data: pandas.DataFrame, task: str, columns: list[str], repo_file_name: str, pk_columns: list[str])
+
+      General function for updating one of the repository data files
+      with new data.
+
+      To update the files we call the _upsert_repository_file method.
+      This method first checks if the row already exists in the file.
+      If it doesn't exist it adds the row. If it does exist it updates
+      the existing row with the new values.
+
+      Parameters
+      ----------
+      new_data : pd.DataFrame
+          DataFrame containing new data to be loaded.
+      task : str
+      columns : list(str)
+          List of columns in new_data dataframe and in repository data
+          file. The columns in the data file are inserted into or updated
+          from the columns in the new_data dataframe.
+      repo_file_name : str
+          Name of repository data file to be inserted/updated.
+      pk_columns: list(str)
+          List of column names in both new_data and repo_file_name that
+          uniquely identify a row. We determine if a row in new_data
+          already exists in repo_file_name by using the values in this
+          combination of columns to look up a row in repo file.
+
+
+
+   .. py:method:: load_variant_file(genome_assembly: str, task: str, data_file: str, file_folder: str, data_source: str, binary_label: int, prior_genome_assembly: str, prior_prior_genome_assembly: str)
+
+      Function for loading data from a data file containing data as it is
+      downloaded from a source data site into our platform repository data
+      files. The input data_file is assumed to contain one row per variant
+      along with the label. There will be separate column in that row for
+      each vep score. For each row in the input data_file we populate
+      the following files:
+
+      - variant.csv - We create one row.
+      - variant_effect_label.csv - We create one row with the label and
+          other informational columns.
+      - variant_effect_score.csv - We create one row for each vep score
+          column. So if we have 5 vep score columns we would create 5
+          rows in this file.
+
+      To update the files we call the _upsert_repository_file method.
+      This method first checks if the row already exists in the file.
+      If it doesn't exist it adds the row. If it does exist it updates
+      the existing row with the new values.
+
+      Parameters
+      ----------
+      genome_assembly : str
+          Genome assembly, typically hg38
+      task : str
+          task code
+      data_file : str
+          File containing data to be loaded.
+      file_folder : str
+          Location of data_file
+      data_source: str
+          Source of the input data_file. i.e. HOTSPOT
+      binary_label: int
+          1 or 0. This is the binary label to be assigned to all the
+          variants in the data_file. The assumption is that all of the
+          variants in the file have the same label.
+      prior_genome_assembly : str
+          Genome assembly prior to genome_assembly that we have chromosome,
+          position data for. typically hg19
+      prior_prior_genome_assembly : str
+          Genome assembly prior to prior_genome_assembly that we have,
+          chromsome position data for. typically hg18
+
+
+
