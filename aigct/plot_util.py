@@ -18,7 +18,7 @@ def barchart(df: pd.DataFrame, x: str, y: str, x_label: str = '',
     fig, ax = plt.subplots(figsize=(6, 4))
     ax = sns.barplot(df, x=x, y=y, palette=palette, hatch=hatch,
                      edgecolor=edgecolor, errorbar=errorbar,
-                     estimator=estimator)
+                     estimator=estimator, hue=x)
     ax.tick_params('both', labelsize=label_size)
     ax.set_ylabel(y_label, fontsize=y_label_fontsize)
     ax.set_xlabel(x_label, fontsize=x_label_fontsize)

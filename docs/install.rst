@@ -8,7 +8,7 @@ Install python package::
 
 Initialize the application::
 
-    init_app –confdir <config> --logdir <log> --outdir <output> --dbdir <dbdir>
+    init_app –-confdir <config> --logdir <log> --outdir <output> --dbdir <dbdir>
 
 Where <config>, <log>, <output>, <dbdir> are directories where to store
 config file, log files, output files containing the results of a benchmarking
