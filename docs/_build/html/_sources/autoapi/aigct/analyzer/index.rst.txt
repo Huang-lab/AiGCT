@@ -38,6 +38,9 @@ Module Contents
    .. py:attribute:: _variant_effect_source_repo
 
 
+   .. py:method:: validate_user_ve_scores(user_ve_scores: pandas.DataFrame)
+
+
    .. py:method:: get_analysis_scores_and_labels(task_code: str, user_ve_scores: pandas.DataFrame = None, user_vep_name: str = 'USER', column_name_map: dict = None, variant_effect_sources: list[str] = None, include_variant_effect_sources: bool = None, variant_query_criteria: aigct.model.VEQueryCriteria = None, vep_min_overlap_percent: float = 0, variant_vep_retention_percent: float = 0) -> pandas.DataFrame
 
 
@@ -77,7 +80,10 @@ Module Contents
           An optional dataframe of user variant effect prediction
           scores. Expected to have the following columns:
           GENOME_ASSEMBLY, CHROMOSOME, POSITION,
-          REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE
+          REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE.
+          The GENOME_ASSEMBLY must be hg38 in current release.
+          RANK_SCORE is a numeric prediction score. It does not have
+          to be standardized or normalized.
       user_vep_name : str, optional
           If user_ve_scores are provided, then this is the label to
           be used for them in the analysis output.

@@ -97,6 +97,7 @@
     <span class="n">VEQueryCriteria</span><span class="p">,</span>
     <span class="n">VariantFilter</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.query_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_query_criteria</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
@@ -199,6 +200,7 @@
 <span class="sd">        -------</span>
 <span class="sd">        DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span></div>
 
 
@@ -251,6 +253,7 @@
 <span class="sd">        DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
         <span class="n">variant_labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="n">task_code</span><span class="p">,</span> <span class="n">qry</span><span class="p">)</span>
         <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
@@ -294,6 +297,7 @@
 <span class="sd">        DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
             <span class="n">task_code</span><span class="p">,</span>
             <span class="n">variant_effect_sources</span><span class="p">,</span>
@@ -324,6 +328,7 @@
 <span class="sd">        DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span>
                                                    <span class="n">qry</span><span class="p">)</span></div>
 
@@ -356,6 +361,7 @@
 <span class="sd">        DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
         <span class="n">label_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span> <span class="n">qry</span><span class="p">)[</span>
             <span class="p">[</span><span class="s1">&#39;CHROMOSOME&#39;</span><span class="p">,</span> <span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">,</span> <span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">]]</span>
         <span class="n">label_df</span><span class="p">[[</span><span class="s1">&#39;POSITIVE_LABEL&#39;</span><span class="p">,</span> <span class="s1">&#39;NEGATIVE_LABEL&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">label_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>

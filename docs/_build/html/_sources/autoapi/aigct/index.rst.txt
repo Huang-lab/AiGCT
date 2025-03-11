@@ -27,6 +27,7 @@ Submodules
    /autoapi/aigct/plot_util/index
    /autoapi/aigct/plotter/index
    /autoapi/aigct/query/index
+   /autoapi/aigct/query_util/index
    /autoapi/aigct/repo_qc/index
    /autoapi/aigct/reporter/index
    /autoapi/aigct/repository/index

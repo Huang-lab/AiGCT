@@ -29,10 +29,10 @@ Module Contents
    .. py:attribute:: _mwu_config
 
 
-   .. py:method:: _plot_roc_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, file_name: str = None)
+   .. py:method:: _plot_roc_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, ves_color_palette: dict, file_name: str = None)
 
 
-   .. py:method:: _plot_pr_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, file_name: str = None)
+   .. py:method:: _plot_pr_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, ves_color_palette: dict, file_name: str = None)
 
 
    .. py:method:: _display_mwu_table(results: aigct.model.VEAnalysisResult, file_name: str = None)
@@ -47,13 +47,13 @@ Module Contents
    .. py:method:: _plot_mwu_bar(mwus: pandas.DataFrame, batch_no: int, num_batches: int, file_name: str = None, palette=None)
 
 
-   .. py:method:: plot_pr_results(results: aigct.model.VEAnalysisResult, dir: str = None)
+   .. py:method:: plot_pr_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
 
 
-   .. py:method:: plot_roc_results(results: aigct.model.VEAnalysisResult, dir: str = None)
+   .. py:method:: plot_roc_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
 
 
-   .. py:method:: plot_mwu_results(results: aigct.model.VEAnalysisResult, dir: str = None)
+   .. py:method:: plot_mwu_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
 
 
    .. py:method:: plot_results(results: aigct.model.VEAnalysisResult, metrics: str | list[str] = ['roc', 'pr', 'mwu'], dir: str = None)

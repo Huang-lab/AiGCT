@@ -16,6 +16,7 @@ Attributes
 
    aigct.etl.repo_loader.COLUMN_NAME_MAP
    aigct.etl.repo_loader.VEP_COLUMN_LIST
+   aigct.etl.repo_loader.VEP_COLUMN_LIST_OLD
    aigct.etl.repo_loader.VARIANT_EFFECT_SOURCE_DATA
    aigct.etl.repo_loader.VARIANT_DATA_SOURCE_DATA
 
@@ -34,6 +35,8 @@ Module Contents
 .. py:data:: COLUMN_NAME_MAP
 
 .. py:data:: VEP_COLUMN_LIST
+
+.. py:data:: VEP_COLUMN_LIST_OLD
 
 .. py:data:: VARIANT_EFFECT_SOURCE_DATA
    :value: [['REVEL', 'REVEL', 'VEP', 'REVEL'], ['GVMP', 'gVMP', 'VEP', 'gVMP'], ['VAR_R', 'VARITY_R',...

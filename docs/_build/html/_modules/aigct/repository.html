@@ -357,7 +357,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
                                      <span class="n">task_code</span><span class="p">,</span>
-                                     <span class="n">VARIANT_EFFECT_LABEL_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+                                     <span class="n">VARIANT_EFFECT_LABEL_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">),</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
 </div>
 
@@ -391,7 +392,8 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">full_file_name</span><span class="p">))</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">full_file_name</span><span class="p">),</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span></div>
 </div>
 
@@ -426,7 +428,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
                                      <span class="n">task_code</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">file_name</span><span class="p">),</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
 </div>
 
@@ -546,7 +549,9 @@
                     <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_variant_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                             <span class="n">folder</span><span class="p">,</span>
-                            <span class="n">VARIANT_FILTER_VARIANT_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+                            <span class="n">VARIANT_FILTER_VARIANT_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">),</span>
+                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+
                     <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache_dict</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
 </div>

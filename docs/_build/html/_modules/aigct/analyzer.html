@@ -78,6 +78,7 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_string_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
      <span class="n">roc_curve</span><span class="p">,</span>
      <span class="n">roc_auc_score</span><span class="p">,</span>
@@ -95,6 +96,7 @@
      <span class="n">VARIANT_PK_COLUMNS</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.pd_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">filter_dataframe_by_list</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.query_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_query_criteria</span>
 
 <div class="viewcode-block" id="VARIANT_EFFECT_SCORE_COLS">
 <a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VARIANT_EFFECT_SCORE_COLS">[docs]</a>
@@ -121,6 +123,14 @@
 <div class="viewcode-block" id="VEAnalyzer._variant_effect_source_repo">
 <a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._variant_effect_source_repo">[docs]</a>
         <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_source_repo</span> <span class="o">=</span> <span class="n">variant_effect_source_repo</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer.validate_user_ve_scores">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer.validate_user_ve_scores">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_user_ve_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_ve_scores</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_string_dtype</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">[</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">])):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CHROMOSOME column values must all be string type&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="VEAnalyzer.get_analysis_scores_and_labels">
@@ -160,6 +170,7 @@
             <span class="k">if</span> <span class="n">column_name_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_name_map</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">user_ve_scores</span> <span class="o">=</span> <span class="n">user_ve_scores</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
                     <span class="n">columns</span><span class="o">=</span><span class="n">column_name_map</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validate_user_ve_scores</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">)</span>
             <span class="n">user_ve_scores</span> <span class="o">=</span> <span class="n">user_ve_scores</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_universe_pks_df</span><span class="p">,</span>
                                                   <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
                                                   <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
@@ -444,7 +455,10 @@
 <span class="sd">            An optional dataframe of user variant effect prediction</span>
 <span class="sd">            scores. Expected to have the following columns:</span>
 <span class="sd">            GENOME_ASSEMBLY, CHROMOSOME, POSITION,</span>
-<span class="sd">            REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE</span>
+<span class="sd">            REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE.</span>
+<span class="sd">            The GENOME_ASSEMBLY must be hg38 in current release.</span>
+<span class="sd">            RANK_SCORE is a numeric prediction score. It does not have</span>
+<span class="sd">            to be standardized or normalized.</span>
 <span class="sd">        user_vep_name : str, optional</span>
 <span class="sd">            If user_ve_scores are provided, then this is the label to</span>
 <span class="sd">            be used for them in the analysis output.</span>
@@ -497,6 +511,8 @@
 <span class="sd">        VEAnalysisResult</span>
 <span class="sd">            Object containing computed metrics</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">variant_query_criteria</span><span class="p">)</span>
 
         <span class="n">scores_and_labels_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_analysis_scores_and_labels</span><span class="p">(</span>
             <span class="n">task_code</span><span class="p">,</span>

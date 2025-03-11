@@ -11,6 +11,7 @@ Functions
 
    aigct.plot_util.barchart
    aigct.plot_util.create_feature_palette
+   aigct.plot_util.get_colors
 
 
 Module Contents
@@ -19,4 +20,6 @@ Module Contents
 .. py:function:: barchart(df: pandas.DataFrame, x: str, y: str, x_label: str = '', y_label: str = '', ci: pandas.DataFrame = None, filename: str = None, hatch: str = None, edgecolor=None, palette=None, errorbar=None, estimator: str = 'mean', title: str = '', title_fontsize: int = 20, y_label_fontsize: int = 15, x_label_fontsize: int = 15, label_size: int = 15, xtick_rotation: int = None, xtick_rotation_mode: str = None, file_dpi: int = 300, bbox_inches: str = 'tight')
 
 .. py:function:: create_feature_palette(values: list) -> dict
+
+.. py:function:: get_colors(num_colors: int) -> list
 

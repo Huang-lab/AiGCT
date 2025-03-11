@@ -93,6 +93,10 @@
                              <span class="n">filter_col_name_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                              <span class="n">in_list</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
                              <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_frame</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data_frame</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data_frame</span><span class="p">[:</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">df_merge_columns</span> <span class="o">=</span> <span class="n">str_or_list_to_list</span><span class="p">(</span><span class="n">df_merge_columns</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">filter_col_name_map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">filter_merge_columns</span> <span class="o">=</span> <span class="n">df_merge_columns</span>

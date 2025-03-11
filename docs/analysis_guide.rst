@@ -148,14 +148,17 @@ Here is an example of some of the plots generated:
 .. image:: _static/roc_curves_0.png
    :width: 60 %
    :align: center
+
 |
 .. image:: _static/pr_curves_0.png
    :width: 60 %
    :align: center
+
 |
 .. image:: _static/mwu_bar_0.png
    :width: 60 %
    :align: center
+
 |
 See the the API documentation for the aigct.plotter.VEAnalysisPlotter.plot_results
 method for more details.

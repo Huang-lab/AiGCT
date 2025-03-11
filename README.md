@@ -45,4 +45,4 @@ where <dbdir> is the database directory specified for init_app above.
 
 ## Documentation Including Installation and Usage Instructions
 
-**[readthedocs](https://aigct-dev.readthedocs.io/en/latest/index.html#)**
+**[readthedocs](https://aigct.readthedocs.io/en/latest/index.html#)**
