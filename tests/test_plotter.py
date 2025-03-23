@@ -54,7 +54,7 @@ def test_plot_results_file(
         "CANCER", sample_user_scores_cancer, "UserVep",
         vep_min_overlap_percent=50,
         variant_vep_retention_percent=1, list_variants=True)
-    ve_plotter.plot_results(metrics, dir="./demo/output")
+    ve_plotter.plot_results(metrics, dir="./demo/output", metrics="mwu")
     pass
 
 

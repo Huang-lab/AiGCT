@@ -59,14 +59,15 @@ class VEAnalysisPlotter:
                             fontsize=self._roc_pr_config.legend_font_size)
         for line in legend.get_lines():
             line.set_linewidth(self._roc_pr_config.legend_line_width)
-        if file_name is not None:
-            plt.savefig(file_name, dpi=self._config.file_dpi,
-                        format='png',
-                        bbox_inches=self._config.bbox_inches)
-            plt.savefig(file_name.replace(".png", ".svg"),
-                        format='svg',
-                        bbox_inches=self._config.bbox_inches)
-        plt.show()
+        if file_name is None:
+            plt.show()
+            return
+        plt.savefig(file_name, dpi=self._config.file_dpi,
+                    format='png',
+                    bbox_inches=self._config.bbox_inches)
+        plt.savefig(file_name.replace(".png", ".svg"),
+                    format='svg',
+                    bbox_inches=self._config.bbox_inches)
 
     def _plot_pr_curves(self, aucs: pd.DataFrame, user_vep_name: str,
                         curve_coords: pd.DataFrame,
@@ -98,14 +99,15 @@ class VEAnalysisPlotter:
                             fontsize=self._roc_pr_config.legend_font_size)
         for line in legend.get_lines():
             line.set_linewidth(self._roc_pr_config.legend_line_width)
-        if file_name is not None:
-            plt.savefig(file_name, dpi=self._config.file_dpi,
-                        format='png',
-                        bbox_inches=self._config.bbox_inches)
-            plt.savefig(file_name.replace(".png", ".svg"),
-                        format='svg',
-                        bbox_inches=self._config.bbox_inches)
-        plt.show()
+        if file_name is None:
+            plt.show()
+            return
+        plt.savefig(file_name, dpi=self._config.file_dpi,
+                    format='png',
+                    bbox_inches=self._config.bbox_inches)
+        plt.savefig(file_name.replace(".png", ".svg"),
+                    format='svg',
+                    bbox_inches=self._config.bbox_inches)
 
     def _display_mwu_table(self, results: VEAnalysisResult,
                            file_name: str = None):

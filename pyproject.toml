@@ -40,9 +40,10 @@ check_install = "aigct.check_install:main"
 exclude = [
   "docs",
   "data",
+  "data1",
   "TGCA.V1",
   "temp",
-  "venv_agct"
+  "venv_aigct"
 ]
 #[tool.hatch.build]
 #include = [

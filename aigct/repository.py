@@ -132,6 +132,11 @@ TABLE_DEFS = {
 }
 
 
+def read_repo_csv(file: str) -> pd.DataFrame:
+    return pd.read_csv(file,
+                       dtype={"CHROMOSOME": str, "BINARY_LABEL": int})
+
+
 class RepoSessionContext:
 
     def __init__(self, data_folder_root: str,
@@ -174,11 +179,10 @@ class VariantEffectLabelCache(ParameterizedSingleton):
         if task_code not in self._cache:
             with self._lock:
                 if task_code not in self._cache:
-                    self._cache[task_code] = pd.read_csv(
+                    self._cache[task_code] = read_repo_csv(
                         os.path.join(self._data_folder_root, DATA_FOLDER,
                                      task_code,
-                                     VARIANT_EFFECT_LABEL_TABLE_DEF.file_name),
-                        dtype={"CHROMOSOME": str})
+                                     VARIANT_EFFECT_LABEL_TABLE_DEF.file_name))
         return self._cache[task_code]
 
 
@@ -201,10 +205,9 @@ class DataCache(ParameterizedSingleton):
         if self._data_frame is None:
             with self._lock:
                 if self._data_frame is None:
-                    self._data_frame = pd.read_csv(
+                    self._data_frame = read_repo_csv(
                         os.path.join(self._data_folder_root,
-                                     self._table_def.full_file_name),
-                        dtype={"CHROMOSOME": str})
+                                     self._table_def.full_file_name))
         return self._data_frame
 
 
@@ -227,11 +230,10 @@ class TaskBasedDataCache(ParameterizedSingleton):
         if task_code not in self._cache:
             with self._lock:
                 if task_code not in self._cache:
-                    self._cache[task_code] = pd.read_csv(
+                    self._cache[task_code] = read_repo_csv(
                         os.path.join(self._data_folder_root, DATA_FOLDER,
                                      task_code,
-                                     self._table_def.file_name),
-                        dtype={"CHROMOSOME": str})
+                                     self._table_def.file_name))
         return self._cache[task_code]
 
 
@@ -303,17 +305,16 @@ class VariantFilterCache(ParameterizedSingleton):
                     folder = os.path.join(self._data_folder_root, DATA_FOLDER,
                                           task_code)
                     cache_dict = dict()
-                    cache_dict["filter_df"] = pd.read_csv(
+                    cache_dict["filter_df"] = read_repo_csv(
                         os.path.join(folder,
                                      VARIANT_FILTER_TABLE_DEF.file_name))
-                    cache_dict["filter_gene_df"] = pd.read_csv(
+                    cache_dict["filter_gene_df"] = read_repo_csv(
                         os.path.join(folder,
                                      VARIANT_FILTER_GENE_TABLE_DEF.file_name))
-                    cache_dict["filter_variant_df"] = pd.read_csv(
+                    cache_dict["filter_variant_df"] = read_repo_csv(
                         os.path.join(
                             folder,
-                            VARIANT_FILTER_VARIANT_TABLE_DEF.file_name),
-                        dtype={"CHROMOSOME": str})
+                            VARIANT_FILTER_VARIANT_TABLE_DEF.file_name))
 
                     self._cache[task_code] = cache_dict
         return self._cache[task_code]
@@ -427,9 +428,11 @@ class VariantRepository:
 class VariantEffectLabelRepository:
 
     def __init__(self, session_context: RepoSessionContext,
+                 variant_task_repo: VariantTaskRepository,
                  variant_repo: VariantRepository,
                  filter_repo: VariantFilterRepository):
         self._cache = VariantEffectLabelCache(session_context.data_folder_root)
+        self._task_repo = variant_task_repo
         self._filter_repo = filter_repo
         self._variant_repo = variant_repo
 
@@ -439,6 +442,16 @@ class VariantEffectLabelRepository:
             VEQueryCriteria(variant_ids=label_df[VARIANT_PK_COLUMNS]))
         return label_df.merge(variant_df, on=VARIANT_PK_COLUMNS,
                               how="inner")
+
+    def get_all_for_all_tasks(self) -> pd.DataFrame:
+        tasks_df = self._task_repo.get_all()
+        labels_dfs = []
+        for row in tasks_df.itertuples():
+            labels_df = self.get_all_by_task(row.CODE)
+            labels_df["TASK_CODE"] = row.CODE
+            labels_df["TASK_NAME"] = row.NAME
+            labels_dfs.append(labels_df)
+        return pd.concat(labels_dfs)
 
     def get(self, task_code: str,
             qry: VEQueryCriteria = None) -> pd.DataFrame:
@@ -472,9 +485,11 @@ class VariantEffectLabelRepository:
 class VariantEffectScoreRepository:
 
     def __init__(self, session_context: RepoSessionContext,
+                 task_repo: VariantTaskRepository,
                  variant_repo: VariantRepository,
                  filter_repo: VariantFilterRepository):
         self._cache = VariantEffectScoreCache(session_context.data_folder_root)
+        self._task_repo = task_repo
         self._filter_repo = filter_repo
         self._variant_repo = variant_repo
 
@@ -520,5 +535,15 @@ class VariantEffectScoreRepository:
                                        filter_dfs.filter_genes,
                                        filter_dfs.filter_variants)
         return merge_df[VARIANT_EFFECT_SCORE_TABLE_DEF.columns]
+
+    def get_all_for_all_tasks(self) -> pd.DataFrame:
+        tasks_df = self._task_repo.get_all()
+        scores_dfs = []
+        for row in tasks_df.itertuples():
+            scores_df = self.get_all_by_task(row.CODE)
+            scores_df["TASK_CODE"] = row.CODE
+            scores_df["TASK_NAME"] = row.NAME
+            scores_dfs.append(scores_df)
+        return pd.concat(scores_dfs)
 
 

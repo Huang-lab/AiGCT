@@ -103,7 +103,8 @@ class VEBenchmarkQueryMgr:
         return pd.Series(
             {"NUM_VARIANTS": len(group),
              "NUM_POSITIVE_LABELS": group["BINARY_LABEL"].sum(),
-             "NUM_NEGATIVE_LABELS": (group["BINARY_LABEL"] ^ 1).sum()
+             "NUM_NEGATIVE_LABELS": (group["BINARY_LABEL"] ^ 1).sum(),
+             "NUM_GENES": group["GENE_SYMBOL"].nunique()
              })
 
     def get_variant_effect_source_stats(
@@ -113,7 +114,7 @@ class VEBenchmarkQueryMgr:
         """
         Get all variant effect sources for a task along with the
         number of variants, number of positive labels,
-        number of negative labels for each source.
+        number of negative labels, number of genes for each source.
 
         Parameters
         ----------
@@ -146,6 +147,29 @@ class VEBenchmarkQueryMgr:
                                      on=VARIANT_PK_COLUMNS)
         grouped_scores = scores_labels.groupby("SCORE_SOURCE")
         return grouped_scores.apply(
+            self._compute_variant_counts,
+            include_groups=False).reset_index()
+
+    def get_all_variant_effect_source_stats(self) -> pd.DataFrame:
+        scores = self._variant_effect_score_repo.get_all_for_all_tasks()
+        grouped_scores = scores.groupby(["TASK_CODE"])
+        return grouped_scores.agg(
+            NUM_SCORE_SOURCES=('SCORE_SOURCE', 'nunique')).reset_index()
+
+    def get_all_task_variant_effect_label_stats(self) -> pd.DataFrame:
+        """
+        Returns one row per task with number of variants,
+        number of positive labels, number of negative labels,
+        number of genes.
+
+        Returns
+        -------
+        DataFrame
+        """
+
+        labels = self._variant_effect_label_repo.get_all_for_all_tasks()
+        grouped_labels = labels.groupby(["TASK_CODE", "TASK_NAME"])
+        return grouped_labels.apply(
             self._compute_variant_counts,
             include_groups=False).reset_index()
 

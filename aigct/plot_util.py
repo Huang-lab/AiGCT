@@ -28,9 +28,11 @@ def barchart(df: pd.DataFrame, x: str, y: str, x_label: str = '',
     if ci is not None and len(ci) != 0:
         plt.errorbar(x=df[x], y=df[y], yerr=ci["CI"], fmt="none", c="k")
     plt.title(title, fontsize=title_fontsize)
-    if filename is not None:
-        plt.savefig(filename, dpi=file_dpi, bbox_inches=bbox_inches)
-        plt.savefig(filename.replace('.png', '.svg'), bbox_inches=bbox_inches)
+    if filename is None:
+        plt.show()
+        return
+    plt.savefig(filename, dpi=file_dpi, bbox_inches=bbox_inches)
+    plt.savefig(filename.replace('.png', '.svg'), bbox_inches=bbox_inches)
 
 
 def create_feature_palette(values: list) -> dict:

@@ -48,10 +48,12 @@ class VEBenchmarkContainer:
             self._repo_session_context)
         self._label_repo = VariantEffectLabelRepository(
             self._repo_session_context,
+            self._variant_task_repo,
             self._variant_repo,
             self._variant_filter_repo)
         self._score_repo = VariantEffectScoreRepository(
             self._repo_session_context,
+            self._variant_task_repo,
             self._variant_repo,
             self._variant_filter_repo)
         self._variant_effect_source_repo = VariantEffectSourceRepository(

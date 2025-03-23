@@ -64,3 +64,13 @@ def test_query_dist(ve_bm_query_mgr: VEBenchmarkQueryMgr,
                                                         qry=qry)
     assert len(dist_qry) > 0 and len(dist_qry) < len(dist_gene)
 
+
+def test_query_get_all_labels_for_all_tasks(ve_bm_query_mgr: VEBenchmarkQueryMgr):
+    labels = ve_bm_query_mgr.get_all_task_variant_effect_label_stats()
+    assert len(labels) > 0
+
+
+def test_get_all_variant_effect_source_stats(
+        ve_bm_query_mgr: VEBenchmarkQueryMgr):
+    score_stats = ve_bm_query_mgr.get_all_variant_effect_source_stats()
+    assert len(score_stats) > 0
