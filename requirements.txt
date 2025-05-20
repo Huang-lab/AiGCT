@@ -10,3 +10,5 @@ scikit_learn>=1.6.1
 scipy>=1.15.1
 seaborn>=0.13.2
 Jinja2>=3.1.5
+dask>=2025.3.0
+pyarrow>=19.0.1

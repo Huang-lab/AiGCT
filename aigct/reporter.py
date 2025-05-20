@@ -12,6 +12,7 @@ from .date_util import now_str_basic_format, now_str_compact
 import os
 import sys
 from .file_util import new_line
+from .report_util import GeneMetricSorter
 
 VARIANT_EFFECT_SCORE_COLS = ["SCORE_SOURCE"] +\
     VARIANT_PK_COLUMNS + ["RANK_SCORE"]
@@ -35,7 +36,8 @@ class VEAnalysisReporter:
         out.write("Total number of variants across all VEPs in analysis: " +
                   str(metrics.num_variants_included))
         new_line(out, 2)
-        self._write_metric_dataframe(out, metrics.general_metrics)
+        self._write_metric_dataframe(out, metrics.general_metrics.sort_values(
+            by="SCORE_SOURCE"))
         new_line(out, 2)
         if metrics.roc_metrics is not None:
             out.write("ROC Metrics")
@@ -57,6 +59,38 @@ class VEAnalysisReporter:
             self._write_metric_dataframe(
                 out, metrics.mwu_metrics.sort_values(by="NEG_LOG10_MWU_PVAL",
                                                      ascending=False))
+            new_line(out, 2)
+        if metrics.gene_general_metrics is None:
+            return
+        gene_metric_sorter = GeneMetricSorter(
+            metrics.gene_unique_variant_counts_df)
+        new_line(out, 2)
+        out.write("Summary of Gene Level Variant Effect Metrics")
+        new_line(out, 2)
+        sorted_df = gene_metric_sorter.sort_gene_metrics(
+            metrics.gene_general_metrics)
+        self._write_metric_dataframe(out, sorted_df)
+        new_line(out, 2)
+        if metrics.gene_roc_metrics is not None:
+            out.write("Gene Level ROC Metrics")
+            new_line(out, 2)
+            sorted_df = gene_metric_sorter.sort_gene_metrics(
+                metrics.gene_roc_metrics)
+            self._write_metric_dataframe(out, sorted_df)
+            new_line(out, 2)
+        if metrics.gene_pr_metrics is not None:
+            out.write("Gene Level Precision/Recall Metrics")
+            new_line(out, 2)
+            sorted_df = gene_metric_sorter.sort_gene_metrics(
+                metrics.gene_pr_metrics)
+            self._write_metric_dataframe(out, sorted_df)
+            new_line(out, 2)
+        if metrics.gene_mwu_metrics is not None:
+            out.write("Gene Level Mann-Whitney U -log10(P value)")
+            new_line(out, 2)
+            sorted_df = gene_metric_sorter.sort_gene_metrics(
+                metrics.gene_mwu_metrics)
+            self._write_metric_dataframe(out, sorted_df)
             new_line(out, 2)
 
     def write_summary(self, metrics: VEAnalysisResult,

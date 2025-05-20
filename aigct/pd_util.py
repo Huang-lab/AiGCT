@@ -66,3 +66,10 @@ def build_dataframe_where_clause(where_params: dict) -> str:
     return clause
 
 
+def merge_by_chunks(left_df: pd.DataFrame, right_df: pd.DataFrame,
+                    chunk_size: int = 500, **kwargs):
+    chunks = []
+    for i in range(0, len(left_df), chunk_size):
+        chunk = left_df.iloc[i:i+chunk_size].merge(right_df, **kwargs)
+        chunks.append(chunk)
+    return pd.concat(chunks)

@@ -45,4 +45,21 @@ class VEAnalysisExporter:
         if results.variants_included is not None:
             results.variants_included.to_csv(
                 os.path.join(dir, "included_variants.csv"), index=False)
-
+        if results.gene_general_metrics is not None:
+            results.gene_general_metrics.to_csv(
+                os.path.join(dir, "gene_general_metrics.csv"), index=False)
+        if results.gene_roc_metrics is not None:
+            results.gene_roc_metrics.to_csv(
+                os.path.join(dir, "gene_roc_metrics.csv"), index=False)
+        if results.gene_pr_metrics is not None:
+            results.gene_pr_metrics.to_csv(
+                os.path.join(dir, "gene_pr_metrics.csv"), index=False)
+        if results.gene_mwu_metrics is not None:
+            results.gene_mwu_metrics.to_csv(
+                os.path.join(dir, "gene_mwu_metrics.csv"), index=False)
+        if results.gene_roc_curve_coordinates is not None:
+            results.gene_roc_curve_coordinates.to_csv(
+                os.path.join(dir, "gene_roc_curve_coords.csv"), index=False)
+        if results.gene_pr_curve_coordinates is not None:
+            results.gene_pr_curve_coordinates.to_csv(
+                os.path.join(dir, "gene_pr_curve_coords.csv"), index=False)

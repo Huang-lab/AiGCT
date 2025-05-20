@@ -86,7 +86,7 @@ class VEBenchmarkQueryMgr:
         qry : VEQueryCriteria
             See description of VEQueryCriteria in model package.
             Specifies criteria that would limit the set of variants
-            to be retrieved. The filter_name attribute is ignored.
+            to be retrieved. The filter_names attribute is ignored.
 
         Returns
         -------
@@ -95,7 +95,10 @@ class VEBenchmarkQueryMgr:
         validate_query_criteria(qry)
         return self._variant_repo.get(qry)
 
-    def get_variant_effect_sources(self, task_code: str) -> pd.DataFrame:
+    def get_variant_effect_sources(
+            self, task_code: str = None) -> pd.DataFrame:
+        if task_code is None:
+            return self._variant_effect_source_repo.get_all()
         return self._variant_effect_source_repo.get_by_task(task_code)
 
     @staticmethod
@@ -151,10 +154,18 @@ class VEBenchmarkQueryMgr:
             include_groups=False).reset_index()
 
     def get_all_variant_effect_source_stats(self) -> pd.DataFrame:
-        scores = self._variant_effect_score_repo.get_all_for_all_tasks()
-        grouped_scores = scores.groupby(["TASK_CODE"])
-        return grouped_scores.agg(
-            NUM_SCORE_SOURCES=('SCORE_SOURCE', 'nunique')).reset_index()
+        tasks_df = self._variant_task_repo.get_all()
+        stats_df = pd.DataFrame(columns=["TASK_NAME", "TASK_CODE",
+                                         "NUM_SCORE_SOURCES"])
+        for row in tasks_df.itertuples():
+            scores_df = self._variant_effect_score_repo.get_all_by_task(  # _slim(
+                row.CODE)
+            num_unique_sources = scores_df['SCORE_SOURCE'].nunique()
+            new_row = pd.DataFrame({"TASK_NAME": [row.NAME],
+                                    "TASK_CODE": [row.CODE],
+                                    "NUM_SCORE_SOURCES": [num_unique_sources]})
+            stats_df = pd.concat([stats_df, new_row]).reset_index(drop=True)
+        return stats_df
 
     def get_all_task_variant_effect_label_stats(self) -> pd.DataFrame:
         """
@@ -175,7 +186,7 @@ class VEBenchmarkQueryMgr:
 
     def get_variant_effect_scores(self, task_code: str,
                                   variant_effect_sources=None,
-                                  include_variant_effect_sources: bool = None,
+                                  include_variant_effect_sources: bool = True,
                                   qry: VEQueryCriteria = None) -> pd.DataFrame:
         """
         Fetches variant effect scores for variant effect sources.

@@ -32,3 +32,19 @@ def test_write_summary_file(
     ve_reporter.write_summary(metrics, "./demo/output")
     pass
 
+
+def test_compute_metrics_basic_gene_level_file(ve_analyzer,
+                                               sample_user_scores_cancer,
+                                               sample_veps,
+                                               ve_reporter:
+                                               VEAnalysisReporter):
+    task_code = "CANCER"
+    metrics = ve_analyzer.compute_metrics(
+        task_code, sample_user_scores_cancer, "UserVep",
+        compute_gene_metrics=True,
+        variant_effect_sources=sample_veps[:3],
+        list_variants=True)
+    ve_reporter.write_summary(metrics, "./demo/output")
+    pass
+
+

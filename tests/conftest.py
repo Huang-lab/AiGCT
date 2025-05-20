@@ -102,3 +102,10 @@ def ve_analysis_exporter(ve_bm_container):
 def ve_data_validator(ve_bm_container):
     return ve_bm_container.data_validator
  
+
+
+@pytest.fixture
+def sample_veps(ve_bm_container):
+    srcs = ve_bm_container.query_mgr.get_variant_effect_sources()
+    return list(srcs[:5]["CODE"])
+

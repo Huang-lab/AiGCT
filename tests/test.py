@@ -11,6 +11,10 @@ from sklearn.metrics import (
 print(type(VariantId))
 
 
+df = pd.read_csv("temp/ASD_630.csv")
+
+
+
 @dataclass
 class TableDef:
     folder: str
@@ -99,7 +103,7 @@ except ValueError as ve:
 except Exception as e:
     f = str(e)
 
-a
+
 
 with open("junk.lis", "w") as out:
     out.write("abc\n\n")
@@ -153,3 +157,17 @@ v1 = v1.reset_index()
 
 v1.to_csv("data/variant.csv",index=False)
 
+
+df = pd.DataFrame({
+    'group': ['A', 'A', 'B', 'B', 'B', 'C'],
+    'col1': [1, 1, 2, 2, 3, 4],
+    'col2': ['x', 'y', 'x', 'x', 'z', 'z'],
+    'col3': [True, False, True, True, False, True]
+})
+
+# Method 1: Group by one column and get unique counts for specific columns
+result = df.groupby('group').apply(
+    lambda x: x[['col1', 'col2', 'col3']].drop_duplicates().shape[0]
+)
+
+pass

@@ -14,7 +14,9 @@ from .file_util import (
     unique_file_name,
     create_folder
 )
-from .plot_util import (barchart, create_feature_palette, get_colors)
+from .plot_util import (barchart, create_feature_palette,
+                        get_colors, heatmap)
+from .report_util import GeneMetricSorter
 
 
 class VEAnalysisPlotter:
@@ -118,7 +120,11 @@ class VEAnalysisPlotter:
                 'NUM_NEGATIVE_LABELS', 'NEG_LOG10_MWU_PVAL', 'EXCEPTION']]
         table_output = table_output.sort_values('NEG_LOG10_MWU_PVAL',
                                                 ascending=False)
-        style = table_output.style.hide().relabel_index(
+        style = table_output.style.set_properties(
+            subset=["NUM_VARIANTS",
+                    "NUM_POSITIVE_LABELS", "NUM_NEGATIVE_LABELS",
+                    "NEG_LOG10_MWU_PVAL"], **{"text-align": "right"})
+        style = style.hide().relabel_index(
              ['VEP', "Variant Total", "Positive Labels", "Negative Labels",
               "MWU -log10(pval)", "Exception"],
              axis=1).set_caption("Mann-Whitney U -log10(p value)")
@@ -135,10 +141,18 @@ class VEAnalysisPlotter:
                 'SOURCE_NAME', 'NUM_VARIANTS', 'NUM_POSITIVE_LABELS',
                 'NUM_NEGATIVE_LABELS', 'PR_AUC']]
         table_output = table_output.sort_values('PR_AUC', ascending=False)
-        style = table_output.style.hide().relabel_index(
+        style = table_output.style.set_properties(
+            subset=["NUM_VARIANTS",
+                    "NUM_POSITIVE_LABELS", "NUM_NEGATIVE_LABELS",
+                    "PR_AUC"], **{"text-align": "right"})
+        style = style.hide().relabel_index(
              ['VEP', "Variant Total", "Positive Labels", "Negative Labels",
               "PR AUC"],
              axis=1).set_caption("Precision/Recall")
+        style = style.set_properties(
+            subset=["NUM_VARIANTS",
+                    "NUM_POSITIVE_LABELS", "NUM_NEGATIVE_LABELS",
+                    "PR_AUC"], **{"text-align": "right"})
         if file_name:
             style.to_html(file_name)
         else:
@@ -152,7 +166,11 @@ class VEAnalysisPlotter:
                 'SOURCE_NAME', 'NUM_VARIANTS', 'NUM_POSITIVE_LABELS',
                 'NUM_NEGATIVE_LABELS', 'ROC_AUC']]
         table_output = table_output.sort_values('ROC_AUC', ascending=False)
-        style = table_output.style.hide().relabel_index(
+        style = table_output.style.set_properties(
+            subset=["NUM_VARIANTS",
+                    "NUM_POSITIVE_LABELS", "NUM_NEGATIVE_LABELS",
+                    "ROC_AUC"], **{"text-align": "right"})
+        style = style.hide().relabel_index(
              ['VEP', "Variant Total", "Positive Labels", "Negative Labels",
               "ROC AUC"],
              axis=1).set_caption("ROC")
@@ -253,6 +271,7 @@ class VEAnalysisPlotter:
 
     def plot_results(self, results: VEAnalysisResult,
                      metrics: str | list[str] = ["roc", "pr", "mwu"],
+                     num_top_genes: int = 10,
                      dir: str = None):
         """
         Plot the results of an analysis either to the screen or to
@@ -266,6 +285,9 @@ class VEAnalysisPlotter:
             Specifies which metrics to plot. Can be a string
             indicating a single metric or a list of strings for
             multiple metrics. The metrics are: roc, pr, mwu.
+        num_top_genes : int
+            Number of top genes to plot. The top genes are the ones for
+            which the most variants were observed.
         dir : str, optional
             Directory to place the plot files. The files will
             be placed in a subdirectory off of this directory
@@ -286,4 +308,95 @@ class VEAnalysisPlotter:
             self.plot_pr_results(results, ves_color_palette, dir)
         if "mwu" in metrics and results.mwu_metrics is not None:
             self.plot_mwu_results(results, ves_color_palette, dir)
+        if results.gene_general_metrics is not None:
+            self.plot_gene_results(results, metrics, num_top_genes, dir)
+
+    def plot_gene_results(self, results: VEAnalysisResult,
+                          metrics: list[str],
+                          num_top_genes: int,
+                          dir: str = None):
+        """
+        Plot gene-level results of an analysis.
+
+        Parameters
+        ----------
+        results : VEAnalysisResult
+            Analysis result object containing gene-level metrics
+        metrics : list[str]
+            List of metrics to plot (roc, pr, mwu)
+        num_top_genes : int
+            Number of top genes to plot
+        dir : str, optional
+            Directory to place the plot files
+        """
+        ves_color_palette = create_feature_palette(
+            results.gene_general_metrics["SOURCE_NAME"].unique())
+        gene_metric_sorter = GeneMetricSorter(
+            results.gene_unique_variant_counts_df, num_top_genes)
+
+        if "roc" in metrics and results.gene_roc_metrics is not None:
+            self.plot_gene_roc_results(results, num_top_genes,
+                                       gene_metric_sorter, 
+                                       ves_color_palette, dir)
+
+        if "pr" in metrics and results.gene_pr_metrics is not None:
+            self.plot_gene_pr_results(results, gene_metric_sorter,
+                                      ves_color_palette, dir)
+
+        if "mwu" in metrics and results.gene_mwu_metrics is not None:
+            self.plot_gene_mwu_results(results, gene_metric_sorter,
+                                       ves_color_palette, dir)
+
+    def plot_gene_roc_results(self, results: VEAnalysisResult,
+                              num_top_genes: int,
+                              gene_metric_sorter: GeneMetricSorter,
+                              ves_color_palette: dict,
+                              dir: str = None):
+
+        gene_roc_metrics = results.gene_general_metrics.merge(
+            results.gene_roc_metrics, how="inner", suffixes=(None, "_y"),
+            on=['SCORE_SOURCE','GENE_SYMBOL'])[[
+                'SOURCE_NAME', 'GENE_SYMBOL','NUM_VARIANTS', 'NUM_POSITIVE_LABELS',
+                'NUM_NEGATIVE_LABELS', 'ROC_AUC']]
+        gene_roc_metrics = gene_metric_sorter.sort_gene_metrics(
+            gene_roc_metrics)
+
+        heatmap_file_name = None if dir is None else os.path.join(
+            dir, "gene_roc_heatmap.png")
+        
+        heatmap(gene_roc_metrics, 'SOURCE_NAME', 'GENE_SYMBOL', 'ROC_AUC',
+                title='Gene-Level ROC', filename=heatmap_file_name)
+                                          
+        # Create gene ROC table
+        table_file_name = None if dir is None else os.path.join(
+            dir, "gene_roc_table.html")
+        self._display_gene_roc_table(gene_roc_metrics, table_file_name)
+
+    def plot_gene_pr_results(self, results: VEAnalysisResult,
+                              ves_color_palette: dict,
+                              dir: str = None):
+        # Implement gene PR curve plotting
+        pass
+
+    def plot_gene_mwu_results(self, results: VEAnalysisResult,
+                              ves_color_palette: dict,
+                              dir: str = None):
+        # Implement gene MWU bar plotting
+        pass
+
+    def _display_gene_roc_table(self, roc_results: pd.DataFrame,
+                                file_name: str = None):
+        style = roc_results.style.set_properties(
+            subset=["NUM_VARIANTS",
+                    "NUM_POSITIVE_LABELS", "NUM_NEGATIVE_LABELS",
+                    "ROC_AUC"], **{"text-align": "right"})
+        style = style.hide().relabel_index(
+             ['VEP', "Gene", "Variant Total", "Positive Labels", "Negative Labels",
+              "ROC AUC"],
+             axis=1).set_caption("Gene-Level ROC")
+        if file_name:
+            style.to_html(file_name)
+        else:
+            display(style)
+
 

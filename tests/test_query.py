@@ -7,7 +7,7 @@ def test_query_criteria(ve_bm_query_mgr: VEBenchmarkQueryMgr,
                         sample_user_scores_cancer):
     qry = VEQueryCriteria(
                           variant_ids=sample_user_scores_cancer[:1500],
-                          filter_name="Oncogene",
+                          filter_names="Oncogene",
                           gene_symbols=['MTOR', 'PTEN'],
                           include_genes=False)
     variants_df = ve_bm_query_mgr.get_all_variants()
@@ -37,7 +37,7 @@ def test_query_source_stats(ve_bm_query_mgr: VEBenchmarkQueryMgr,
                             sample_user_scores_cancer):
     qry = VEQueryCriteria(
                           variant_ids=sample_user_scores_cancer[:1500],
-                          filter_name="Oncogene",
+                          filter_names="Oncogene",
                           gene_symbols=['MTOR', 'PTEN'],
                           include_genes=False)
     stats = ve_bm_query_mgr.get_variant_effect_source_stats(
@@ -52,7 +52,7 @@ def test_query_dist(ve_bm_query_mgr: VEBenchmarkQueryMgr,
                     sample_user_scores_cancer):
     qry = VEQueryCriteria(
                           variant_ids=sample_user_scores_cancer[:1500],
-                          filter_name="Oncogene",
+                          filter_names="Oncogene",
                           gene_symbols=['MTOR', 'PTEN'],
                           include_genes=False)
     dist_gene = ve_bm_query_mgr.get_variant_distribution("CANCER")
@@ -74,3 +74,15 @@ def test_get_all_variant_effect_source_stats(
         ve_bm_query_mgr: VEBenchmarkQueryMgr):
     score_stats = ve_bm_query_mgr.get_all_variant_effect_source_stats()
     assert len(score_stats) > 0
+
+
+def test_get_by_filters(
+        ve_bm_query_mgr: VEBenchmarkQueryMgr):
+    task_code = "CANCER"
+    qry1 = VEQueryCriteria(filter_names=["Oncogene", "MSK_passenger"])
+    variants1 = ve_bm_query_mgr.get_variants_by_task(task_code, qry1)
+    qry2 = VEQueryCriteria(filter_names="Oncogene")
+    variants2 = ve_bm_query_mgr.get_variants_by_task(task_code, qry2)
+    assert len(variants1) > len(variants2)
+    pass
+

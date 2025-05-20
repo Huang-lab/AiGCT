@@ -119,19 +119,20 @@ class VEQueryCriteria:
     allele_frequency : float, optional
         Used in conjunction to allele_frequency_operator to limit variants
         to those meeting a certain allele_frequency criteria.
-    filter_name : str, optional
-        The name of a system filter that can be used to limit the variants
-        returned.
+    filter_names : str | list[str], optional
+        The name(s) of a system filter that can be used to limit the variants
+        returned. If more than one is given then the filters are combined
+        using a logical OR.
     """
 
-    gene_symbols: List[str] | pd.DataFrame | pd.Series = None
+    gene_symbols: list[str] | pd.DataFrame | pd.Series = None
     include_genes: bool = True
     variant_ids: pd.DataFrame = None
     include_variant_ids: bool = True
     column_name_map: Dict = None
     allele_frequency_operator: str = "="
     allele_frequency: float = None
-    filter_name: str = None
+    filter_names: str | list[str] = None
 
 
 @dataclass
@@ -164,17 +165,39 @@ class VEAnalysisResult:
     mwu_metrics : DataFrame, optional
         Mann-Whitney U metrics containing columns: SCORE_SOURCE,
         NEG_LOG10_MWU_PVAL, SOURCE_NAME
+    gene_general_metrics : DataFrame, optional
+        Gene-level general metrics with columns: SCORE_SOURCE,
+        GENE_SYMBOL, NUM_VARIANTS, NUM_POSITIVE_LABELS,
+        NUM_NEGATIVE_LABELS, SOURCE_NAME
+    gene_roc_metrics : DataFrame, optional
+        Gene-level ROC metrics with columns: SCORE_SOURCE,
+        GENE_SYMBOL, ROC_AUC, EXCEPTION, SOURCE_NAME
+    gene_pr_metrics : DataFrame, optional
+        Gene-level precision/recall metrics with columns: SCORE_SOURCE,
+        GENE_SYMBOL, PR_AUC, SOURCE_NAME
+    gene_mwu_metrics : DataFrame, optional
+        Gene-level Mann-Whitney U metrics with columns: SCORE_SOURCE,
+        GENE_SYMBOL, NEG_LOG10_MWU_PVAL, SOURCE_NAME
     roc_curve_coordinates : DataFrame, optional
         Columns: SCORE_SOURCE,
         FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD
     pr_curve_coordinates : DataFrame, optional
         Columns: SCORE_SOURCE,
         PRECISION, RECALL, THRESHOLD
+    gene_roc_curve_coordinates : DataFrame, optional
+        Gene-level ROC curve coordinates with columns: SCORE_SOURCE,
+        GENE_SYMBOL, FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD
+    gene_pr_curve_coordinates : DataFrame, optional
+        Gene-level precision/recall curve coordinates with columns:
+        SCORE_SOURCE, GENE_SYMBOL, PRECISION, RECALL, THRESHOLD
     variants_included : DataFrame, optional
         List of variants included for each vep included the user vep.
         Columns:
         SCORE_SOURCE, GENOME_ASSEMBLY, CHROMOSOME, POSITION,
         REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE
+    gene_unique_variant_counts_df : DataFrame, optional
+        Count of unique variants per gene across all vepswith columns:
+        GENE_SYMBOL, NUM_UNIQUE_VARIANTS
     """
 
     num_variants_included: int
@@ -184,9 +207,16 @@ class VEAnalysisResult:
     roc_metrics: pd.DataFrame
     pr_metrics: pd.DataFrame
     mwu_metrics: pd.DataFrame
+    gene_general_metrics: pd.DataFrame
+    gene_roc_metrics: pd.DataFrame
+    gene_pr_metrics: pd.DataFrame
+    gene_mwu_metrics: pd.DataFrame
     roc_curve_coordinates: pd.DataFrame
     pr_curve_coordinates: pd.DataFrame
+    gene_roc_curve_coordinates: pd.DataFrame
+    gene_pr_curve_coordinates: pd.DataFrame
     variants_included: pd.DataFrame
+    gene_unique_variant_counts_df: pd.DataFrame
 
 
 @dataclass
@@ -205,5 +235,3 @@ class PkViolations:
     variant_dups: pd.DataFrame
     variant_effect_source_dups: pd.DataFrame
     task_violations: dict[str, TaskPkViolations]
-
-

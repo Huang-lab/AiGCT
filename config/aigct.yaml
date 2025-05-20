@@ -13,7 +13,7 @@ repository:
   # Root directory for the repository data .csv files. The
   # repository "data" directory is a subdirectory off of this directory.
   # root_dir: ~/gitrepo/agct_dev
-  root_dir: ~/gitrepo/aigct_data1/repo/repo
+  root_dir: ~/gitrepo/aigct_data1/repo1
   source_url: 
 
 plot:

@@ -6,15 +6,18 @@ details of the repository structure.
 
 import os
 import pandas as pd
+import dask.dataframe as dd
 from .util import ParameterizedSingleton
 import threading
 from dataclasses import dataclass, field
 from .pd_util import (
     filter_dataframe_by_list,
-    build_dataframe_where_clause
+    build_dataframe_where_clause,
+    merge_by_chunks
 )
 from .model import VariantFilter, VEQueryCriteria
 
+MERGE_CHUNK_SIZE = 500000
 
 TASK_SUBFOLDER = {
     "CANCER": "CANCER"
@@ -220,20 +223,25 @@ class TaskBasedDataCache(ParameterizedSingleton):
     as required by the ParameterizedSingleton class.
     """
 
-    def _init_once(self, data_folder_root: str, table_def: TableDef):
+    def _init_once(self, data_folder_root: str, table_def: TableDef,
+                   disable_cache: bool = False):
         self._data_folder_root = data_folder_root
         self._table_def = table_def
         self._cache = dict()
         self._lock = threading.Lock()
+        self._disable_cache = disable_cache
 
     def get_data_frame(self, task_code: str):
         if task_code not in self._cache:
             with self._lock:
                 if task_code not in self._cache:
-                    self._cache[task_code] = read_repo_csv(
+                    data_frame = read_repo_csv(
                         os.path.join(self._data_folder_root, DATA_FOLDER,
                                      task_code,
                                      self._table_def.file_name))
+                    if self._disable_cache:
+                        return data_frame
+                    self._cache[task_code] = data_frame
         return self._cache[task_code]
 
 
@@ -257,8 +265,9 @@ class VariantEffectScoreCache(TaskBasedDataCache):
     as required by the ParameterizedSingleton class.
     """
 
-    def _init_once(self, data_folder_root: str):
-        super()._init_once(data_folder_root, VARIANT_EFFECT_SCORE_TABLE_DEF)
+    def _init_once(self, data_folder_root: str, disable_cache: bool = False):
+        super()._init_once(data_folder_root, VARIANT_EFFECT_SCORE_TABLE_DEF,
+                           disable_cache)
 
 
 class VariantCache(DataCache):
@@ -376,6 +385,17 @@ class VariantFilterRepository:
             return None
         return VariantFilter(filter, filter_genes, filter_variants)
 
+    def get_by_task_filter_names(
+            self, task_code: str, filter_names: list[str]) -> list[
+                VariantFilter]:
+        variant_filters = []
+        for filter_name in filter_names:
+            variant_filter = self.get_by_task_filter_name(task_code, filter_name)
+            if variant_filter is None:
+                raise Exception(f"Invalid filter name: {filter_name}")
+            variant_filters.append(variant_filter)
+        return variant_filters
+
 
 def query_by_filter(query_df: pd.DataFrame,
                     filter: pd.Series,
@@ -392,6 +412,17 @@ def query_by_filter(query_df: pd.DataFrame,
                                             VARIANT_PK_COLUMNS, None,
                                             filter["INCLUDE_VARIANTS"] == 'Y')
     return query_df
+
+
+def query_by_filters(query_df: pd.DataFrame, filters: list[VariantFilter]
+                     ) -> pd.DataFrame:
+    results = []
+    for filter in filters:
+        result = query_by_filter(query_df, filter.filter,
+                                 filter.filter_genes,
+                                 filter.filter_variants)
+        results.append(result)
+    return pd.concat(results).drop_duplicates()
 
 
 class VariantRepository:
@@ -470,15 +501,14 @@ class VariantEffectLabelRepository:
             variant_df = self._variant_repo.get_all()
         merge_df = label_df.merge(variant_df, how="inner",
                                   on=VARIANT_PK_COLUMNS)
-        if qry is not None and qry.filter_name is not None:
-            filter_dfs = \
-                self._filter_repo.get_by_task_filter_name(task_code,
-                                                          qry.filter_name)
-            if filter_dfs is None:
-                raise Exception("Invalid filter name: " + qry.filter_name)
-            merge_df = query_by_filter(merge_df, filter_dfs.filter,
-                                       filter_dfs.filter_genes,
-                                       filter_dfs.filter_variants)
+        if qry is not None and qry.filter_names is not None:
+            if isinstance(qry.filter_names, str):
+                filter_names = [qry.filter_names]
+            else:
+                filter_names = qry.filter_names
+            filters = self._filter_repo.get_by_task_filter_names(
+                task_code, filter_names)
+            merge_df = query_by_filters(merge_df, filters)
         return merge_df
 
 
@@ -488,7 +518,8 @@ class VariantEffectScoreRepository:
                  task_repo: VariantTaskRepository,
                  variant_repo: VariantRepository,
                  filter_repo: VariantFilterRepository):
-        self._cache = VariantEffectScoreCache(session_context.data_folder_root)
+        self._cache = VariantEffectScoreCache(session_context.data_folder_root,
+                                              disable_cache=True)
         self._task_repo = task_repo
         self._filter_repo = filter_repo
         self._variant_repo = variant_repo
@@ -499,8 +530,14 @@ class VariantEffectScoreRepository:
             VARIANT_PK_COLUMNS].drop_duplicates(),
             include_variant_ids=True)
         variant_df = self._variant_repo.get(query_criteria)
-        return score_df.merge(variant_df, on=VARIANT_PK_COLUMNS,
-                              how="inner")
+        return merge_by_chunks(score_df, variant_df,
+                               chunk_size=MERGE_CHUNK_SIZE,
+                               on=VARIANT_PK_COLUMNS,
+                               how="inner")
+
+    def get_all_by_task_slim(self, task_code: str) -> pd.DataFrame:
+        score_df = self._cache.get_data_frame(task_code)
+        return score_df
 
     def get(self, task_code: str,
             variant_effect_sources: list[str] | str = None,
@@ -523,24 +560,25 @@ class VariantEffectScoreRepository:
                                                 qry.column_name_map,
                                                 qry.include_variant_ids)
         variant_df = self._variant_repo.get(qry)
-        merge_df = score_df.merge(variant_df, how="inner",
-                                  on=VARIANT_PK_COLUMNS)
-        if qry.filter_name is not None:
-            filter_dfs = \
-                self._filter_repo.get_by_task_filter_name(task_code,
-                                                          qry.filter_name)
-            if filter_dfs is None:
-                raise Exception("Invalid filter name: " + qry.filter_name)
-            merge_df = query_by_filter(merge_df, filter_dfs.filter,
-                                       filter_dfs.filter_genes,
-                                       filter_dfs.filter_variants)
+        merge_df = merge_by_chunks(score_df, variant_df,
+                                   chunk_size=MERGE_CHUNK_SIZE,
+                                   how="inner",
+                                   on=VARIANT_PK_COLUMNS)
+        if qry.filter_names is not None:
+            if isinstance(qry.filter_names, str):
+                filter_names = [qry.filter_names]
+            else:
+                filter_names = qry.filter_names
+            filters = self._filter_repo.get_by_task_filter_names(
+                task_code, filter_names)
+            merge_df = query_by_filters(merge_df, filters)
         return merge_df[VARIANT_EFFECT_SCORE_TABLE_DEF.columns]
 
     def get_all_for_all_tasks(self) -> pd.DataFrame:
         tasks_df = self._task_repo.get_all()
         scores_dfs = []
         for row in tasks_df.itertuples():
-            scores_df = self.get_all_by_task(row.CODE)
+            scores_df = self.get_all_by_task_slim(row.CODE)
             scores_df["TASK_CODE"] = row.CODE
             scores_df["TASK_NAME"] = row.NAME
             scores_dfs.append(scores_df)
