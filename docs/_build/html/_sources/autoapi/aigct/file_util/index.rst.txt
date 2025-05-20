@@ -1,0 +1,32 @@
+aigct.file_util
+===============
+
+.. py:module:: aigct.file_util
+
+.. autoapi-nested-parse::
+
+   Dependency injector utilities. Bogus implementation to mimick a proper 
+   DI provider. This class could be reimplemented if we decide to use
+   a proper one in the future.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.file_util.new_line
+   aigct.file_util.unique_file_name
+   aigct.file_util.create_folder
+
+
+Module Contents
+---------------
+
+.. py:function:: new_line(out, num_nls: int = 1)
+
+.. py:function:: unique_file_name(*args, suffix=None)
+
+.. py:function:: create_folder(folder)
+

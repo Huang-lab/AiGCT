@@ -1,0 +1,36 @@
+aigct
+=====
+
+.. py:module:: aigct
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/aigct/analyzer/index
+   /autoapi/aigct/check_install/index
+   /autoapi/aigct/config/index
+   /autoapi/aigct/container/index
+   /autoapi/aigct/context/index
+   /autoapi/aigct/date_util/index
+   /autoapi/aigct/etl/index
+   /autoapi/aigct/exporter/index
+   /autoapi/aigct/file_util/index
+   /autoapi/aigct/init_app/index
+   /autoapi/aigct/install_db/index
+   /autoapi/aigct/install_util/index
+   /autoapi/aigct/model/index
+   /autoapi/aigct/pd_util/index
+   /autoapi/aigct/plot_util/index
+   /autoapi/aigct/plotter/index
+   /autoapi/aigct/query/index
+   /autoapi/aigct/query_util/index
+   /autoapi/aigct/repo_qc/index
+   /autoapi/aigct/reporter/index
+   /autoapi/aigct/repository/index
+   /autoapi/aigct/util/index
+
+

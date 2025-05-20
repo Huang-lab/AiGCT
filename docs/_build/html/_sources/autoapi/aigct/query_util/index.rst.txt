@@ -1,0 +1,19 @@
+aigct.query_util
+================
+
+.. py:module:: aigct.query_util
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.query_util.validate_query_criteria
+
+
+Module Contents
+---------------
+
+.. py:function:: validate_query_criteria(qry: aigct.model.VEQueryCriteria)
+

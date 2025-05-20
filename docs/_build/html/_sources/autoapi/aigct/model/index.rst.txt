@@ -1,0 +1,345 @@
+aigct.model
+===========
+
+.. py:module:: aigct.model
+
+.. autoapi-nested-parse::
+
+   Classes that represent model objects.
+
+   Model objects are containers for data. They generally do not have
+   behavior associated with them.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.model.VariantId
+   aigct.model.VariantEffectSource
+   aigct.model.VariantFilter
+   aigct.model.VEQueryCriteria
+   aigct.model.VEAnalysisResult
+   aigct.model.TaskPkViolations
+   aigct.model.PkViolations
+
+
+Module Contents
+---------------
+
+.. py:class:: VariantId
+
+   Model object that represents a variant id.
+
+   Attributes
+   ----------
+   genome_assembly : str
+       genome assembly symbol, i.e. hg38
+   chromosome : str
+       chromosome
+   position : int
+       position
+   reference_nucleotide : str
+       reference nucleotide
+   alternate_nucleotide : str
+       alternate_nucleotide
+
+
+   .. py:attribute:: genome_assembly
+      :type:  str
+
+
+   .. py:attribute:: chromosome
+      :type:  str
+
+
+   .. py:attribute:: position
+      :type:  int
+
+
+   .. py:attribute:: reference_nucleotide
+      :type:  str
+
+
+   .. py:attribute:: alternate_nucleotide
+      :type:  str
+
+
+.. py:class:: VariantEffectSource
+
+   Model object that represents a variant effect source.
+
+   Attributes
+   ----------
+   code : str
+       A unique code that identifies the variant effect source
+   name : str
+       A unique name of the source
+   source_type : str
+       i.e. VEP
+   description : str
+       Description
+
+
+   .. py:attribute:: code
+      :type:  str
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: source_type
+      :type:  str
+
+
+   .. py:attribute:: description
+      :type:  str
+
+
+.. py:class:: VariantFilter
+
+   Model object that represents named variant filter query. The
+   filter criteria consists either of a list of genes or a list
+   of variant id's or both.
+
+   Attributes
+   ----------
+   filter : Series
+       A series with the the unique code, name, description of the
+       filter.
+   filter_genes : DataFrame
+       A dataframe of gene symbols associated with the filter.
+       If None then there filter_variants must not be None.
+   filter_variants : DataFrame
+       A dataframe of variant id's associated with the filter.
+       If None then there filter_genes must not be None.
+
+
+   .. py:attribute:: filter
+      :type:  pandas.Series
+
+
+   .. py:attribute:: filter_genes
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: filter_variants
+      :type:  pandas.DataFrame
+
+
+.. py:class:: VEQueryCriteria
+
+   Model object that represents variant query criteria.
+
+   Attributes
+   ----------
+   gene_symbols : list or DataFrame, optional
+       List of gene symbols
+   include_genes : bool, optional
+       If gene_symbols is provided, indicates whether to limit variants
+       to associated with those gene_symbols to exclude variants
+       associated with the gene_symbols.
+   variant_ids : DataFrame, optional
+       List of variant ids. The dataframe is expected to have the
+       following columns:
+       GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+       REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE
+       If the column names are different specify a value for
+       column_name_map mapping the column names to the expected names.
+   include_variant_ids : bool, optional
+       If variant_ids is provided, indicates whether to limit variants
+       to the variant_ids provided or to fetch all variants but those
+       in variant_ids
+   column_name_map : Dict, optional
+       A dictionary that maps the column names in variant_ids to the
+       expected column names.
+   allele_frequency_operator : str, optional
+       If allele_frequency is provided, this is one of "eq", "gt",
+       "lt", "ge", "le". i.e. limit variants to those whose
+       allele_frequency is equal to, greater than, etc. the
+       allele_frequency.
+   allele_frequency : float, optional
+       Used in conjunction to allele_frequency_operator to limit variants
+       to those meeting a certain allele_frequency criteria.
+   filter_name : str, optional
+       The name of a system filter that can be used to limit the variants
+       returned.
+
+
+   .. py:attribute:: gene_symbols
+      :type:  List[str] | pandas.DataFrame | pandas.Series
+      :value: None
+
+
+
+   .. py:attribute:: include_genes
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: variant_ids
+      :type:  pandas.DataFrame
+      :value: None
+
+
+
+   .. py:attribute:: include_variant_ids
+      :type:  bool
+      :value: True
+
+
+
+   .. py:attribute:: column_name_map
+      :type:  Dict
+      :value: None
+
+
+
+   .. py:attribute:: allele_frequency_operator
+      :type:  str
+      :value: '='
+
+
+
+   .. py:attribute:: allele_frequency
+      :type:  float
+      :value: None
+
+
+
+   .. py:attribute:: filter_name
+      :type:  str
+      :value: None
+
+
+
+.. py:class:: VEAnalysisResult
+
+   Represents the result of calling VEAnalyzer.compute_metrics.
+
+   Attributes
+   ----------
+   num_variants_included : int
+       The total number of unique variants included in the analysis
+       across all veps.
+   num_user_variants : int
+       The number of user supplied variants included in the analysis
+   user_vep_name : str
+       Name of user vep
+   general_metrics : DataFrame
+       Has the following columns:
+       SCORE_SOURCE - Short unique vep identifier
+       NUM_VARIANTS, NUM_POSITIVE_LABELS, NUM_NEGATIVE_LABELS,
+       SOURCE_NAME - Name of vep
+   roc_metrics : DataFrame, optional
+       Roc metrics with columns: SCORE_SOURCE,
+       ROC_AUC, EXCEPTION, SOURCE_NAME
+       EXCEPTION would store an exception message in the event the
+       roc could not be computed for that vep.
+   pr_metrics : DataFrame, optional
+       Precision/Recall metrics containing columns: SCORE_SOURCE,
+       PR_AUC, SOURCE_NAME
+   mwu_metrics : DataFrame, optional
+       Mann-Whitney U metrics containing columns: SCORE_SOURCE,
+       NEG_LOG10_MWU_PVAL, SOURCE_NAME
+   roc_curve_coordinates : DataFrame, optional
+       Columns: SCORE_SOURCE,
+       FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD
+   pr_curve_coordinates : DataFrame, optional
+       Columns: SCORE_SOURCE,
+       PRECISION, RECALL, THRESHOLD
+   variants_included : DataFrame, optional
+       List of variants included for each vep included the user vep.
+       Columns:
+       SCORE_SOURCE, GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+       REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE
+
+
+   .. py:attribute:: num_variants_included
+      :type:  int
+
+
+   .. py:attribute:: num_user_variants
+      :type:  int
+
+
+   .. py:attribute:: user_vep_name
+      :type:  str
+
+
+   .. py:attribute:: general_metrics
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: roc_metrics
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: pr_metrics
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: mwu_metrics
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: roc_curve_coordinates
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: pr_curve_coordinates
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: variants_included
+      :type:  pandas.DataFrame
+
+
+.. py:class:: TaskPkViolations
+
+   .. py:attribute:: dups_found
+      :type:  bool
+
+
+   .. py:attribute:: variant_effect_label_dups
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: variant_effect_score_dups
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: variant_filter_dups
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: variant_filter_gene_dups
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: variant_filter_variant_dups
+      :type:  pandas.DataFrame
+
+
+.. py:class:: PkViolations
+
+   .. py:attribute:: dups_found
+      :type:  bool
+
+
+   .. py:attribute:: variant_dups
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: variant_effect_source_dups
+      :type:  pandas.DataFrame
+
+
+   .. py:attribute:: task_violations
+      :type:  dict[str, TaskPkViolations]
+
+

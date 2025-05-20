@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.model &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aigct.model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aigct.model</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes that represent model objects.</span>
+
+<span class="sd">Model objects are containers for data. They generally do not have</span>
+<span class="sd">behavior associated with them.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="VariantId">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantId">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantId</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Model object that represents a variant id.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    genome_assembly : str</span>
+<span class="sd">        genome assembly symbol, i.e. hg38</span>
+<span class="sd">    chromosome : str</span>
+<span class="sd">        chromosome</span>
+<span class="sd">    position : int</span>
+<span class="sd">        position</span>
+<span class="sd">    reference_nucleotide : str</span>
+<span class="sd">        reference nucleotide</span>
+<span class="sd">    alternate_nucleotide : str</span>
+<span class="sd">        alternate_nucleotide</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VariantId.genome_assembly">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantId.genome_assembly">[docs]</a>
+    <span class="n">genome_assembly</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VariantId.chromosome">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantId.chromosome">[docs]</a>
+    <span class="n">chromosome</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VariantId.position">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantId.position">[docs]</a>
+    <span class="n">position</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="VariantId.reference_nucleotide">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantId.reference_nucleotide">[docs]</a>
+    <span class="n">reference_nucleotide</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VariantId.alternate_nucleotide">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantId.alternate_nucleotide">[docs]</a>
+    <span class="n">alternate_nucleotide</span><span class="p">:</span> <span class="nb">str</span></div>
+</div>
+
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="VariantEffectSource">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantEffectSource">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectSource</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Model object that represents a variant effect source.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    code : str</span>
+<span class="sd">        A unique code that identifies the variant effect source</span>
+<span class="sd">    name : str</span>
+<span class="sd">        A unique name of the source</span>
+<span class="sd">    source_type : str</span>
+<span class="sd">        i.e. VEP</span>
+<span class="sd">    description : str</span>
+<span class="sd">        Description</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VariantEffectSource.code">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantEffectSource.code">[docs]</a>
+    <span class="n">code</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VariantEffectSource.name">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantEffectSource.name">[docs]</a>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VariantEffectSource.source_type">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantEffectSource.source_type">[docs]</a>
+    <span class="n">source_type</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VariantEffectSource.description">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantEffectSource.description">[docs]</a>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span></div>
+</div>
+
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="VariantFilter">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantFilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantFilter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Model object that represents named variant filter query. The</span>
+<span class="sd">    filter criteria consists either of a list of genes or a list</span>
+<span class="sd">    of variant id&#39;s or both.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filter : Series</span>
+<span class="sd">        A series with the the unique code, name, description of the</span>
+<span class="sd">        filter.</span>
+<span class="sd">    filter_genes : DataFrame</span>
+<span class="sd">        A dataframe of gene symbols associated with the filter.</span>
+<span class="sd">        If None then there filter_variants must not be None.</span>
+<span class="sd">    filter_variants : DataFrame</span>
+<span class="sd">        A dataframe of variant id&#39;s associated with the filter.</span>
+<span class="sd">        If None then there filter_genes must not be None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VariantFilter.filter">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantFilter.filter">[docs]</a>
+    <span class="nb">filter</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span></div>
+
+<div class="viewcode-block" id="VariantFilter.filter_genes">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantFilter.filter_genes">[docs]</a>
+    <span class="n">filter_genes</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VariantFilter.filter_variants">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VariantFilter.filter_variants">[docs]</a>
+    <span class="n">filter_variants</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+</div>
+
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="VEQueryCriteria">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VEQueryCriteria</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Model object that represents variant query criteria.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gene_symbols : list or DataFrame, optional</span>
+<span class="sd">        List of gene symbols</span>
+<span class="sd">    include_genes : bool, optional</span>
+<span class="sd">        If gene_symbols is provided, indicates whether to limit variants</span>
+<span class="sd">        to associated with those gene_symbols to exclude variants</span>
+<span class="sd">        associated with the gene_symbols.</span>
+<span class="sd">    variant_ids : DataFrame, optional</span>
+<span class="sd">        List of variant ids. The dataframe is expected to have the</span>
+<span class="sd">        following columns:</span>
+<span class="sd">        GENOME_ASSEMBLY, CHROMOSOME, POSITION,</span>
+<span class="sd">        REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE</span>
+<span class="sd">        If the column names are different specify a value for</span>
+<span class="sd">        column_name_map mapping the column names to the expected names.</span>
+<span class="sd">    include_variant_ids : bool, optional</span>
+<span class="sd">        If variant_ids is provided, indicates whether to limit variants</span>
+<span class="sd">        to the variant_ids provided or to fetch all variants but those</span>
+<span class="sd">        in variant_ids</span>
+<span class="sd">    column_name_map : Dict, optional</span>
+<span class="sd">        A dictionary that maps the column names in variant_ids to the</span>
+<span class="sd">        expected column names.</span>
+<span class="sd">    allele_frequency_operator : str, optional</span>
+<span class="sd">        If allele_frequency is provided, this is one of &quot;eq&quot;, &quot;gt&quot;,</span>
+<span class="sd">        &quot;lt&quot;, &quot;ge&quot;, &quot;le&quot;. i.e. limit variants to those whose</span>
+<span class="sd">        allele_frequency is equal to, greater than, etc. the</span>
+<span class="sd">        allele_frequency.</span>
+<span class="sd">    allele_frequency : float, optional</span>
+<span class="sd">        Used in conjunction to allele_frequency_operator to limit variants</span>
+<span class="sd">        to those meeting a certain allele_frequency criteria.</span>
+<span class="sd">    filter_name : str, optional</span>
+<span class="sd">        The name of a system filter that can be used to limit the variants</span>
+<span class="sd">        returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VEQueryCriteria.gene_symbols">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.gene_symbols">[docs]</a>
+    <span class="n">gene_symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="VEQueryCriteria.include_genes">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.include_genes">[docs]</a>
+    <span class="n">include_genes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="VEQueryCriteria.variant_ids">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.variant_ids">[docs]</a>
+    <span class="n">variant_ids</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="VEQueryCriteria.include_variant_ids">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.include_variant_ids">[docs]</a>
+    <span class="n">include_variant_ids</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="VEQueryCriteria.column_name_map">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.column_name_map">[docs]</a>
+    <span class="n">column_name_map</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="VEQueryCriteria.allele_frequency_operator">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.allele_frequency_operator">[docs]</a>
+    <span class="n">allele_frequency_operator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span></div>
+
+<div class="viewcode-block" id="VEQueryCriteria.allele_frequency">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.allele_frequency">[docs]</a>
+    <span class="n">allele_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="VEQueryCriteria.filter_name">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.filter_name">[docs]</a>
+    <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="VEAnalysisResult">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VEAnalysisResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the result of calling VEAnalyzer.compute_metrics.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    num_variants_included : int</span>
+<span class="sd">        The total number of unique variants included in the analysis</span>
+<span class="sd">        across all veps.</span>
+<span class="sd">    num_user_variants : int</span>
+<span class="sd">        The number of user supplied variants included in the analysis</span>
+<span class="sd">    user_vep_name : str</span>
+<span class="sd">        Name of user vep</span>
+<span class="sd">    general_metrics : DataFrame</span>
+<span class="sd">        Has the following columns:</span>
+<span class="sd">        SCORE_SOURCE - Short unique vep identifier</span>
+<span class="sd">        NUM_VARIANTS, NUM_POSITIVE_LABELS, NUM_NEGATIVE_LABELS,</span>
+<span class="sd">        SOURCE_NAME - Name of vep</span>
+<span class="sd">    roc_metrics : DataFrame, optional</span>
+<span class="sd">        Roc metrics with columns: SCORE_SOURCE,</span>
+<span class="sd">        ROC_AUC, EXCEPTION, SOURCE_NAME</span>
+<span class="sd">        EXCEPTION would store an exception message in the event the</span>
+<span class="sd">        roc could not be computed for that vep.</span>
+<span class="sd">    pr_metrics : DataFrame, optional</span>
+<span class="sd">        Precision/Recall metrics containing columns: SCORE_SOURCE,</span>
+<span class="sd">        PR_AUC, SOURCE_NAME</span>
+<span class="sd">    mwu_metrics : DataFrame, optional</span>
+<span class="sd">        Mann-Whitney U metrics containing columns: SCORE_SOURCE,</span>
+<span class="sd">        NEG_LOG10_MWU_PVAL, SOURCE_NAME</span>
+<span class="sd">    roc_curve_coordinates : DataFrame, optional</span>
+<span class="sd">        Columns: SCORE_SOURCE,</span>
+<span class="sd">        FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD</span>
+<span class="sd">    pr_curve_coordinates : DataFrame, optional</span>
+<span class="sd">        Columns: SCORE_SOURCE,</span>
+<span class="sd">        PRECISION, RECALL, THRESHOLD</span>
+<span class="sd">    variants_included : DataFrame, optional</span>
+<span class="sd">        List of variants included for each vep included the user vep.</span>
+<span class="sd">        Columns:</span>
+<span class="sd">        SCORE_SOURCE, GENOME_ASSEMBLY, CHROMOSOME, POSITION,</span>
+<span class="sd">        REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VEAnalysisResult.num_variants_included">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.num_variants_included">[docs]</a>
+    <span class="n">num_variants_included</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.num_user_variants">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.num_user_variants">[docs]</a>
+    <span class="n">num_user_variants</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.user_vep_name">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.user_vep_name">[docs]</a>
+    <span class="n">user_vep_name</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.general_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.general_metrics">[docs]</a>
+    <span class="n">general_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.roc_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.roc_metrics">[docs]</a>
+    <span class="n">roc_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.pr_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.pr_metrics">[docs]</a>
+    <span class="n">pr_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.mwu_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.mwu_metrics">[docs]</a>
+    <span class="n">mwu_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.roc_curve_coordinates">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.roc_curve_coordinates">[docs]</a>
+    <span class="n">roc_curve_coordinates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.pr_curve_coordinates">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.pr_curve_coordinates">[docs]</a>
+    <span class="n">pr_curve_coordinates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.variants_included">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.variants_included">[docs]</a>
+    <span class="n">variants_included</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+</div>
+
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="TaskPkViolations">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.TaskPkViolations">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskPkViolations</span><span class="p">:</span>
+<div class="viewcode-block" id="TaskPkViolations.dups_found">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.TaskPkViolations.dups_found">[docs]</a>
+    <span class="n">dups_found</span><span class="p">:</span> <span class="nb">bool</span></div>
+
+<div class="viewcode-block" id="TaskPkViolations.variant_effect_label_dups">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.TaskPkViolations.variant_effect_label_dups">[docs]</a>
+    <span class="n">variant_effect_label_dups</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="TaskPkViolations.variant_effect_score_dups">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.TaskPkViolations.variant_effect_score_dups">[docs]</a>
+    <span class="n">variant_effect_score_dups</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="TaskPkViolations.variant_filter_dups">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.TaskPkViolations.variant_filter_dups">[docs]</a>
+    <span class="n">variant_filter_dups</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="TaskPkViolations.variant_filter_gene_dups">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.TaskPkViolations.variant_filter_gene_dups">[docs]</a>
+    <span class="n">variant_filter_gene_dups</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="TaskPkViolations.variant_filter_variant_dups">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.TaskPkViolations.variant_filter_variant_dups">[docs]</a>
+    <span class="n">variant_filter_variant_dups</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+</div>
+
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="PkViolations">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.PkViolations">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PkViolations</span><span class="p">:</span>
+<div class="viewcode-block" id="PkViolations.dups_found">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.PkViolations.dups_found">[docs]</a>
+    <span class="n">dups_found</span><span class="p">:</span> <span class="nb">bool</span></div>
+
+<div class="viewcode-block" id="PkViolations.variant_dups">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.PkViolations.variant_dups">[docs]</a>
+    <span class="n">variant_dups</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="PkViolations.variant_effect_source_dups">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.PkViolations.variant_effect_source_dups">[docs]</a>
+    <span class="n">variant_effect_source_dups</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="PkViolations.task_violations">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.PkViolations.task_violations">[docs]</a>
+    <span class="n">task_violations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TaskPkViolations</span><span class="p">]</span></div>
+</div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

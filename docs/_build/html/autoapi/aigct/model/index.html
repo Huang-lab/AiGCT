@@ -1,0 +1,540 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.model &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="aigct.pd_util" href="../pd_util/index.html" />
+    <link rel="prev" title="aigct.install_util" href="../install_util/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">aigct</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../analyzer/index.html">aigct.analyzer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../check_install/index.html">aigct.check_install</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../config/index.html">aigct.config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../container/index.html">aigct.container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../context/index.html">aigct.context</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../date_util/index.html">aigct.date_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../etl/index.html">aigct.etl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../exporter/index.html">aigct.exporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../file_util/index.html">aigct.file_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../init_app/index.html">aigct.init_app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../install_db/index.html">aigct.install_db</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../install_util/index.html">aigct.install_util</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aigct.model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pd_util/index.html">aigct.pd_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plot_util/index.html">aigct.plot_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plotter/index.html">aigct.plotter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../query/index.html">aigct.query</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../query_util/index.html">aigct.query_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../repo_qc/index.html">aigct.repo_qc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reporter/index.html">aigct.reporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../repository/index.html">aigct.repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../util/index.html">aigct.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">aigct</a></li>
+      <li class="breadcrumb-item active">aigct.model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/aigct/model/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-aigct.model">
+<span id="aigct-model"></span><h1>aigct.model<a class="headerlink" href="#module-aigct.model" title="Link to this heading"></a></h1>
+<p>Classes that represent model objects.</p>
+<p>Model objects are containers for data. They generally do not have
+behavior associated with them.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.model.VariantId" title="aigct.model.VariantId"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantId</span></code></a></p></td>
+<td><p>Model object that represents a variant id.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.model.VariantEffectSource" title="aigct.model.VariantEffectSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantEffectSource</span></code></a></p></td>
+<td><p>Model object that represents a variant effect source.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.model.VariantFilter" title="aigct.model.VariantFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantFilter</span></code></a></p></td>
+<td><p>Model object that represents named variant filter query. The</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.model.VEQueryCriteria" title="aigct.model.VEQueryCriteria"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VEQueryCriteria</span></code></a></p></td>
+<td><p>Model object that represents variant query criteria.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.model.VEAnalysisResult" title="aigct.model.VEAnalysisResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VEAnalysisResult</span></code></a></p></td>
+<td><p>Represents the result of calling VEAnalyzer.compute_metrics.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.model.TaskPkViolations" title="aigct.model.TaskPkViolations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TaskPkViolations</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.model.PkViolations" title="aigct.model.PkViolations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PkViolations</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.VariantId">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">VariantId</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#VariantId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantId" title="Link to this definition"></a></dt>
+<dd><p>Model object that represents a variant id.</p>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>genome_assembly<span class="classifier">str</span></dt><dd><p>genome assembly symbol, i.e. hg38</p>
+</dd>
+<dt>chromosome<span class="classifier">str</span></dt><dd><p>chromosome</p>
+</dd>
+<dt>position<span class="classifier">int</span></dt><dd><p>position</p>
+</dd>
+<dt>reference_nucleotide<span class="classifier">str</span></dt><dd><p>reference nucleotide</p>
+</dd>
+<dt>alternate_nucleotide<span class="classifier">str</span></dt><dd><p>alternate_nucleotide</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantId.genome_assembly">
+<span class="sig-name descname"><span class="pre">genome_assembly</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantId.genome_assembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantId.genome_assembly" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantId.chromosome">
+<span class="sig-name descname"><span class="pre">chromosome</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantId.chromosome"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantId.chromosome" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantId.position">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantId.position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantId.position" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantId.reference_nucleotide">
+<span class="sig-name descname"><span class="pre">reference_nucleotide</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantId.reference_nucleotide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantId.reference_nucleotide" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantId.alternate_nucleotide">
+<span class="sig-name descname"><span class="pre">alternate_nucleotide</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantId.alternate_nucleotide"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantId.alternate_nucleotide" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.VariantEffectSource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">VariantEffectSource</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#VariantEffectSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantEffectSource" title="Link to this definition"></a></dt>
+<dd><p>Model object that represents a variant effect source.</p>
+<section id="id1">
+<h3>Attributes<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>code<span class="classifier">str</span></dt><dd><p>A unique code that identifies the variant effect source</p>
+</dd>
+<dt>name<span class="classifier">str</span></dt><dd><p>A unique name of the source</p>
+</dd>
+<dt>source_type<span class="classifier">str</span></dt><dd><p>i.e. VEP</p>
+</dd>
+<dt>description<span class="classifier">str</span></dt><dd><p>Description</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantEffectSource.code">
+<span class="sig-name descname"><span class="pre">code</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantEffectSource.code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantEffectSource.code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantEffectSource.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantEffectSource.name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantEffectSource.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantEffectSource.source_type">
+<span class="sig-name descname"><span class="pre">source_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantEffectSource.source_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantEffectSource.source_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantEffectSource.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantEffectSource.description"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantEffectSource.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.VariantFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">VariantFilter</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#VariantFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantFilter" title="Link to this definition"></a></dt>
+<dd><p>Model object that represents named variant filter query. The
+filter criteria consists either of a list of genes or a list
+of variant id’s or both.</p>
+<section id="id2">
+<h3>Attributes<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>filter<span class="classifier">Series</span></dt><dd><p>A series with the the unique code, name, description of the
+filter.</p>
+</dd>
+<dt>filter_genes<span class="classifier">DataFrame</span></dt><dd><p>A dataframe of gene symbols associated with the filter.
+If None then there filter_variants must not be None.</p>
+</dd>
+<dt>filter_variants<span class="classifier">DataFrame</span></dt><dd><p>A dataframe of variant id’s associated with the filter.
+If None then there filter_genes must not be None.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantFilter.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.Series</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantFilter.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantFilter.filter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantFilter.filter_genes">
+<span class="sig-name descname"><span class="pre">filter_genes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantFilter.filter_genes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantFilter.filter_genes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VariantFilter.filter_variants">
+<span class="sig-name descname"><span class="pre">filter_variants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VariantFilter.filter_variants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VariantFilter.filter_variants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">VEQueryCriteria</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria" title="Link to this definition"></a></dt>
+<dd><p>Model object that represents variant query criteria.</p>
+<section id="id3">
+<h3>Attributes<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>gene_symbols<span class="classifier">list or DataFrame, optional</span></dt><dd><p>List of gene symbols</p>
+</dd>
+<dt>include_genes<span class="classifier">bool, optional</span></dt><dd><p>If gene_symbols is provided, indicates whether to limit variants
+to associated with those gene_symbols to exclude variants
+associated with the gene_symbols.</p>
+</dd>
+<dt>variant_ids<span class="classifier">DataFrame, optional</span></dt><dd><p>List of variant ids. The dataframe is expected to have the
+following columns:
+GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE
+If the column names are different specify a value for
+column_name_map mapping the column names to the expected names.</p>
+</dd>
+<dt>include_variant_ids<span class="classifier">bool, optional</span></dt><dd><p>If variant_ids is provided, indicates whether to limit variants
+to the variant_ids provided or to fetch all variants but those
+in variant_ids</p>
+</dd>
+<dt>column_name_map<span class="classifier">Dict, optional</span></dt><dd><p>A dictionary that maps the column names in variant_ids to the
+expected column names.</p>
+</dd>
+<dt>allele_frequency_operator<span class="classifier">str, optional</span></dt><dd><p>If allele_frequency is provided, this is one of “eq”, “gt”,
+“lt”, “ge”, “le”. i.e. limit variants to those whose
+allele_frequency is equal to, greater than, etc. the
+allele_frequency.</p>
+</dd>
+<dt>allele_frequency<span class="classifier">float, optional</span></dt><dd><p>Used in conjunction to allele_frequency_operator to limit variants
+to those meeting a certain allele_frequency criteria.</p>
+</dd>
+<dt>filter_name<span class="classifier">str, optional</span></dt><dd><p>The name of a system filter that can be used to limit the variants
+returned.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.gene_symbols">
+<span class="sig-name descname"><span class="pre">gene_symbols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.gene_symbols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.gene_symbols" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.include_genes">
+<span class="sig-name descname"><span class="pre">include_genes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.include_genes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.include_genes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.variant_ids">
+<span class="sig-name descname"><span class="pre">variant_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.variant_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.variant_ids" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.include_variant_ids">
+<span class="sig-name descname"><span class="pre">include_variant_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.include_variant_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.include_variant_ids" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.column_name_map">
+<span class="sig-name descname"><span class="pre">column_name_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.column_name_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.column_name_map" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.allele_frequency_operator">
+<span class="sig-name descname"><span class="pre">allele_frequency_operator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'='</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.allele_frequency_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.allele_frequency_operator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.allele_frequency">
+<span class="sig-name descname"><span class="pre">allele_frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.allele_frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.allele_frequency" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.filter_name">
+<span class="sig-name descname"><span class="pre">filter_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.filter_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.filter_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">VEAnalysisResult</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult" title="Link to this definition"></a></dt>
+<dd><p>Represents the result of calling VEAnalyzer.compute_metrics.</p>
+<section id="id4">
+<h3>Attributes<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>num_variants_included<span class="classifier">int</span></dt><dd><p>The total number of unique variants included in the analysis
+across all veps.</p>
+</dd>
+<dt>num_user_variants<span class="classifier">int</span></dt><dd><p>The number of user supplied variants included in the analysis</p>
+</dd>
+<dt>user_vep_name<span class="classifier">str</span></dt><dd><p>Name of user vep</p>
+</dd>
+<dt>general_metrics<span class="classifier">DataFrame</span></dt><dd><p>Has the following columns:
+SCORE_SOURCE - Short unique vep identifier
+NUM_VARIANTS, NUM_POSITIVE_LABELS, NUM_NEGATIVE_LABELS,
+SOURCE_NAME - Name of vep</p>
+</dd>
+<dt>roc_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Roc metrics with columns: SCORE_SOURCE,
+ROC_AUC, EXCEPTION, SOURCE_NAME
+EXCEPTION would store an exception message in the event the
+roc could not be computed for that vep.</p>
+</dd>
+<dt>pr_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Precision/Recall metrics containing columns: SCORE_SOURCE,
+PR_AUC, SOURCE_NAME</p>
+</dd>
+<dt>mwu_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Mann-Whitney U metrics containing columns: SCORE_SOURCE,
+NEG_LOG10_MWU_PVAL, SOURCE_NAME</p>
+</dd>
+<dt>roc_curve_coordinates<span class="classifier">DataFrame, optional</span></dt><dd><p>Columns: SCORE_SOURCE,
+FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD</p>
+</dd>
+<dt>pr_curve_coordinates<span class="classifier">DataFrame, optional</span></dt><dd><p>Columns: SCORE_SOURCE,
+PRECISION, RECALL, THRESHOLD</p>
+</dd>
+<dt>variants_included<span class="classifier">DataFrame, optional</span></dt><dd><p>List of variants included for each vep included the user vep.
+Columns:
+SCORE_SOURCE, GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.num_variants_included">
+<span class="sig-name descname"><span class="pre">num_variants_included</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.num_variants_included"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.num_variants_included" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.num_user_variants">
+<span class="sig-name descname"><span class="pre">num_user_variants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.num_user_variants"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.num_user_variants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.user_vep_name">
+<span class="sig-name descname"><span class="pre">user_vep_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.user_vep_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.user_vep_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.general_metrics">
+<span class="sig-name descname"><span class="pre">general_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.general_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.general_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.roc_metrics">
+<span class="sig-name descname"><span class="pre">roc_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.roc_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.roc_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.pr_metrics">
+<span class="sig-name descname"><span class="pre">pr_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.pr_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.pr_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.mwu_metrics">
+<span class="sig-name descname"><span class="pre">mwu_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.mwu_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.mwu_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.roc_curve_coordinates">
+<span class="sig-name descname"><span class="pre">roc_curve_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.roc_curve_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.roc_curve_coordinates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.pr_curve_coordinates">
+<span class="sig-name descname"><span class="pre">pr_curve_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.pr_curve_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.pr_curve_coordinates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.variants_included">
+<span class="sig-name descname"><span class="pre">variants_included</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.variants_included"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.variants_included" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.TaskPkViolations">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">TaskPkViolations</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#TaskPkViolations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.TaskPkViolations" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.TaskPkViolations.dups_found">
+<span class="sig-name descname"><span class="pre">dups_found</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#TaskPkViolations.dups_found"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.TaskPkViolations.dups_found" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.TaskPkViolations.variant_effect_label_dups">
+<span class="sig-name descname"><span class="pre">variant_effect_label_dups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#TaskPkViolations.variant_effect_label_dups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.TaskPkViolations.variant_effect_label_dups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.TaskPkViolations.variant_effect_score_dups">
+<span class="sig-name descname"><span class="pre">variant_effect_score_dups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#TaskPkViolations.variant_effect_score_dups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.TaskPkViolations.variant_effect_score_dups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.TaskPkViolations.variant_filter_dups">
+<span class="sig-name descname"><span class="pre">variant_filter_dups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#TaskPkViolations.variant_filter_dups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.TaskPkViolations.variant_filter_dups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.TaskPkViolations.variant_filter_gene_dups">
+<span class="sig-name descname"><span class="pre">variant_filter_gene_dups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#TaskPkViolations.variant_filter_gene_dups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.TaskPkViolations.variant_filter_gene_dups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.TaskPkViolations.variant_filter_variant_dups">
+<span class="sig-name descname"><span class="pre">variant_filter_variant_dups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#TaskPkViolations.variant_filter_variant_dups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.TaskPkViolations.variant_filter_variant_dups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.PkViolations">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">PkViolations</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#PkViolations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.PkViolations" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.PkViolations.dups_found">
+<span class="sig-name descname"><span class="pre">dups_found</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#PkViolations.dups_found"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.PkViolations.dups_found" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.PkViolations.variant_dups">
+<span class="sig-name descname"><span class="pre">variant_dups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#PkViolations.variant_dups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.PkViolations.variant_dups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.PkViolations.variant_effect_source_dups">
+<span class="sig-name descname"><span class="pre">variant_effect_source_dups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#PkViolations.variant_effect_source_dups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.PkViolations.variant_effect_source_dups" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.PkViolations.task_violations">
+<span class="sig-name descname"><span class="pre">task_violations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#aigct.model.TaskPkViolations" title="aigct.model.TaskPkViolations"><span class="pre">TaskPkViolations</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../../_modules/aigct/model.html#PkViolations.task_violations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.PkViolations.task_violations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../install_util/index.html" class="btn btn-neutral float-left" title="aigct.install_util" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../pd_util/index.html" class="btn btn-neutral float-right" title="aigct.pd_util" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,398 @@
+aigct.repository
+================
+
+.. py:module:: aigct.repository
+
+.. autoapi-nested-parse::
+
+   Data access layer methods for accessing variant repository.
+   Classes here provide an encapsulation layer to hide the internal
+   details of the repository structure.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   aigct.repository.TASK_SUBFOLDER
+   aigct.repository.DATA_FOLDER
+   aigct.repository.TASK_FOLDERS
+   aigct.repository.VARIANT_PK_COLUMNS
+   aigct.repository.VARIANT_NON_PK_COLUMNS
+   aigct.repository.VARIANT_TABLE_DEF
+   aigct.repository.VARIANT_LABEL_NON_PK_COLUMNS
+   aigct.repository.VARIANT_EFFECT_LABEL_TABLE_DEF
+   aigct.repository.VARIANT_EFFECT_SCORE_PK_COLUMNS
+   aigct.repository.VARIANT_EFFECT_SCORE_NON_PK_COLUMNS
+   aigct.repository.VARIANT_EFFECT_SCORE_TABLE_DEF
+   aigct.repository.VARIANT_TASK_TABLE_DEF
+   aigct.repository.VARIANT_EFFECT_SOURCE_TABLE_DEF
+   aigct.repository.VARIANT_DATA_SOURCE_TABLE_DEF
+   aigct.repository.VARIANT_FILTER_TABLE_DEF
+   aigct.repository.VARIANT_FILTER_GENE_TABLE_DEF
+   aigct.repository.VARIANT_FILTER_VARIANT_TABLE_DEF
+   aigct.repository.TABLE_DEFS
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.repository.TableDef
+   aigct.repository.RepoSessionContext
+   aigct.repository.VariantEffectLabelCache
+   aigct.repository.DataCache
+   aigct.repository.TaskBasedDataCache
+   aigct.repository.TaskDataCache
+   aigct.repository.VariantEffectScoreCache
+   aigct.repository.VariantCache
+   aigct.repository.VariantTaskCache
+   aigct.repository.VariantEffectSourceCache
+   aigct.repository.VariantFilterCache
+   aigct.repository.VariantEffectSourceRepository
+   aigct.repository.VariantTaskRepository
+   aigct.repository.VariantFilterRepository
+   aigct.repository.VariantRepository
+   aigct.repository.VariantEffectLabelRepository
+   aigct.repository.VariantEffectScoreRepository
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   aigct.repository.query_by_filter
+
+
+Module Contents
+---------------
+
+.. py:data:: TASK_SUBFOLDER
+
+.. py:data:: DATA_FOLDER
+   :value: 'data'
+
+
+.. py:data:: TASK_FOLDERS
+
+.. py:class:: TableDef
+
+   .. py:attribute:: folder
+      :type:  str
+
+
+   .. py:attribute:: file_name
+      :type:  str
+
+
+   .. py:attribute:: pk_columns
+      :type:  list[str]
+
+
+   .. py:attribute:: non_pk_columns
+      :type:  list[str]
+
+
+   .. py:attribute:: columns
+      :type:  list[str]
+
+
+   .. py:attribute:: full_file_name
+      :type:  str
+
+
+   .. py:method:: __post_init__()
+
+
+.. py:data:: VARIANT_PK_COLUMNS
+   :value: ['GENOME_ASSEMBLY', 'CHROMOSOME', 'POSITION', 'REFERENCE_NUCLEOTIDE', 'ALTERNATE_NUCLEOTIDE']
+
+
+.. py:data:: VARIANT_NON_PK_COLUMNS
+   :value: ['PRIOR_GENOME_ASSEMBLY', 'PRIOR_CHROMOSOME', 'PRIOR_POSITION', 'PRIOR_PRIOR_GENOME_ASSEMBLY',...
+
+
+.. py:data:: VARIANT_TABLE_DEF
+
+.. py:data:: VARIANT_LABEL_NON_PK_COLUMNS
+   :value: ['LABEL_SOURCE', 'RAW_LABEL', 'BINARY_LABEL']
+
+
+.. py:data:: VARIANT_EFFECT_LABEL_TABLE_DEF
+
+.. py:data:: VARIANT_EFFECT_SCORE_PK_COLUMNS
+   :value: ['GENOME_ASSEMBLY', 'CHROMOSOME', 'POSITION', 'REFERENCE_NUCLEOTIDE', 'ALTERNATE_NUCLEOTIDE',...
+
+
+.. py:data:: VARIANT_EFFECT_SCORE_NON_PK_COLUMNS
+   :value: ['RAW_SCORE', 'RANK_SCORE']
+
+
+.. py:data:: VARIANT_EFFECT_SCORE_TABLE_DEF
+
+.. py:data:: VARIANT_TASK_TABLE_DEF
+
+.. py:data:: VARIANT_EFFECT_SOURCE_TABLE_DEF
+
+.. py:data:: VARIANT_DATA_SOURCE_TABLE_DEF
+
+.. py:data:: VARIANT_FILTER_TABLE_DEF
+
+.. py:data:: VARIANT_FILTER_GENE_TABLE_DEF
+
+.. py:data:: VARIANT_FILTER_VARIANT_TABLE_DEF
+
+.. py:data:: TABLE_DEFS
+
+.. py:class:: RepoSessionContext(data_folder_root: str, table_defs: dict[str, TableDef])
+
+   .. py:attribute:: _data_folder_root
+
+
+   .. py:attribute:: _table_defs
+
+
+   .. py:property:: data_folder_root
+
+
+   .. py:method:: table_def(table_name: str)
+
+
+   .. py:method:: table_file(table_name: str, task: str = None)
+
+
+.. py:class:: VariantEffectLabelCache
+
+   Bases: :py:obj:`aigct.util.ParameterizedSingleton`
+
+
+   Caches the variant csv file in a dataframe. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str)
+
+
+   .. py:method:: get_data_frame(task_code: str)
+
+
+.. py:class:: DataCache
+
+   Bases: :py:obj:`aigct.util.ParameterizedSingleton`
+
+
+   Caches a repository csv file in a dataframe. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str, table_def: TableDef)
+
+
+   .. py:property:: data_frame
+
+
+.. py:class:: TaskBasedDataCache
+
+   Bases: :py:obj:`aigct.util.ParameterizedSingleton`
+
+
+   Caches a repository csv file in a dataframe. Maintains a separate
+   cache for each task in a dict. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str, table_def: TableDef)
+
+
+   .. py:method:: get_data_frame(task_code: str)
+
+
+.. py:class:: TaskDataCache
+
+   Bases: :py:obj:`DataCache`
+
+
+   Caches the variant csv file in a dataframe. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str)
+
+
+.. py:class:: VariantEffectScoreCache
+
+   Bases: :py:obj:`TaskBasedDataCache`
+
+
+   Caches the variant csv file in a dataframe. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str)
+
+
+.. py:class:: VariantCache
+
+   Bases: :py:obj:`DataCache`
+
+
+   Caches the variant csv file in a dataframe. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str)
+
+
+.. py:class:: VariantTaskCache
+
+   Bases: :py:obj:`DataCache`
+
+
+   Caches the variant csv file in a dataframe. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str)
+
+
+.. py:class:: VariantEffectSourceCache
+
+   Bases: :py:obj:`DataCache`
+
+
+   Caches a repository csv file in a dataframe. Implements the singleton
+   pattern to ensure there is only one instance of the cached dataframe.
+   We use an _init_once method rather than the normal __init__ method
+   as required by the ParameterizedSingleton class.
+
+
+   .. py:method:: _init_once(data_folder_root: str)
+
+
+.. py:class:: VariantFilterCache
+
+   Bases: :py:obj:`aigct.util.ParameterizedSingleton`
+
+
+   Classes that wish to behave as threadsafe singletons can inherit from
+   this class. To be used only by classes that have an initialization
+   method that takes parameters. The class must implement an _init_once
+   method instead of the normal __init__ method for initialization.
+   It takes same parameters as __init__ method. By inheriting from this
+   class all instantiations of the subclass will return the same instance.
+
+
+   .. py:method:: _init_once(data_folder_root: str)
+
+
+   .. py:method:: get_data_frames(task_code: str) -> dict
+
+
+.. py:class:: VariantEffectSourceRepository(session_context: RepoSessionContext, variant_effect_score_repo)
+
+   .. py:attribute:: _cache
+
+
+   .. py:attribute:: _variant_effect_score_repo
+
+
+   .. py:method:: get_all() -> pandas.DataFrame
+
+
+   .. py:method:: get_by_task(task_code: str) -> pandas.DataFrame
+
+
+   .. py:method:: get_by_code(codes: list[str]) -> pandas.DataFrame
+
+
+.. py:class:: VariantTaskRepository(session_context: RepoSessionContext)
+
+   .. py:attribute:: _cache
+
+
+   .. py:method:: get_all() -> pandas.DataFrame
+
+
+.. py:class:: VariantFilterRepository(session_context: RepoSessionContext)
+
+   .. py:attribute:: _cache
+
+
+   .. py:method:: get_by_task(task_code: str) -> dict[str, pandas.DataFrame]
+
+
+   .. py:method:: get_by_task_filter_name(task_code: str, filter_name: str) -> aigct.model.VariantFilter
+
+
+.. py:function:: query_by_filter(query_df: pandas.DataFrame, filter: pandas.Series, filter_gene_df: pandas.DataFrame, filter_variant_df: pandas.DataFrame) -> pandas.DataFrame
+
+.. py:class:: VariantRepository(session_context: RepoSessionContext)
+
+   .. py:attribute:: _cache
+
+
+   .. py:method:: get_all() -> pandas.DataFrame
+
+
+   .. py:method:: get(qry: aigct.model.VEQueryCriteria) -> pandas.DataFrame
+
+      Fetches variants. The optional parameters are filter criteria used to
+      limit the set of variants returned.
+
+
+
+.. py:class:: VariantEffectLabelRepository(session_context: RepoSessionContext, variant_repo: VariantRepository, filter_repo: VariantFilterRepository)
+
+   .. py:attribute:: _cache
+
+
+   .. py:attribute:: _filter_repo
+
+
+   .. py:attribute:: _variant_repo
+
+
+   .. py:method:: get_all_by_task(task_code: str) -> pandas.DataFrame
+
+
+   .. py:method:: get(task_code: str, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+
+      Fetches variant effect labels.
+
+
+
+.. py:class:: VariantEffectScoreRepository(session_context: RepoSessionContext, variant_repo: VariantRepository, filter_repo: VariantFilterRepository)
+
+   .. py:attribute:: _cache
+
+
+   .. py:attribute:: _filter_repo
+
+
+   .. py:attribute:: _variant_repo
+
+
+   .. py:method:: get_all_by_task(task_code: str) -> pandas.DataFrame
+
+
+   .. py:method:: get(task_code: str, variant_effect_sources: list[str] | str = None, include_variant_effect_sources: bool = True, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+
+

@@ -1,0 +1,81 @@
+aigct.container
+===============
+
+.. py:module:: aigct.container
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.container.VEBenchmarkContainer
+
+
+Module Contents
+---------------
+
+.. py:class:: VEBenchmarkContainer(config_file: str = './config/aigct.yaml')
+
+   Class to simulate a Dependency Injection container.
+   It could be reimplemented in the future if we decide to use
+   a proper one. The interface, however, would remain the same.
+
+
+   .. py:attribute:: _repo_session_context
+
+
+   .. py:attribute:: _variant_task_repo
+
+
+   .. py:attribute:: _variant_repo
+
+
+   .. py:attribute:: _variant_filter_repo
+
+
+   .. py:attribute:: _label_repo
+
+
+   .. py:attribute:: _score_repo
+
+
+   .. py:attribute:: _variant_effect_source_repo
+
+
+   .. py:attribute:: _analyzer
+
+
+   .. py:attribute:: _query_mgr
+
+
+   .. py:attribute:: _reporter
+
+
+   .. py:attribute:: _plotter
+
+
+   .. py:attribute:: _exporter
+
+
+   .. py:attribute:: _data_validator
+
+
+   .. py:property:: analyzer
+
+
+   .. py:property:: query_mgr
+
+
+   .. py:property:: reporter
+
+
+   .. py:property:: plotter
+
+
+   .. py:property:: exporter
+
+
+   .. py:property:: data_validator
+
+

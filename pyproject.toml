@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aigct"
+version = "0.1a1.dev3"
+authors = [
+  { name="Claudio Fratarcangeli", email="claudiofr@yahoo.com" },
+]
+description = "AI Genomics CollecTive (AIGCT) is a platform for systematically evaluating ML/AI models of variant effects across the spectrum of genomics-based precision medicine"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "ipython>=8.12.3",
+  "matplotlib>=3.10.0",
+  "numpy>=2.2.3",
+  "pandas>=2.2.3",
+  "pytest>=8.3.4",
+  "PyYAML>=6.0.2",
+  "Requests>=2.32.3",
+  "scikit_learn>=1.6.1",
+  "scipy>=1.15.1",
+  "seaborn>=0.13.2",
+  "Jinja2>=3.1.5",
+  "dask>=2025.3.0",
+  "pyarrow>=19.0.1",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.scripts]
+init_app = "aigct.init_app:main"
+install_db = "aigct.install_db:main"
+check_install = "aigct.check_install:main"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "docs",
+  "data",
+  "data1",
+  "TGCA.V1",
+  "temp",
+  "venv_aigct"
+]
+#[tool.hatch.build]
+#include = [
+#    "config/*"
+#]
+[project.urls]
+Homepage = "https://github.com/claudiofr/AGCT_dev"
+Issues = "https://github.com/claudiofr/AGCT_dev/issues"

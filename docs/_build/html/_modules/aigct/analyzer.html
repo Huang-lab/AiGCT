@@ -1,0 +1,576 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.analyzer &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">aigct.analyzer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aigct.analyzer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_string_dtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+     <span class="n">roc_curve</span><span class="p">,</span>
+     <span class="n">roc_auc_score</span><span class="p">,</span>
+     <span class="n">precision_recall_curve</span><span class="p">,</span>
+     <span class="n">auc</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">VEQueryCriteria</span><span class="p">,</span>
+    <span class="n">VEAnalysisResult</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.repository</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+     <span class="n">VariantEffectScoreRepository</span><span class="p">,</span>
+     <span class="n">VariantEffectLabelRepository</span><span class="p">,</span>
+     <span class="n">VariantEffectSourceRepository</span><span class="p">,</span>
+     <span class="n">VARIANT_PK_COLUMNS</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pd_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">filter_dataframe_by_list</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.query_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_query_criteria</span>
+
+<div class="viewcode-block" id="VARIANT_EFFECT_SCORE_COLS">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VARIANT_EFFECT_SCORE_COLS">[docs]</a>
+<span class="n">VARIANT_EFFECT_SCORE_COLS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">]</span> <span class="o">+</span>\
+    <span class="n">VARIANT_PK_COLUMNS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="VEAnalyzer">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VEAnalyzer</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variant_effect_score_repo</span><span class="p">:</span> <span class="n">VariantEffectScoreRepository</span><span class="p">,</span>
+                 <span class="n">variant_effect_label_repo</span><span class="p">:</span> <span class="n">VariantEffectLabelRepository</span><span class="p">,</span>
+                 <span class="n">variant_effect_source_repo</span><span class="p">:</span> <span class="n">VariantEffectSourceRepository</span><span class="p">):</span>
+<div class="viewcode-block" id="VEAnalyzer._variant_effect_score_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._variant_effect_score_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span> <span class="o">=</span> <span class="n">variant_effect_score_repo</span></div>
+
+<div class="viewcode-block" id="VEAnalyzer._variant_effect_label_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._variant_effect_label_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span> <span class="o">=</span> <span class="n">variant_effect_label_repo</span></div>
+
+<div class="viewcode-block" id="VEAnalyzer._variant_effect_source_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._variant_effect_source_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_source_repo</span> <span class="o">=</span> <span class="n">variant_effect_source_repo</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer.validate_user_ve_scores">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer.validate_user_ve_scores">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_user_ve_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_ve_scores</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_string_dtype</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">[</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">])):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CHROMOSOME column values must all be string type&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer.get_analysis_scores_and_labels">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer.get_analysis_scores_and_labels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_analysis_scores_and_labels</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">user_ve_scores</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">user_vep_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;USER&quot;</span><span class="p">,</span>
+            <span class="n">column_name_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">variant_effect_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">variant_query_criteria</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">vep_min_overlap_percent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">variant_vep_retention_percent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">vep_min_overlap_percent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vep_min_overlap_percent</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">variant_vep_retention_percent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">variant_vep_retention_percent</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">user_ve_scores</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">variant_effect_sources</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">variant_effect_sources</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">variant_effect_sources</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Get the full universe of variants for query criteria. The universe</span>
+        <span class="c1"># is limited to those for which we have labels.</span>
+        <span class="n">variant_universe_pks_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">task_code</span><span class="p">,</span> <span class="n">variant_query_criteria</span><span class="p">)[</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">]</span>
+
+        <span class="c1"># if user has specified variant scores then restrict user</span>
+        <span class="c1"># variants to those in the universe(i.e. those for which we have</span>
+        <span class="c1"># labels) and then reset the universe to the filtered user variant list</span>
+        <span class="k">if</span> <span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">column_name_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">column_name_map</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">user_ve_scores</span> <span class="o">=</span> <span class="n">user_ve_scores</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+                    <span class="n">columns</span><span class="o">=</span><span class="n">column_name_map</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validate_user_ve_scores</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">)</span>
+            <span class="n">user_ve_scores</span> <span class="o">=</span> <span class="n">user_ve_scores</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_universe_pks_df</span><span class="p">,</span>
+                                                  <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+                                                  <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+            <span class="n">user_ve_scores</span> <span class="o">=</span> <span class="n">user_ve_scores</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+                <span class="n">SCORE_SOURCE</span><span class="o">=</span><span class="n">user_vep_name</span><span class="p">)</span>
+            <span class="n">variant_universe_pks_df</span> <span class="o">=</span> <span class="n">user_ve_scores</span><span class="p">[</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                <span class="ow">not</span> <span class="n">include_variant_effect_sources</span> <span class="ow">and</span>
+                <span class="n">variant_effect_sources</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># We only do the analysis against the user scores.</span>
+            <span class="c1"># We don&#39;t use any system veps.</span>
+            <span class="n">analysis_ve_scores_df</span> <span class="o">=</span> \
+                <span class="n">user_ve_scores</span><span class="p">[</span><span class="n">VARIANT_EFFECT_SCORE_COLS</span><span class="p">]</span>
+            <span class="n">analysis_labels_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">task_code</span><span class="p">,</span> <span class="n">VEQueryCriteria</span><span class="p">(</span>
+                    <span class="n">variant_ids</span><span class="o">=</span><span class="n">user_ve_scores</span><span class="p">[</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We include system veps in the analysis</span>
+            <span class="c1"># get the system vep scores based upon selection critera</span>
+            <span class="n">system_ve_scores_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_score_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">task_code</span><span class="p">,</span> <span class="n">variant_effect_sources</span><span class="p">,</span>
+                <span class="n">include_variant_effect_sources</span><span class="p">,</span>
+                <span class="n">variant_query_criteria</span><span class="p">)</span>
+            
+            <span class="c1"># First restrict the set of system vep scores to the variants</span>
+            <span class="c1"># in the universe. Then compute how many variants there are for</span>
+            <span class="c1"># each vep. Then we only keep the vep scores for veps where</span>
+            <span class="c1"># the variant count is above the vep_min_overlap_count</span>
+            <span class="n">vep_min_overlap_count</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">variant_universe_pks_df</span><span class="p">)</span> <span class="o">*</span>
+                                     <span class="n">vep_min_overlap_percent</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+            <span class="n">system_ve_scores_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span>
+                <span class="n">system_ve_scores_df</span><span class="p">,</span> <span class="n">variant_universe_pks_df</span><span class="p">,</span>
+                <span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+            <span class="n">retained_veps</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">system_ve_scores_count_by_vep</span> <span class="o">=</span> <span class="n">system_ve_scores_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+                <span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+            <span class="n">retained_veps</span> <span class="o">=</span> <span class="n">system_ve_scores_count_by_vep</span><span class="p">[</span>
+                <span class="n">system_ve_scores_count_by_vep</span> <span class="o">&gt;=</span> <span class="n">vep_min_overlap_count</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">system_ve_scores_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span>
+                <span class="n">system_ve_scores_df</span><span class="p">,</span> <span class="n">retained_veps</span><span class="p">,</span> <span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Now for each variant we compute how many veps for which we have</span>
+            <span class="c1"># scores. We then retain only those variants where the number of</span>
+            <span class="c1"># veps is above variant_vep_retention_count</span>
+            <span class="n">variant_vep_retention_count</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">retained_veps</span><span class="p">)</span> <span class="o">*</span> <span class="n">variant_vep_retention_percent</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">)</span>
+
+            <span class="n">system_ve_scores_count_by_var</span> <span class="o">=</span> <span class="n">system_ve_scores_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+                <span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+            <span class="n">retained_variants</span> <span class="o">=</span> <span class="p">(</span><span class="n">system_ve_scores_count_by_var</span><span class="p">[</span>
+                <span class="n">system_ve_scores_count_by_var</span> <span class="o">&gt;=</span> <span class="n">variant_vep_retention_count</span><span class="p">]</span><span class="o">.</span>
+                    <span class="n">reset_index</span><span class="p">())</span>
+
+            <span class="c1"># If user specified scores append them to the system ones. Then</span>
+            <span class="c1"># merge in the labels for all of the variants.</span>
+            <span class="k">if</span> <span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">analysis_ve_scores_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
+                    <span class="n">system_ve_scores_df</span><span class="p">[</span><span class="n">VARIANT_EFFECT_SCORE_COLS</span><span class="p">],</span>
+                    <span class="n">user_ve_scores</span><span class="p">[</span><span class="n">VARIANT_EFFECT_SCORE_COLS</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">analysis_ve_scores_df</span> <span class="o">=</span> <span class="n">system_ve_scores_df</span><span class="p">[</span>
+                    <span class="n">VARIANT_EFFECT_SCORE_COLS</span><span class="p">]</span>
+            <span class="n">analysis_ve_scores_df</span> <span class="o">=</span> <span class="n">filter_dataframe_by_list</span><span class="p">(</span>
+                <span class="n">analysis_ve_scores_df</span><span class="p">,</span>
+                <span class="n">retained_variants</span><span class="p">,</span>
+                <span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+            <span class="n">analysis_labels_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_label_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">task_code</span><span class="p">,</span> <span class="n">VEQueryCriteria</span><span class="p">(</span><span class="n">variant_ids</span><span class="o">=</span><span class="n">retained_variants</span><span class="p">))</span>
+        <span class="n">analysis_ve_scores_labels_df</span> <span class="o">=</span> <span class="n">analysis_ve_scores_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="n">analysis_labels_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">analysis_ve_scores_labels_df</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._compute_pr">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._compute_pr">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_pr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">grouped_ve_scores_labels</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+
+        <span class="n">aucs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">precision_recall_score_sources</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">precisions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">recalls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">thresholds_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">score_source</span><span class="p">,</span> <span class="n">scores_labels_df</span> <span class="ow">in</span> <span class="n">grouped_ve_scores_labels</span><span class="p">:</span>
+            <span class="n">prs</span><span class="p">,</span> <span class="n">recs</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="n">precision_recall_curve</span><span class="p">(</span>
+                <span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">],</span>
+                <span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">])</span>
+            <span class="n">aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">auc</span><span class="p">(</span><span class="n">recs</span><span class="p">,</span> <span class="n">prs</span><span class="p">))</span>
+            <span class="n">precision_recall_score_sources</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">score_source</span><span class="p">]</span> <span class="o">*</span>
+                                                  <span class="nb">len</span><span class="p">(</span><span class="n">thresholds</span><span class="p">))</span>
+            <span class="n">precisions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">prs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">recalls</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">recs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">thresholds_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">thresholds</span><span class="p">)</span>
+        <span class="n">pr_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">:</span>
+                              <span class="n">grouped_ve_scores_labels</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+                              <span class="s2">&quot;PR_AUC&quot;</span><span class="p">:</span> <span class="n">aucs</span><span class="p">})</span>
+        <span class="n">pr_curve_coords_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">:</span> <span class="n">precision_recall_score_sources</span><span class="p">,</span>
+             <span class="s2">&quot;PRECISION&quot;</span><span class="p">:</span> <span class="n">precisions</span><span class="p">,</span>
+             <span class="s2">&quot;RECALL&quot;</span><span class="p">:</span> <span class="n">recalls</span><span class="p">,</span>
+             <span class="s2">&quot;THRESHOLD&quot;</span><span class="p">:</span> <span class="n">thresholds_list</span>
+             <span class="p">})</span>
+        <span class="k">return</span> <span class="n">pr_df</span><span class="p">,</span> <span class="n">pr_curve_coords_df</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._compute_roc">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._compute_roc">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_roc</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">grouped_ve_scores_labels</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+
+        <span class="n">aucs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">fpr_tpr_score_sources</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">false_positive_rates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">true_positive_rates</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">thresholds_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">exceps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">score_source</span><span class="p">,</span> <span class="n">scores_labels_df</span> <span class="ow">in</span> <span class="n">grouped_ve_scores_labels</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scores_labels_df</span><span class="p">)</span> <span class="o">==</span>
+                        <span class="nb">sum</span><span class="p">(</span><span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">])</span> <span class="ow">or</span>
+                        <span class="nb">sum</span><span class="p">(</span><span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot compute roc metrics because all &quot;</span>
+                                    <span class="s2">&quot;labels have same value&quot;</span><span class="p">)</span>
+                <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">],</span>
+                                    <span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">])</span>
+                <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span>
+                    <span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">],</span>
+                    <span class="n">scores_labels_df</span><span class="p">[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">])</span>
+                <span class="n">aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">auc</span><span class="p">)</span>
+                <span class="n">fpr_tpr_score_sources</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">score_source</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">fpr</span><span class="p">))</span>
+                <span class="n">false_positive_rates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">fpr</span><span class="p">)</span>
+                <span class="n">true_positive_rates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tpr</span><span class="p">)</span>
+                <span class="n">thresholds_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">thresholds</span><span class="p">)</span>
+                <span class="n">exceps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="n">exceps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="n">roc_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">:</span> <span class="n">grouped_ve_scores_labels</span><span class="o">.</span>
+                               <span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+                               <span class="s2">&quot;ROC_AUC&quot;</span><span class="p">:</span> <span class="n">aucs</span><span class="p">,</span>
+                               <span class="s2">&quot;EXCEPTION&quot;</span><span class="p">:</span> <span class="n">exceps</span>
+                               <span class="p">})</span>
+        <span class="n">roc_curve_coords_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">:</span> <span class="n">fpr_tpr_score_sources</span><span class="p">,</span>
+             <span class="s2">&quot;FALSE_POSITIVE_RATE&quot;</span><span class="p">:</span> <span class="n">false_positive_rates</span><span class="p">,</span>
+             <span class="s2">&quot;TRUE_POSITIVE_RATE&quot;</span><span class="p">:</span> <span class="n">true_positive_rates</span><span class="p">,</span>
+             <span class="s2">&quot;THRESHOLD&quot;</span><span class="p">:</span> <span class="n">thresholds_list</span>
+             <span class="p">})</span>
+        <span class="k">return</span> <span class="n">roc_df</span><span class="p">,</span> <span class="n">roc_curve_coords_df</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="VEAnalyzer._compute_general_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._compute_general_metrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_general_metrics</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="p">{</span><span class="s2">&quot;NUM_VARIANTS&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">),</span>
+             <span class="s2">&quot;NUM_POSITIVE_LABELS&quot;</span><span class="p">:</span> <span class="n">group</span><span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span>
+             <span class="s2">&quot;NUM_NEGATIVE_LABELS&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">]</span> <span class="o">^</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+             <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._add_info_to_metric_dataframes">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._add_info_to_metric_dataframes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_info_to_metric_dataframes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">dfs</span><span class="p">):</span>  <span class="c1"># -&gt; list(pd.DataFrame):</span>
+        <span class="n">return_dfs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">dfs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_source_repo</span><span class="o">.</span><span class="n">get_all</span><span class="p">()[</span>
+                    <span class="p">[</span><span class="s2">&quot;CODE&quot;</span><span class="p">,</span> <span class="s2">&quot;NAME&quot;</span><span class="p">]],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">,</span>
+                            <span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;CODE&quot;</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">&quot;NAME&quot;</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">]</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="s2">&quot;SOURCE_NAME&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">&quot;CODE&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">return_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_dfs</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._compute_mwu">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._compute_mwu">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_mwu</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">grouped_ve_scores_labels</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+        <span class="n">neg_log10_mwu_pvals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">exceps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">score_source</span><span class="p">,</span> <span class="n">scores_labels_df</span> <span class="ow">in</span> <span class="n">grouped_ve_scores_labels</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">positive_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scores_labels_df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                    <span class="s1">&#39;BINARY_LABEL == 1&#39;</span><span class="p">)[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">])</span>
+                <span class="n">negative_scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scores_labels_df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                    <span class="s1">&#39;BINARY_LABEL == 0&#39;</span><span class="p">)[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">positive_scores</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">negative_scores</span><span class="p">)]:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s2">&quot;Cannot compute mann-whitney u values &quot;</span> <span class="o">+</span>
+                        <span class="s2">&quot;because all labels have same value&quot;</span><span class="p">)</span>
+                <span class="n">neg_log10_mwu_pval</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">mannwhitneyu</span><span class="p">(</span>
+                    <span class="n">negative_scores</span><span class="p">,</span> <span class="n">positive_scores</span><span class="p">)</span><span class="o">.</span><span class="n">pvalue</span><span class="p">)</span>
+                <span class="n">neg_log10_mwu_pvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">neg_log10_mwu_pval</span><span class="p">)</span>
+                <span class="n">exceps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">neg_log10_mwu_pvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="n">exceps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+        <span class="n">mwu_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">:</span> <span class="n">grouped_ve_scores_labels</span><span class="o">.</span>
+                               <span class="n">groups</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+                               <span class="s2">&quot;NEG_LOG10_MWU_PVAL&quot;</span><span class="p">:</span> <span class="n">neg_log10_mwu_pvals</span><span class="p">,</span>
+                               <span class="s2">&quot;EXCEPTION&quot;</span><span class="p">:</span> <span class="n">exceps</span>
+                               <span class="p">})</span>
+        <span class="k">return</span> <span class="n">mwu_df</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._compute_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._compute_metrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_metrics</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ve_scores_labels_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">list_variants</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+
+        <span class="n">grouped_ve_scores_labels</span> <span class="o">=</span> <span class="n">ve_scores_labels_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">)</span>
+        <span class="n">general_metrics_df</span> <span class="o">=</span> <span class="n">grouped_ve_scores_labels</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_general_metrics</span><span class="p">,</span> <span class="n">include_groups</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">roc_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">roc_curve_coords_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">pr_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">pr_curve_coords_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">mwu_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;roc&quot;</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">roc_df</span><span class="p">,</span> <span class="n">roc_curve_coords_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_roc</span><span class="p">(</span>
+                <span class="n">grouped_ve_scores_labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;pr&quot;</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">pr_df</span><span class="p">,</span> <span class="n">pr_curve_coords_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_pr</span><span class="p">(</span>
+                <span class="n">grouped_ve_scores_labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;mwu&quot;</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">mwu_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_mwu</span><span class="p">(</span><span class="n">grouped_ve_scores_labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">list_variants</span><span class="p">:</span>
+            <span class="n">included_variants_df</span> <span class="o">=</span> <span class="n">ve_scores_labels_df</span><span class="p">[[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">]</span> <span class="o">+</span>
+                                                       <span class="n">VARIANT_PK_COLUMNS</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">included_variants_df</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">metric_dataframes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_info_to_metric_dataframes</span><span class="p">(</span>
+                <span class="n">general_metrics_df</span><span class="p">,</span> <span class="n">roc_df</span><span class="p">,</span> <span class="n">pr_df</span><span class="p">,</span>
+                <span class="n">mwu_df</span><span class="p">)</span>
+        <span class="n">metric_dataframes</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">roc_curve_coords_df</span><span class="p">,</span> <span class="n">pr_curve_coords_df</span><span class="p">,</span>
+                                  <span class="n">included_variants_df</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">metric_dataframes</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer.compute_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer.compute_metrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_metrics</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">user_ve_scores</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">user_vep_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;USER&quot;</span><span class="p">,</span>
+            <span class="n">column_name_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">variant_effect_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">variant_query_criteria</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">vep_min_overlap_percent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">variant_vep_retention_percent</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;roc&quot;</span><span class="p">,</span> <span class="s2">&quot;pr&quot;</span><span class="p">,</span> <span class="s2">&quot;mwu&quot;</span><span class="p">],</span>
+            <span class="n">list_variants</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VEAnalysisResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates performance metrics for an optional user supplied set of</span>
+<span class="sd">        vep scores and for system supplied vep&#39;s. If the user doesn&#39;t provide</span>
+<span class="sd">        vep scores, will only generate metrics for system veps. Returns</span>
+<span class="sd">        an object containing all the metrics which can then be used to</span>
+<span class="sd">        generate plots, reports, or csv data files.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task_code : str</span>
+<span class="sd">            Task code</span>
+<span class="sd">        user_ve_scores : DataFrame, optional</span>
+<span class="sd">            An optional dataframe of user variant effect prediction</span>
+<span class="sd">            scores. Expected to have the following columns:</span>
+<span class="sd">            GENOME_ASSEMBLY, CHROMOSOME, POSITION,</span>
+<span class="sd">            REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE.</span>
+<span class="sd">            The GENOME_ASSEMBLY must be hg38 in current release.</span>
+<span class="sd">            RANK_SCORE is a numeric prediction score. It does not have</span>
+<span class="sd">            to be standardized or normalized.</span>
+<span class="sd">        user_vep_name : str, optional</span>
+<span class="sd">            If user_ve_scores are provided, then this is the label to</span>
+<span class="sd">            be used for them in the analysis output.</span>
+<span class="sd">        column_name_map : dict, optional</span>
+<span class="sd">            If the column names in user_ve_scores are not the expected</span>
+<span class="sd">            names, then this maps the column names to the expected names.</span>
+<span class="sd">        variant_effect_sources : list, optional</span>
+<span class="sd">            If specified it would restrict the analysis to the</span>
+<span class="sd">            system supplied vep&#39;s in this list.</span>
+<span class="sd">        include_variant_effect_sources : bool, optional</span>
+<span class="sd">            If variant_effect_sources is specified, indicates whether to</span>
+<span class="sd">            limit the analysis to the system supplied vep&#39;s specified or to</span>
+<span class="sd">            exclude the system supplied vep&#39;s specified.</span>
+<span class="sd">            If variant_effect_sources is not specified a value of False</span>
+<span class="sd">            indicates that all system variant effect sources should</span>
+<span class="sd">            be excluded from the analysis.</span>
+<span class="sd">        variant_query_criteria : VEQueryCriteria, optional</span>
+<span class="sd">            See description of VEQueryCriteria in model package.</span>
+<span class="sd">            Specifies criteria that would limit the set of variants</span>
+<span class="sd">            to be included in the analysis.</span>
+<span class="sd">        vep_min_overlap_percent : float</span>
+<span class="sd">            In order for a system supplied vep to be included in the</span>
+<span class="sd">            analysis the set of variants for which it has scores must</span>
+<span class="sd">            overlap the variants in user_ve_scores by at least this</span>
+<span class="sd">            percentage amount. If the user_ve_scores is not specified,</span>
+<span class="sd">            then it must overlap the entire universe of variants in</span>
+<span class="sd">            the system for which we have labels by at least this</span>
+<span class="sd">            percentage amount. A value of 0 means that it can overlap</span>
+<span class="sd">            by any amount to be included.</span>
+<span class="sd">        variant_vep_retention_percent : float</span>
+<span class="sd">            In order for a variant to be included in the analysis</span>
+<span class="sd">            there must exist scores for the variant in at least</span>
+<span class="sd">            this percent of the system vep&#39;s included in the analysis</span>
+<span class="sd">            based on the value of vep_min_overlap_percent. For example,</span>
+<span class="sd">            if a value of 50 is specified and 10 system vep&#39;s qualified</span>
+<span class="sd">            for inclusion, then a variant must be in at least 5 veps</span>
+<span class="sd">            to be included in the analysis.</span>
+<span class="sd">        metrics : str or list[str]</span>
+<span class="sd">            Specifies which metrics to compute. Can be a string</span>
+<span class="sd">            indicating a single metric or a list of strings for</span>
+<span class="sd">            multiple metrics. The metrics are: roc, pr, mwu.</span>
+<span class="sd">        list_variants: bool</span>
+<span class="sd">            Include the list of variants</span>
+<span class="sd">            that were included in the analysis in the return result</span>
+<span class="sd">            object. There is a separate list for the user variants</span>
+<span class="sd">            as well as for each system vep.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        VEAnalysisResult</span>
+<span class="sd">            Object containing computed metrics</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">variant_query_criteria</span><span class="p">)</span>
+
+        <span class="n">scores_and_labels_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_analysis_scores_and_labels</span><span class="p">(</span>
+            <span class="n">task_code</span><span class="p">,</span>
+            <span class="n">user_ve_scores</span><span class="p">,</span>
+            <span class="n">user_vep_name</span><span class="p">,</span>
+            <span class="n">column_name_map</span><span class="p">,</span>
+            <span class="n">variant_effect_sources</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="p">,</span>
+            <span class="n">variant_query_criteria</span><span class="p">,</span>
+            <span class="n">vep_min_overlap_percent</span><span class="p">,</span>
+            <span class="n">variant_vep_retention_percent</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span>
+        <span class="n">general_metrics_df</span><span class="p">,</span> <span class="n">roc_df</span><span class="p">,</span> <span class="n">pr_df</span><span class="p">,</span> <span class="n">mwu_df</span><span class="p">,</span> <span class="n">roc_curve_coords_df</span><span class="p">,</span> \
+            <span class="n">pr_curve_coords_df</span><span class="p">,</span> <span class="n">included_variants_df</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_metrics</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span> <span class="n">scores_and_labels_df</span><span class="p">,</span>
+                                  <span class="n">metrics</span><span class="p">,</span> <span class="n">list_variants</span><span class="p">)</span>
+        <span class="n">num_variants</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">scores_and_labels_df</span><span class="p">[</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">())</span>
+        <span class="n">num_user_variants</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> \
+            <span class="nb">len</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">VEAnalysisResult</span><span class="p">(</span>
+            <span class="n">num_variants</span><span class="p">,</span>
+            <span class="n">num_user_variants</span><span class="p">,</span> <span class="n">user_vep_name</span><span class="p">,</span>
+            <span class="n">general_metrics_df</span><span class="p">,</span> <span class="n">roc_df</span><span class="p">,</span>
+            <span class="n">pr_df</span><span class="p">,</span> <span class="n">mwu_df</span><span class="p">,</span> <span class="n">roc_curve_coords_df</span><span class="p">,</span>
+            <span class="n">pr_curve_coords_df</span><span class="p">,</span> <span class="n">included_variants_df</span><span class="p">)</span></div>
+</div>
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

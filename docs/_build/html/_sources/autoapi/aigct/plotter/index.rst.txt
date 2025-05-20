@@ -1,0 +1,80 @@
+aigct.plotter
+=============
+
+.. py:module:: aigct.plotter
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.plotter.VEAnalysisPlotter
+
+
+Module Contents
+---------------
+
+.. py:class:: VEAnalysisPlotter(config: aigct.util.Config)
+
+   Plot results of an analysis
+
+
+   .. py:attribute:: _config
+
+
+   .. py:attribute:: _roc_pr_config
+
+
+   .. py:attribute:: _mwu_config
+
+
+   .. py:method:: _plot_roc_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, ves_color_palette: dict, file_name: str = None)
+
+
+   .. py:method:: _plot_pr_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, ves_color_palette: dict, file_name: str = None)
+
+
+   .. py:method:: _display_mwu_table(results: aigct.model.VEAnalysisResult, file_name: str = None)
+
+
+   .. py:method:: _display_pr_table(results: aigct.model.VEAnalysisResult, file_name: str = None)
+
+
+   .. py:method:: _display_roc_table(results: aigct.model.VEAnalysisResult, file_name: str = None)
+
+
+   .. py:method:: _plot_mwu_bar(mwus: pandas.DataFrame, batch_no: int, num_batches: int, file_name: str = None, palette=None)
+
+
+   .. py:method:: plot_pr_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
+
+
+   .. py:method:: plot_roc_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
+
+
+   .. py:method:: plot_mwu_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
+
+
+   .. py:method:: plot_results(results: aigct.model.VEAnalysisResult, metrics: str | list[str] = ['roc', 'pr', 'mwu'], dir: str = None)
+
+      Plot the results of an analysis either to the screen or to
+      files.
+
+      Parameters
+      ----------
+      results : VEAnalysisResult
+          Analysis result object
+      metrics : str or list[str]
+          Specifies which metrics to plot. Can be a string
+          indicating a single metric or a list of strings for
+          multiple metrics. The metrics are: roc, pr, mwu.
+      dir : str, optional
+          Directory to place the plot files. The files will
+          be placed in a subdirectory off of this directory
+          whose name begins with ve_analysis_plots and suffixed
+          by a unique timestamp. If not specified will plot
+          to screen.
+
+
+
