@@ -243,14 +243,15 @@
 <span class="sd">    allele_frequency : float, optional</span>
 <span class="sd">        Used in conjunction to allele_frequency_operator to limit variants</span>
 <span class="sd">        to those meeting a certain allele_frequency criteria.</span>
-<span class="sd">    filter_name : str, optional</span>
-<span class="sd">        The name of a system filter that can be used to limit the variants</span>
-<span class="sd">        returned.</span>
+<span class="sd">    filter_names : str | list[str], optional</span>
+<span class="sd">        The name(s) of a system filter that can be used to limit the variants</span>
+<span class="sd">        returned. If more than one is given then the filters are combined</span>
+<span class="sd">        using a logical OR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="VEQueryCriteria.gene_symbols">
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.gene_symbols">[docs]</a>
-    <span class="n">gene_symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="n">gene_symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="VEQueryCriteria.include_genes">
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.include_genes">[docs]</a>
@@ -276,9 +277,9 @@
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.allele_frequency">[docs]</a>
     <span class="n">allele_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="VEQueryCriteria.filter_name">
-<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.filter_name">[docs]</a>
-    <span class="n">filter_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span></div>
+<div class="viewcode-block" id="VEQueryCriteria.filter_names">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEQueryCriteria.filter_names">[docs]</a>
+    <span class="n">filter_names</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 </div>
 
 
@@ -315,17 +316,39 @@
 <span class="sd">    mwu_metrics : DataFrame, optional</span>
 <span class="sd">        Mann-Whitney U metrics containing columns: SCORE_SOURCE,</span>
 <span class="sd">        NEG_LOG10_MWU_PVAL, SOURCE_NAME</span>
+<span class="sd">    gene_general_metrics : DataFrame, optional</span>
+<span class="sd">        Gene-level general metrics with columns: SCORE_SOURCE,</span>
+<span class="sd">        GENE_SYMBOL, NUM_VARIANTS, NUM_POSITIVE_LABELS,</span>
+<span class="sd">        NUM_NEGATIVE_LABELS, SOURCE_NAME</span>
+<span class="sd">    gene_roc_metrics : DataFrame, optional</span>
+<span class="sd">        Gene-level ROC metrics with columns: SCORE_SOURCE,</span>
+<span class="sd">        GENE_SYMBOL, ROC_AUC, EXCEPTION, SOURCE_NAME</span>
+<span class="sd">    gene_pr_metrics : DataFrame, optional</span>
+<span class="sd">        Gene-level precision/recall metrics with columns: SCORE_SOURCE,</span>
+<span class="sd">        GENE_SYMBOL, PR_AUC, SOURCE_NAME</span>
+<span class="sd">    gene_mwu_metrics : DataFrame, optional</span>
+<span class="sd">        Gene-level Mann-Whitney U metrics with columns: SCORE_SOURCE,</span>
+<span class="sd">        GENE_SYMBOL, NEG_LOG10_MWU_PVAL, SOURCE_NAME</span>
 <span class="sd">    roc_curve_coordinates : DataFrame, optional</span>
 <span class="sd">        Columns: SCORE_SOURCE,</span>
 <span class="sd">        FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD</span>
 <span class="sd">    pr_curve_coordinates : DataFrame, optional</span>
 <span class="sd">        Columns: SCORE_SOURCE,</span>
 <span class="sd">        PRECISION, RECALL, THRESHOLD</span>
+<span class="sd">    gene_roc_curve_coordinates : DataFrame, optional</span>
+<span class="sd">        Gene-level ROC curve coordinates with columns: SCORE_SOURCE,</span>
+<span class="sd">        GENE_SYMBOL, FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD</span>
+<span class="sd">    gene_pr_curve_coordinates : DataFrame, optional</span>
+<span class="sd">        Gene-level precision/recall curve coordinates with columns:</span>
+<span class="sd">        SCORE_SOURCE, GENE_SYMBOL, PRECISION, RECALL, THRESHOLD</span>
 <span class="sd">    variants_included : DataFrame, optional</span>
 <span class="sd">        List of variants included for each vep included the user vep.</span>
 <span class="sd">        Columns:</span>
 <span class="sd">        SCORE_SOURCE, GENOME_ASSEMBLY, CHROMOSOME, POSITION,</span>
 <span class="sd">        REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE</span>
+<span class="sd">    gene_unique_variant_counts_df : DataFrame, optional</span>
+<span class="sd">        Count of unique variants per gene across all vepswith columns:</span>
+<span class="sd">        GENE_SYMBOL, NUM_UNIQUE_VARIANTS</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="VEAnalysisResult.num_variants_included">
@@ -356,6 +379,22 @@
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.mwu_metrics">[docs]</a>
     <span class="n">mwu_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
 
+<div class="viewcode-block" id="VEAnalysisResult.gene_general_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.gene_general_metrics">[docs]</a>
+    <span class="n">gene_general_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.gene_roc_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.gene_roc_metrics">[docs]</a>
+    <span class="n">gene_roc_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.gene_pr_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.gene_pr_metrics">[docs]</a>
+    <span class="n">gene_pr_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.gene_mwu_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.gene_mwu_metrics">[docs]</a>
+    <span class="n">gene_mwu_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
 <div class="viewcode-block" id="VEAnalysisResult.roc_curve_coordinates">
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.roc_curve_coordinates">[docs]</a>
     <span class="n">roc_curve_coordinates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
@@ -364,9 +403,21 @@
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.pr_curve_coordinates">[docs]</a>
     <span class="n">pr_curve_coordinates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
 
+<div class="viewcode-block" id="VEAnalysisResult.gene_roc_curve_coordinates">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.gene_roc_curve_coordinates">[docs]</a>
+    <span class="n">gene_roc_curve_coordinates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.gene_pr_curve_coordinates">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.gene_pr_curve_coordinates">[docs]</a>
+    <span class="n">gene_pr_curve_coordinates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
 <div class="viewcode-block" id="VEAnalysisResult.variants_included">
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.variants_included">[docs]</a>
     <span class="n">variants_included</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisResult.gene_unique_variant_counts_df">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisResult.gene_unique_variant_counts_df">[docs]</a>
+    <span class="n">gene_unique_variant_counts_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
 </div>
 
 
@@ -422,8 +473,6 @@
 <a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.PkViolations.task_violations">[docs]</a>
     <span class="n">task_violations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TaskPkViolations</span><span class="p">]</span></div>
 </div>
-
-
 
 </pre></div>
 

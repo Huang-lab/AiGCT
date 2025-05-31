@@ -91,7 +91,9 @@
     <span class="n">unique_file_name</span><span class="p">,</span>
     <span class="n">create_folder</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">barchart</span><span class="p">,</span> <span class="n">create_feature_palette</span><span class="p">,</span> <span class="n">get_colors</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">barchart</span><span class="p">,</span> <span class="n">create_feature_palette</span><span class="p">,</span>
+                        <span class="n">get_colors</span><span class="p">,</span> <span class="n">heatmap</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.report_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneMetricSorter</span>
 
 
 <div class="viewcode-block" id="VEAnalysisPlotter">
@@ -118,19 +120,24 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_roc_curves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aucs</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">user_vep_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                          <span class="n">curve_coords</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                          <span class="n">batch_no</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_batches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">num_top_labelled_veps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                          <span class="n">ves_color_palette</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                          <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">roc_title</span> <span class="o">+</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">batch_no</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">num_batches</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">num_batches</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+        <span class="n">plot_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ve_auc</span> <span class="ow">in</span> <span class="n">aucs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;ROC_AUC&#39;</span><span class="p">]):</span>
                 <span class="k">continue</span>
             <span class="n">ve_curve_coords</span> <span class="o">=</span> <span class="n">curve_coords</span><span class="p">[</span><span class="n">curve_coords</span><span class="p">[</span><span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">]</span> <span class="o">==</span>
                                            <span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
                 <span class="s1">&#39;THRESHOLD&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">]</span> <span class="o">+</span> \
-                <span class="s1">&#39; (AUC=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;ROC_AUC&#39;</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+            <span class="k">if</span> <span class="n">num_top_labelled_veps</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">plot_count</span> <span class="o">&lt;</span> <span class="n">num_top_labelled_veps</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">]</span> <span class="o">+</span> \
+                    <span class="s1">&#39; (AUC=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;ROC_AUC&#39;</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                 <span class="n">ve_curve_coords</span><span class="p">[</span><span class="s1">&#39;FALSE_POSITIVE_RATE&#39;</span><span class="p">],</span>
                 <span class="n">ve_curve_coords</span><span class="p">[</span><span class="s1">&#39;TRUE_POSITIVE_RATE&#39;</span><span class="p">],</span>
@@ -138,6 +145,7 @@
                 <span class="n">color</span><span class="o">=</span><span class="n">ves_color_palette</span><span class="p">[</span><span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">]],</span>
                 <span class="n">lw</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">line_width</span><span class="p">,</span>
                 <span class="n">linestyle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">line_style</span><span class="p">)</span>
+            <span class="n">plot_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;False Positive Rate&#39;</span><span class="p">,</span>
                    <span class="n">fontsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">x_axis_font_size</span><span class="p">)</span>
@@ -149,14 +157,15 @@
                             <span class="n">fontsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">legend_font_size</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">legend</span><span class="o">.</span><span class="n">get_lines</span><span class="p">():</span>
             <span class="n">line</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">legend_line_width</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">file_dpi</span><span class="p">,</span>
-                        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
-                        <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.svg&quot;</span><span class="p">),</span>
-                        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">,</span>
-                        <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">return</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">file_dpi</span><span class="p">,</span>
+                    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.svg&quot;</span><span class="p">),</span>
+                    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="VEAnalysisPlotter._plot_pr_curves">
@@ -164,16 +173,21 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_pr_curves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aucs</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">user_vep_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                         <span class="n">curve_coords</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
                         <span class="n">batch_no</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_batches</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">num_top_labelled_veps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                         <span class="n">ves_color_palette</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">pr_title</span> <span class="o">+</span> \
             <span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">batch_no</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">num_batches</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">if</span> <span class="n">num_batches</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+        <span class="n">plot_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ve_auc</span> <span class="ow">in</span> <span class="n">aucs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
             <span class="n">ve_curve_coords</span> <span class="o">=</span> <span class="n">curve_coords</span><span class="p">[</span><span class="n">curve_coords</span><span class="p">[</span><span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">]</span> <span class="o">==</span>
                                            <span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
                 <span class="s1">&#39;THRESHOLD&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">]</span> <span class="o">+</span> \
-                <span class="s1">&#39; (AUC=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;PR_AUC&#39;</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+            <span class="k">if</span> <span class="n">num_top_labelled_veps</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">plot_count</span> <span class="o">&lt;</span> <span class="n">num_top_labelled_veps</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">]</span> <span class="o">+</span> \
+                    <span class="s1">&#39; (AUC=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;PR_AUC&#39;</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                 <span class="n">ve_curve_coords</span><span class="p">[</span><span class="s1">&#39;RECALL&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:],</span>
                 <span class="n">ve_curve_coords</span><span class="p">[</span><span class="s1">&#39;PRECISION&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">:],</span>
@@ -181,6 +195,7 @@
                 <span class="n">color</span><span class="o">=</span><span class="n">ves_color_palette</span><span class="p">[</span><span class="n">ve_auc</span><span class="p">[</span><span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">]],</span>
                 <span class="n">lw</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">line_width</span><span class="p">,</span>
                 <span class="n">linestyle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">line_style</span><span class="p">)</span>
+            <span class="n">plot_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Recall&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">x_axis_font_size</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Precision&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">y_axis_font_size</span><span class="p">)</span>
@@ -191,14 +206,15 @@
                             <span class="n">fontsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">legend_font_size</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">legend</span><span class="o">.</span><span class="n">get_lines</span><span class="p">():</span>
             <span class="n">line</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">legend_line_width</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">file_dpi</span><span class="p">,</span>
-                        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
-                        <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.svg&quot;</span><span class="p">),</span>
-                        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">,</span>
-                        <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">return</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">file_dpi</span><span class="p">,</span>
+                    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="s2">&quot;.svg&quot;</span><span class="p">),</span>
+                    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;svg&#39;</span><span class="p">,</span>
+                    <span class="n">bbox_inches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">bbox_inches</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="VEAnalysisPlotter._display_mwu_table">
@@ -209,12 +225,16 @@
             <span class="n">results</span><span class="o">.</span><span class="n">mwu_metrics</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;_y&quot;</span><span class="p">),</span>
             <span class="n">on</span><span class="o">=</span><span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">)[[</span>
                 <span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_VARIANTS&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_POSITIVE_LABELS&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;NUM_NEGATIVE_LABELS&#39;</span><span class="p">,</span> <span class="s1">&#39;NEG_LOG10_MWU_PVAL&#39;</span><span class="p">,</span> <span class="s1">&#39;EXCEPTION&#39;</span><span class="p">]]</span>
+                <span class="s1">&#39;NUM_NEGATIVE_LABELS&#39;</span><span class="p">,</span> <span class="s1">&#39;NEG_LOG10_MWU_PVAL&#39;</span><span class="p">]]</span>
         <span class="n">table_output</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;NEG_LOG10_MWU_PVAL&#39;</span><span class="p">,</span>
                                                 <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">style</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span><span class="o">.</span><span class="n">relabel_index</span><span class="p">(</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span>
+            <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NUM_VARIANTS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;NUM_POSITIVE_LABELS&quot;</span><span class="p">,</span> <span class="s2">&quot;NUM_NEGATIVE_LABELS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;NEG_LOG10_MWU_PVAL&quot;</span><span class="p">],</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;text-align&quot;</span><span class="p">:</span> <span class="s2">&quot;right&quot;</span><span class="p">})</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span><span class="o">.</span><span class="n">relabel_index</span><span class="p">(</span>
              <span class="p">[</span><span class="s1">&#39;VEP&#39;</span><span class="p">,</span> <span class="s2">&quot;Variant Total&quot;</span><span class="p">,</span> <span class="s2">&quot;Positive Labels&quot;</span><span class="p">,</span> <span class="s2">&quot;Negative Labels&quot;</span><span class="p">,</span>
-              <span class="s2">&quot;MWU -log10(pval)&quot;</span><span class="p">,</span> <span class="s2">&quot;Exception&quot;</span><span class="p">],</span>
+              <span class="s2">&quot;MWU -log10(pval)&quot;</span><span class="p">],</span>
              <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s2">&quot;Mann-Whitney U -log10(p value)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
             <span class="n">style</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
@@ -232,10 +252,18 @@
                 <span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_VARIANTS&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_POSITIVE_LABELS&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;NUM_NEGATIVE_LABELS&#39;</span><span class="p">,</span> <span class="s1">&#39;PR_AUC&#39;</span><span class="p">]]</span>
         <span class="n">table_output</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;PR_AUC&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">style</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span><span class="o">.</span><span class="n">relabel_index</span><span class="p">(</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span>
+            <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NUM_VARIANTS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;NUM_POSITIVE_LABELS&quot;</span><span class="p">,</span> <span class="s2">&quot;NUM_NEGATIVE_LABELS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;PR_AUC&quot;</span><span class="p">],</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;text-align&quot;</span><span class="p">:</span> <span class="s2">&quot;right&quot;</span><span class="p">})</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span><span class="o">.</span><span class="n">relabel_index</span><span class="p">(</span>
              <span class="p">[</span><span class="s1">&#39;VEP&#39;</span><span class="p">,</span> <span class="s2">&quot;Variant Total&quot;</span><span class="p">,</span> <span class="s2">&quot;Positive Labels&quot;</span><span class="p">,</span> <span class="s2">&quot;Negative Labels&quot;</span><span class="p">,</span>
               <span class="s2">&quot;PR AUC&quot;</span><span class="p">],</span>
              <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s2">&quot;Precision/Recall&quot;</span><span class="p">)</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span>
+            <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NUM_VARIANTS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;NUM_POSITIVE_LABELS&quot;</span><span class="p">,</span> <span class="s2">&quot;NUM_NEGATIVE_LABELS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;PR_AUC&quot;</span><span class="p">],</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;text-align&quot;</span><span class="p">:</span> <span class="s2">&quot;right&quot;</span><span class="p">})</span>
         <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
             <span class="n">style</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -252,7 +280,11 @@
                 <span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_VARIANTS&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_POSITIVE_LABELS&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;NUM_NEGATIVE_LABELS&#39;</span><span class="p">,</span> <span class="s1">&#39;ROC_AUC&#39;</span><span class="p">]]</span>
         <span class="n">table_output</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;ROC_AUC&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">style</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span><span class="o">.</span><span class="n">relabel_index</span><span class="p">(</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">table_output</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span>
+            <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NUM_VARIANTS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;NUM_POSITIVE_LABELS&quot;</span><span class="p">,</span> <span class="s2">&quot;NUM_NEGATIVE_LABELS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;ROC_AUC&quot;</span><span class="p">],</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;text-align&quot;</span><span class="p">:</span> <span class="s2">&quot;right&quot;</span><span class="p">})</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span><span class="o">.</span><span class="n">relabel_index</span><span class="p">(</span>
              <span class="p">[</span><span class="s1">&#39;VEP&#39;</span><span class="p">,</span> <span class="s2">&quot;Variant Total&quot;</span><span class="p">,</span> <span class="s2">&quot;Positive Labels&quot;</span><span class="p">,</span> <span class="s2">&quot;Negative Labels&quot;</span><span class="p">,</span>
               <span class="s2">&quot;ROC AUC&quot;</span><span class="p">],</span>
              <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s2">&quot;ROC&quot;</span><span class="p">)</span>
@@ -277,7 +309,8 @@
                  <span class="n">title_fontsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">title_font_size</span><span class="p">,</span>
                  <span class="n">y_label_fontsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">y_label_font_size</span><span class="p">,</span>
                  <span class="n">x_label_fontsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">x_label_font_size</span><span class="p">,</span>
-                 <span class="n">label_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">,</span>
+                 <span class="n">y_tick_label_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">y_tick_label_size</span><span class="p">,</span>
+                 <span class="n">x_tick_label_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">x_tick_label_size</span><span class="p">,</span>
                  <span class="n">xtick_rotation</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">xtick_rotation</span><span class="p">,</span>
                  <span class="n">xtick_rotation_mode</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">xtick_rotation_mode</span><span class="p">,</span>
                  <span class="n">file_dpi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">file_dpi</span><span class="p">,</span>
@@ -287,6 +320,7 @@
 <div class="viewcode-block" id="VEAnalysisPlotter.plot_pr_results">
 <a class="viewcode-back" href="../../autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter.plot_pr_results">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_pr_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">VEAnalysisResult</span><span class="p">,</span>
+                        <span class="n">num_top_labelled_veps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                         <span class="n">ves_color_palette</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                         <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">num_curves_per_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">num_curves_per_plot</span>
@@ -305,6 +339,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_plot_pr_curves</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">results</span><span class="o">.</span><span class="n">user_vep_name</span><span class="p">,</span>
                                  <span class="n">results</span><span class="o">.</span><span class="n">pr_curve_coordinates</span><span class="p">,</span>
                                  <span class="n">batch_no</span><span class="p">,</span> <span class="n">num_batches</span><span class="p">,</span>
+                                 <span class="n">num_top_labelled_veps</span><span class="p">,</span>
                                  <span class="n">ves_color_palette</span><span class="p">,</span> <span class="n">batch_file_name</span><span class="p">)</span>
         <span class="n">pr_table_file_name</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;pr_table&quot;</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span><span class="p">)</span>
@@ -314,6 +349,7 @@
 <div class="viewcode-block" id="VEAnalysisPlotter.plot_roc_results">
 <a class="viewcode-back" href="../../autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter.plot_roc_results">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_roc_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">VEAnalysisResult</span><span class="p">,</span>
+                         <span class="n">num_top_labelled_veps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                          <span class="n">ves_color_palette</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
                          <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">num_curves_per_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roc_pr_config</span><span class="o">.</span><span class="n">num_curves_per_plot</span>
@@ -332,6 +368,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_plot_roc_curves</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">results</span><span class="o">.</span><span class="n">user_vep_name</span><span class="p">,</span>
                                   <span class="n">results</span><span class="o">.</span><span class="n">roc_curve_coordinates</span><span class="p">,</span>
                                   <span class="n">batch_no</span><span class="p">,</span> <span class="n">num_batches</span><span class="p">,</span>
+                                  <span class="n">num_top_labelled_veps</span><span class="p">,</span>
                                   <span class="n">ves_color_palette</span><span class="p">,</span> <span class="n">batch_file_name</span><span class="p">)</span>
         <span class="n">roc_table_file_name</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;roc_table&quot;</span> <span class="o">+</span> <span class="s2">&quot;.html&quot;</span><span class="p">)</span>
@@ -368,6 +405,8 @@
 <a class="viewcode-back" href="../../autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter.plot_results">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">VEAnalysisResult</span><span class="p">,</span>
                      <span class="n">metrics</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;roc&quot;</span><span class="p">,</span> <span class="s2">&quot;pr&quot;</span><span class="p">,</span> <span class="s2">&quot;mwu&quot;</span><span class="p">],</span>
+                     <span class="n">num_top_labelled_veps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">num_top_genes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the results of an analysis either to the screen or to</span>
@@ -381,6 +420,14 @@
 <span class="sd">            Specifies which metrics to plot. Can be a string</span>
 <span class="sd">            indicating a single metric or a list of strings for</span>
 <span class="sd">            multiple metrics. The metrics are: roc, pr, mwu.</span>
+<span class="sd">        num_top_labelled_veps : int</span>
+<span class="sd">            If not None, only this many of the top performing veps will be</span>
+<span class="sd">            labelled in the auc plot legends. This is useful when there are</span>
+<span class="sd">            many veps and the legend becomes too cluttered.</span>
+<span class="sd">        num_top_genes : int</span>
+<span class="sd">            If compute_gene_metrics was set to True in call to compute_metrics,</span>
+<span class="sd">            then only include this many top genes in the plot. The top gene</span>
+<span class="sd">            are the ones for which the most variants were observed.</span>
 <span class="sd">        dir : str, optional</span>
 <span class="sd">            Directory to place the plot files. The files will</span>
 <span class="sd">            be placed in a subdirectory off of this directory</span>
@@ -396,12 +443,143 @@
         <span class="n">ves_color_palette</span> <span class="o">=</span> <span class="n">create_feature_palette</span><span class="p">(</span>
             <span class="n">results</span><span class="o">.</span><span class="n">general_metrics</span><span class="p">[</span><span class="s2">&quot;SOURCE_NAME&quot;</span><span class="p">])</span>
         <span class="k">if</span> <span class="s2">&quot;roc&quot;</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="ow">and</span> <span class="n">results</span><span class="o">.</span><span class="n">roc_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_roc_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">ves_color_palette</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_roc_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">num_top_labelled_veps</span><span class="p">,</span>
+                                  <span class="n">ves_color_palette</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;pr&quot;</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="ow">and</span> <span class="n">results</span><span class="o">.</span><span class="n">pr_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_pr_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">ves_color_palette</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_pr_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">num_top_labelled_veps</span><span class="p">,</span>
+                                 <span class="n">ves_color_palette</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;mwu&quot;</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="ow">and</span> <span class="n">results</span><span class="o">.</span><span class="n">mwu_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_mwu_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">ves_color_palette</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_mwu_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">ves_color_palette</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">results</span><span class="o">.</span><span class="n">gene_general_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_gene_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">num_top_genes</span><span class="p">,</span> <span class="nb">dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalysisPlotter.plot_gene_results">
+<a class="viewcode-back" href="../../autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter.plot_gene_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_gene_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">VEAnalysisResult</span><span class="p">,</span>
+                          <span class="n">metrics</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                          <span class="n">num_top_genes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot gene-level results of an analysis.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        results : VEAnalysisResult</span>
+<span class="sd">            Analysis result object containing gene-level metrics</span>
+<span class="sd">        metrics : list[str]</span>
+<span class="sd">            List of metrics to plot (roc, pr, mwu)</span>
+<span class="sd">        num_top_genes : int</span>
+<span class="sd">            Number of top genes to plot based on the number of variants</span>
+<span class="sd">            in each gene included in the analysis.</span>
+<span class="sd">        dir : str, optional</span>
+<span class="sd">            Directory to place the plot files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ves_color_palette</span> <span class="o">=</span> <span class="n">create_feature_palette</span><span class="p">(</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">gene_general_metrics</span><span class="p">[</span><span class="s2">&quot;SOURCE_NAME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="n">gene_metric_sorter</span> <span class="o">=</span> <span class="n">GeneMetricSorter</span><span class="p">(</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">gene_unique_variant_counts_df</span><span class="p">,</span> <span class="n">num_top_genes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;roc&quot;</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="ow">and</span> <span class="n">results</span><span class="o">.</span><span class="n">gene_roc_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_gene_level_results</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">gene_general_metrics</span><span class="p">,</span>
+                                         <span class="n">results</span><span class="o">.</span><span class="n">gene_roc_metrics</span><span class="p">,</span>
+                                         <span class="s2">&quot;ROC_AUC&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;ROC AUC&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;Gene-Level ROC&quot;</span><span class="p">,</span>
+                                         <span class="n">gene_metric_sorter</span><span class="p">,</span>
+                                         <span class="n">ves_color_palette</span><span class="p">,</span>
+                                         <span class="nb">dir</span><span class="p">,</span>
+                                         <span class="s2">&quot;gene_roc_heatmap.png&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;gene_roc_table.html&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;pr&quot;</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="ow">and</span> <span class="n">results</span><span class="o">.</span><span class="n">gene_pr_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_gene_level_results</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">gene_general_metrics</span><span class="p">,</span>
+                                         <span class="n">results</span><span class="o">.</span><span class="n">gene_pr_metrics</span><span class="p">,</span>
+                                         <span class="s2">&quot;PR_AUC&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;PR AUC&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;Gene-Level Precision/Recall&quot;</span><span class="p">,</span>
+                                         <span class="n">gene_metric_sorter</span><span class="p">,</span>
+                                         <span class="n">ves_color_palette</span><span class="p">,</span>
+                                         <span class="nb">dir</span><span class="p">,</span>
+                                         <span class="s2">&quot;gene_pr_heatmap.png&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;gene_pr_table.html&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;mwu&quot;</span> <span class="ow">in</span> <span class="n">metrics</span> <span class="ow">and</span> <span class="n">results</span><span class="o">.</span><span class="n">gene_mwu_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_gene_level_results</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">gene_general_metrics</span><span class="p">,</span>
+                                         <span class="n">results</span><span class="o">.</span><span class="n">gene_mwu_metrics</span><span class="p">,</span>
+                                         <span class="s2">&quot;NEG_LOG10_MWU_PVAL&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;MWU -log10(pval)&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;Gene-Level Mann-Whitney U&quot;</span><span class="p">,</span>
+                                         <span class="n">gene_metric_sorter</span><span class="p">,</span>
+                                         <span class="n">ves_color_palette</span><span class="p">,</span>
+                                         <span class="nb">dir</span><span class="p">,</span>
+                                         <span class="s2">&quot;gene_mwu_heatmap.png&quot;</span><span class="p">,</span>
+                                         <span class="s2">&quot;gene_mwu_table.html&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalysisPlotter.plot_gene_level_results">
+<a class="viewcode-back" href="../../autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter.plot_gene_level_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_gene_level_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gene_general_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                <span class="n">gene_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                <span class="n">metric_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">metric_display_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                <span class="n">gene_metric_sorter</span><span class="p">:</span> <span class="n">GeneMetricSorter</span><span class="p">,</span>
+                                <span class="n">ves_color_palette</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                                <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                <span class="n">figure_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                <span class="n">table_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">gene_metrics</span> <span class="o">=</span> <span class="n">gene_general_metrics</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="n">gene_metrics</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;_y&quot;</span><span class="p">),</span>
+            <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SCORE_SOURCE&#39;</span><span class="p">,</span> <span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">])[[</span>
+                <span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_VARIANTS&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;NUM_POSITIVE_LABELS&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;NUM_NEGATIVE_LABELS&#39;</span><span class="p">,</span> <span class="n">metric_column</span><span class="p">]]</span>
+        <span class="n">gene_metrics</span> <span class="o">=</span> <span class="n">gene_metric_sorter</span><span class="o">.</span><span class="n">sort_gene_metrics</span><span class="p">(</span>
+            <span class="n">gene_metrics</span><span class="p">)</span>
+
+        <span class="n">heatmap_file_name</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">dir</span><span class="p">,</span> <span class="n">figure_file_name</span><span class="p">)</span>
+
+        <span class="n">gene_metrics_heatmap</span> <span class="o">=</span> <span class="n">gene_metrics</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">metric_column</span><span class="si">}</span><span class="s1">.notna()&#39;</span><span class="p">)</span>
+        <span class="n">heatmap</span><span class="p">(</span><span class="n">gene_metrics_heatmap</span><span class="p">,</span> <span class="s1">&#39;SOURCE_NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;GENE_SYMBOL&#39;</span><span class="p">,</span>
+                <span class="n">metric_column</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;Gene&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;VEP&#39;</span><span class="p">,</span>
+                <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">metric_display_name</span><span class="p">,</span>
+                          <span class="s1">&#39;shrink&#39;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">},</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">heatmap_file_name</span><span class="p">)</span>
+
+        <span class="c1"># Create gene ROC table</span>
+        <span class="n">table_file_name</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">dir</span><span class="p">,</span> <span class="n">table_file_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_display_gene_metric_table</span><span class="p">(</span><span class="n">gene_metrics</span><span class="p">,</span> <span class="n">metric_column</span><span class="p">,</span>
+                                        <span class="n">metric_display_name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span>
+                                        <span class="n">table_file_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalysisPlotter._display_gene_metric_table">
+<a class="viewcode-back" href="../../autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter._display_gene_metric_table">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_display_gene_metric_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                                   <span class="n">metric_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">metric_display_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">metrics_df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">set_properties</span><span class="p">(</span>
+            <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;NUM_VARIANTS&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;NUM_POSITIVE_LABELS&quot;</span><span class="p">,</span> <span class="s2">&quot;NUM_NEGATIVE_LABELS&quot;</span><span class="p">,</span>
+                    <span class="n">metric_column</span><span class="p">],</span> <span class="o">**</span><span class="p">{</span><span class="s2">&quot;text-align&quot;</span><span class="p">:</span> <span class="s2">&quot;right&quot;</span><span class="p">})</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span><span class="o">.</span><span class="n">relabel_index</span><span class="p">(</span>
+             <span class="p">[</span><span class="s1">&#39;VEP&#39;</span><span class="p">,</span> <span class="s2">&quot;Gene&quot;</span><span class="p">,</span> <span class="s2">&quot;Variant Total&quot;</span><span class="p">,</span> <span class="s2">&quot;Positive Labels&quot;</span><span class="p">,</span> <span class="s2">&quot;Negative Labels&quot;</span><span class="p">,</span>
+              <span class="n">metric_display_name</span><span class="p">],</span>
+             <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="n">style</span><span class="o">.</span><span class="n">to_html</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">display</span><span class="p">(</span><span class="n">style</span><span class="p">)</span></div>
 </div>
+
+
+
 
 
 </pre></div>

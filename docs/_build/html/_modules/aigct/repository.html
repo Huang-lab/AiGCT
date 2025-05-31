@@ -83,14 +83,20 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dask.dataframe</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterizedSingleton</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.pd_util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">filter_dataframe_by_list</span><span class="p">,</span>
-    <span class="n">build_dataframe_where_clause</span>
+    <span class="n">build_dataframe_where_clause</span><span class="p">,</span>
+    <span class="n">merge_by_chunks</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">VariantFilter</span><span class="p">,</span> <span class="n">VEQueryCriteria</span>
+
+<div class="viewcode-block" id="MERGE_CHUNK_SIZE">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.MERGE_CHUNK_SIZE">[docs]</a>
+<span class="n">MERGE_CHUNK_SIZE</span> <span class="o">=</span> <span class="mi">500000</span></div>
 
 
 <div class="viewcode-block" id="TASK_SUBFOLDER">
@@ -287,6 +293,14 @@
 
 
 
+<div class="viewcode-block" id="read_repo_csv">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.read_repo_csv">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_repo_csv</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file</span><span class="p">,</span>
+                       <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">})</span></div>
+
+
+
 <div class="viewcode-block" id="RepoSessionContext">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RepoSessionContext</span><span class="p">:</span>
@@ -354,11 +368,10 @@
         <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
             <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_repo_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
                                      <span class="n">task_code</span><span class="p">,</span>
-                                     <span class="n">VARIANT_EFFECT_LABEL_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">),</span>
-                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+                                     <span class="n">VARIANT_EFFECT_LABEL_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
 </div>
 
@@ -390,10 +403,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span> <span class="o">=</span> <span class="n">read_repo_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">full_file_name</span><span class="p">),</span>
-                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">full_file_name</span><span class="p">))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_frame</span></div>
 </div>
 
@@ -412,11 +424,13 @@
 
 <div class="viewcode-block" id="TaskBasedDataCache._init_once">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.TaskBasedDataCache._init_once">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table_def</span><span class="p">:</span> <span class="n">TableDef</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table_def</span><span class="p">:</span> <span class="n">TableDef</span><span class="p">,</span>
+                   <span class="n">disable_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span> <span class="o">=</span> <span class="n">data_folder_root</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span> <span class="o">=</span> <span class="n">table_def</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_disable_cache</span> <span class="o">=</span> <span class="n">disable_cache</span></div>
 
 
 <div class="viewcode-block" id="TaskBasedDataCache.get_data_frame">
@@ -425,11 +439,13 @@
         <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
             <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">task_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="n">data_frame</span> <span class="o">=</span> <span class="n">read_repo_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
                                      <span class="n">task_code</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">file_name</span><span class="p">),</span>
-                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">_table_def</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_disable_cache</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">data_frame</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_frame</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
 </div>
 
@@ -465,8 +481,9 @@
 
 <div class="viewcode-block" id="VariantEffectScoreCache._init_once">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreCache._init_once">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_once</span><span class="p">(</span><span class="n">data_folder_root</span><span class="p">,</span> <span class="n">VARIANT_EFFECT_SCORE_TABLE_DEF</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">disable_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_once</span><span class="p">(</span><span class="n">data_folder_root</span><span class="p">,</span> <span class="n">VARIANT_EFFECT_SCORE_TABLE_DEF</span><span class="p">,</span>
+                           <span class="n">disable_cache</span><span class="p">)</span></div>
 </div>
 
 
@@ -540,17 +557,16 @@
                     <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span><span class="p">,</span> <span class="n">DATA_FOLDER</span><span class="p">,</span>
                                           <span class="n">task_code</span><span class="p">)</span>
                     <span class="n">cache_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_repo_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span>
                                      <span class="n">VARIANT_FILTER_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
-                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_gene_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_gene_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_repo_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span>
                                      <span class="n">VARIANT_FILTER_GENE_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
-                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_variant_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="n">cache_dict</span><span class="p">[</span><span class="s2">&quot;filter_variant_df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_repo_csv</span><span class="p">(</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                             <span class="n">folder</span><span class="p">,</span>
-                            <span class="n">VARIANT_FILTER_VARIANT_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">),</span>
-                        <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;CHROMOSOME&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+                            <span class="n">VARIANT_FILTER_VARIANT_TABLE_DEF</span><span class="o">.</span><span class="n">file_name</span><span class="p">))</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">cache_dict</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">task_code</span><span class="p">]</span></div>
@@ -650,6 +666,20 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_genes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_variants</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">VariantFilter</span><span class="p">(</span><span class="nb">filter</span><span class="p">,</span> <span class="n">filter_genes</span><span class="p">,</span> <span class="n">filter_variants</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantFilterRepository.get_by_task_filter_names">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantFilterRepository.get_by_task_filter_names">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_by_task_filter_names</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filter_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span>
+                <span class="n">VariantFilter</span><span class="p">]:</span>
+        <span class="n">variant_filters</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">filter_name</span> <span class="ow">in</span> <span class="n">filter_names</span><span class="p">:</span>
+            <span class="n">variant_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_by_task_filter_name</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span> <span class="n">filter_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">variant_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid filter name: </span><span class="si">{</span><span class="n">filter_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">variant_filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">variant_filter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">variant_filters</span></div>
 </div>
 
 
@@ -671,6 +701,20 @@
                                             <span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>
                                             <span class="nb">filter</span><span class="p">[</span><span class="s2">&quot;INCLUDE_VARIANTS&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">query_df</span></div>
+
+
+
+<div class="viewcode-block" id="query_by_filters">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.query_by_filters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">query_by_filters</span><span class="p">(</span><span class="n">query_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">VariantFilter</span><span class="p">]</span>
+                     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="nb">filter</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">query_by_filter</span><span class="p">(</span><span class="n">query_df</span><span class="p">,</span> <span class="nb">filter</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
+                                 <span class="nb">filter</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">,</span>
+                                 <span class="nb">filter</span><span class="o">.</span><span class="n">filter_variants</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span></div>
 
 
 
@@ -722,11 +766,16 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectLabelRepository</span><span class="p">:</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">,</span>
+                 <span class="n">variant_task_repo</span><span class="p">:</span> <span class="n">VariantTaskRepository</span><span class="p">,</span>
                  <span class="n">variant_repo</span><span class="p">:</span> <span class="n">VariantRepository</span><span class="p">,</span>
                  <span class="n">filter_repo</span><span class="p">:</span> <span class="n">VariantFilterRepository</span><span class="p">):</span>
 <div class="viewcode-block" id="VariantEffectLabelRepository._cache">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository._cache">[docs]</a>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantEffectLabelCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariantEffectLabelRepository._task_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository._task_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_repo</span> <span class="o">=</span> <span class="n">variant_task_repo</span></div>
 
 <div class="viewcode-block" id="VariantEffectLabelRepository._filter_repo">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository._filter_repo">[docs]</a>
@@ -745,6 +794,19 @@
             <span class="n">VEQueryCriteria</span><span class="p">(</span><span class="n">variant_ids</span><span class="o">=</span><span class="n">label_df</span><span class="p">[</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">label_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
                               <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectLabelRepository.get_all_for_all_tasks">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository.get_all_for_all_tasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_for_all_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">tasks_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_repo</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
+        <span class="n">labels_dfs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tasks_df</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+            <span class="n">labels_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_by_task</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">CODE</span><span class="p">)</span>
+            <span class="n">labels_df</span><span class="p">[</span><span class="s2">&quot;TASK_CODE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">CODE</span>
+            <span class="n">labels_df</span><span class="p">[</span><span class="s2">&quot;TASK_NAME&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">NAME</span>
+            <span class="n">labels_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">labels_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">labels_dfs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="VariantEffectLabelRepository.get">
@@ -766,15 +828,14 @@
             <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
         <span class="n">merge_df</span> <span class="o">=</span> <span class="n">label_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
                                   <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">qry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">filter_dfs</span> <span class="o">=</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span><span class="o">.</span><span class="n">get_by_task_filter_name</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span>
-                                                          <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">filter_dfs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid filter name: &quot;</span> <span class="o">+</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
-            <span class="n">merge_df</span> <span class="o">=</span> <span class="n">query_by_filter</span><span class="p">(</span><span class="n">merge_df</span><span class="p">,</span> <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
-                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">,</span>
-                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_variants</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">filter_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filter_names</span> <span class="o">=</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span><span class="o">.</span><span class="n">get_by_task_filter_names</span><span class="p">(</span>
+                <span class="n">task_code</span><span class="p">,</span> <span class="n">filter_names</span><span class="p">)</span>
+            <span class="n">merge_df</span> <span class="o">=</span> <span class="n">query_by_filters</span><span class="p">(</span><span class="n">merge_df</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">merge_df</span></div>
 </div>
 
@@ -785,11 +846,17 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectScoreRepository</span><span class="p">:</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">,</span>
+                 <span class="n">task_repo</span><span class="p">:</span> <span class="n">VariantTaskRepository</span><span class="p">,</span>
                  <span class="n">variant_repo</span><span class="p">:</span> <span class="n">VariantRepository</span><span class="p">,</span>
                  <span class="n">filter_repo</span><span class="p">:</span> <span class="n">VariantFilterRepository</span><span class="p">):</span>
 <div class="viewcode-block" id="VariantEffectScoreRepository._cache">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository._cache">[docs]</a>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantEffectScoreCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="n">VariantEffectScoreCache</span><span class="p">(</span><span class="n">session_context</span><span class="o">.</span><span class="n">data_folder_root</span><span class="p">,</span>
+                                              <span class="n">disable_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariantEffectScoreRepository._task_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository._task_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_repo</span> <span class="o">=</span> <span class="n">task_repo</span></div>
 
 <div class="viewcode-block" id="VariantEffectScoreRepository._filter_repo">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository._filter_repo">[docs]</a>
@@ -808,8 +875,17 @@
             <span class="n">VARIANT_PK_COLUMNS</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(),</span>
             <span class="n">include_variant_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query_criteria</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">score_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
-                              <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">merge_by_chunks</span><span class="p">(</span><span class="n">score_df</span><span class="p">,</span> <span class="n">variant_df</span><span class="p">,</span>
+                               <span class="n">chunk_size</span><span class="o">=</span><span class="n">MERGE_CHUNK_SIZE</span><span class="p">,</span>
+                               <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">,</span>
+                               <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectScoreRepository.get_all_by_task_slim">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository.get_all_by_task_slim">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_by_task_slim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">score_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">get_data_frame</span><span class="p">(</span><span class="n">task_code</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">score_df</span></div>
 
 
 <div class="viewcode-block" id="VariantEffectScoreRepository.get">
@@ -835,18 +911,32 @@
                                                 <span class="n">qry</span><span class="o">.</span><span class="n">column_name_map</span><span class="p">,</span>
                                                 <span class="n">qry</span><span class="o">.</span><span class="n">include_variant_ids</span><span class="p">)</span>
         <span class="n">variant_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variant_repo</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qry</span><span class="p">)</span>
-        <span class="n">merge_df</span> <span class="o">=</span> <span class="n">score_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">variant_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
-                                  <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">filter_dfs</span> <span class="o">=</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span><span class="o">.</span><span class="n">get_by_task_filter_name</span><span class="p">(</span><span class="n">task_code</span><span class="p">,</span>
-                                                          <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">filter_dfs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid filter name: &quot;</span> <span class="o">+</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_name</span><span class="p">)</span>
-            <span class="n">merge_df</span> <span class="o">=</span> <span class="n">query_by_filter</span><span class="p">(</span><span class="n">merge_df</span><span class="p">,</span> <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
-                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_genes</span><span class="p">,</span>
-                                       <span class="n">filter_dfs</span><span class="o">.</span><span class="n">filter_variants</span><span class="p">)</span>
+        <span class="n">merge_df</span> <span class="o">=</span> <span class="n">merge_by_chunks</span><span class="p">(</span><span class="n">score_df</span><span class="p">,</span> <span class="n">variant_df</span><span class="p">,</span>
+                                   <span class="n">chunk_size</span><span class="o">=</span><span class="n">MERGE_CHUNK_SIZE</span><span class="p">,</span>
+                                   <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span>
+                                   <span class="n">on</span><span class="o">=</span><span class="n">VARIANT_PK_COLUMNS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">filter_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filter_names</span> <span class="o">=</span> <span class="n">qry</span><span class="o">.</span><span class="n">filter_names</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_repo</span><span class="o">.</span><span class="n">get_by_task_filter_names</span><span class="p">(</span>
+                <span class="n">task_code</span><span class="p">,</span> <span class="n">filter_names</span><span class="p">)</span>
+            <span class="n">merge_df</span> <span class="o">=</span> <span class="n">query_by_filters</span><span class="p">(</span><span class="n">merge_df</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">merge_df</span><span class="p">[</span><span class="n">VARIANT_EFFECT_SCORE_TABLE_DEF</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectScoreRepository.get_all_for_all_tasks">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository.get_all_for_all_tasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_for_all_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">tasks_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_repo</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
+        <span class="n">scores_dfs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tasks_df</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+            <span class="n">scores_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_by_task_slim</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">CODE</span><span class="p">)</span>
+            <span class="n">scores_df</span><span class="p">[</span><span class="s2">&quot;TASK_CODE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">CODE</span>
+            <span class="n">scores_df</span><span class="p">[</span><span class="s2">&quot;TASK_NAME&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">NAME</span>
+            <span class="n">scores_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scores_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">scores_dfs</span><span class="p">)</span></div>
 </div>
 
 

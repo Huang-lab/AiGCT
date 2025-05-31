@@ -76,7 +76,7 @@ Module Contents
       qry : VEQueryCriteria
           See description of VEQueryCriteria in model package.
           Specifies criteria that would limit the set of variants
-          to be retrieved. The filter_name attribute is ignored.
+          to be retrieved. The filter_names attribute is ignored.
 
       Returns
       -------
@@ -84,7 +84,7 @@ Module Contents
 
 
 
-   .. py:method:: get_variant_effect_sources(task_code: str) -> pandas.DataFrame
+   .. py:method:: get_variant_effect_sources(task_code: str = None) -> pandas.DataFrame
 
 
    .. py:method:: _compute_variant_counts(group) -> pandas.Series
@@ -96,7 +96,7 @@ Module Contents
 
       Get all variant effect sources for a task along with the
       number of variants, number of positive labels,
-      number of negative labels for each source.
+      number of negative labels, number of genes for each source.
 
       Parameters
       ----------
@@ -120,7 +120,22 @@ Module Contents
 
 
 
-   .. py:method:: get_variant_effect_scores(task_code: str, variant_effect_sources=None, include_variant_effect_sources: bool = None, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+   .. py:method:: get_all_variant_effect_source_stats() -> pandas.DataFrame
+
+
+   .. py:method:: get_all_task_variant_effect_label_stats() -> pandas.DataFrame
+
+      Returns one row per task with number of variants,
+      number of positive labels, number of negative labels,
+      number of genes.
+
+      Returns
+      -------
+      DataFrame
+
+
+
+   .. py:method:: get_variant_effect_scores(task_code: str, variant_effect_sources=None, include_variant_effect_sources: bool = True, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
 
       Fetches variant effect scores for variant effect sources.
 

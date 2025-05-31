@@ -29,10 +29,10 @@ Module Contents
    .. py:attribute:: _mwu_config
 
 
-   .. py:method:: _plot_roc_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, ves_color_palette: dict, file_name: str = None)
+   .. py:method:: _plot_roc_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, num_top_labelled_veps: int, ves_color_palette: dict, file_name: str = None)
 
 
-   .. py:method:: _plot_pr_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, ves_color_palette: dict, file_name: str = None)
+   .. py:method:: _plot_pr_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, num_top_labelled_veps: int, ves_color_palette: dict, file_name: str = None)
 
 
    .. py:method:: _display_mwu_table(results: aigct.model.VEAnalysisResult, file_name: str = None)
@@ -47,16 +47,16 @@ Module Contents
    .. py:method:: _plot_mwu_bar(mwus: pandas.DataFrame, batch_no: int, num_batches: int, file_name: str = None, palette=None)
 
 
-   .. py:method:: plot_pr_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
+   .. py:method:: plot_pr_results(results: aigct.model.VEAnalysisResult, num_top_labelled_veps: int, ves_color_palette: dict, dir: str = None)
 
 
-   .. py:method:: plot_roc_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
+   .. py:method:: plot_roc_results(results: aigct.model.VEAnalysisResult, num_top_labelled_veps: int, ves_color_palette: dict, dir: str = None)
 
 
    .. py:method:: plot_mwu_results(results: aigct.model.VEAnalysisResult, ves_color_palette: dict, dir: str = None)
 
 
-   .. py:method:: plot_results(results: aigct.model.VEAnalysisResult, metrics: str | list[str] = ['roc', 'pr', 'mwu'], dir: str = None)
+   .. py:method:: plot_results(results: aigct.model.VEAnalysisResult, metrics: str | list[str] = ['roc', 'pr', 'mwu'], num_top_labelled_veps: int = None, num_top_genes: int = None, dir: str = None)
 
       Plot the results of an analysis either to the screen or to
       files.
@@ -69,6 +69,14 @@ Module Contents
           Specifies which metrics to plot. Can be a string
           indicating a single metric or a list of strings for
           multiple metrics. The metrics are: roc, pr, mwu.
+      num_top_labelled_veps : int
+          If not None, only this many of the top performing veps will be
+          labelled in the auc plot legends. This is useful when there are
+          many veps and the legend becomes too cluttered.
+      num_top_genes : int
+          If compute_gene_metrics was set to True in call to compute_metrics,
+          then only include this many top genes in the plot. The top gene
+          are the ones for which the most variants were observed.
       dir : str, optional
           Directory to place the plot files. The files will
           be placed in a subdirectory off of this directory
@@ -76,5 +84,29 @@ Module Contents
           by a unique timestamp. If not specified will plot
           to screen.
 
+
+
+   .. py:method:: plot_gene_results(results: aigct.model.VEAnalysisResult, metrics: list[str], num_top_genes: int = None, dir: str = None)
+
+      Plot gene-level results of an analysis.
+
+      Parameters
+      ----------
+      results : VEAnalysisResult
+          Analysis result object containing gene-level metrics
+      metrics : list[str]
+          List of metrics to plot (roc, pr, mwu)
+      num_top_genes : int
+          Number of top genes to plot based on the number of variants
+          in each gene included in the analysis.
+      dir : str, optional
+          Directory to place the plot files
+
+
+
+   .. py:method:: plot_gene_level_results(gene_general_metrics: pandas.DataFrame, gene_metrics: pandas.DataFrame, metric_column: str, metric_display_name: str, title: str, gene_metric_sorter: aigct.report_util.GeneMetricSorter, ves_color_palette: dict, dir: str = None, figure_file_name: str = None, table_file_name: str = None)
+
+
+   .. py:method:: _display_gene_metric_table(metrics_df: pandas.DataFrame, metric_column: str, metric_display_name: str, title: str, file_name: str = None)
 
 

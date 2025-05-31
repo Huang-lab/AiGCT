@@ -19,6 +19,7 @@ Functions
 
    aigct.pd_util.filter_dataframe_by_list
    aigct.pd_util.build_dataframe_where_clause
+   aigct.pd_util.merge_by_chunks
 
 
 Module Contents
@@ -31,4 +32,6 @@ Module Contents
 .. py:function:: filter_dataframe_by_list(data_frame: pandas.DataFrame, filter_list: pandas.DataFrame | list[str] | str | pandas.Series, df_merge_columns: list[str] | str, filter_col_name_map: dict = None, in_list: bool = True) -> pandas.DataFrame
 
 .. py:function:: build_dataframe_where_clause(where_params: dict) -> str
+
+.. py:function:: merge_by_chunks(left_df: pandas.DataFrame, right_df: pandas.DataFrame, chunk_size: int = 500, **kwargs)
 

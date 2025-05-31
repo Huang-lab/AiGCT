@@ -1,0 +1,28 @@
+aigct.report_util
+=================
+
+.. py:module:: aigct.report_util
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   aigct.report_util.GeneMetricSorter
+
+
+Module Contents
+---------------
+
+.. py:class:: GeneMetricSorter(gene_variant_counts: pandas.DataFrame, num_top_genes: int = None)
+
+   Sort the gene metrics dataframe by variant effect source ascending
+   and descending by the number of unique variants
+   per gene. This will ensure that the gene metrics are presented
+   in a consistent order across all gene metric dataframes.
+
+
+   .. py:method:: sort_gene_metrics(gene_metrics: pandas.DataFrame)
+
+

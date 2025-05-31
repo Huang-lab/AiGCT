@@ -151,6 +151,16 @@ This will generate a series of presentation ready plots and tables:
 * Table showing Precision/Recall AUC's for user and system veps.
 * Table showing Negative Log10 Mann-Whitney U values for user and system veps.
 
+If "compute_gene_metrics" is set to True, the following additional plots and tables
+will be generated:
+
+* Heatmap showing ROC AUC values for the user and system veps for the top N genes.
+* Heatmap showing Precision/Recall AUC values for the user and system veps for the top N genes.
+* Heatmap showing Negative Log10 Mann-Whitney U values for the user and system veps for the top N genes.
+* Table showing ROC AUC's for the user and system veps for the top N genes.
+* Table showing Precision/Recall AUC's for the user and system veps for the top N genes.
+* Table showing Negative Log10 Mann-Whitney U values for the user and system veps for the top N genes.
+
 Here is an example of some of the plots generated:
 
 .. image:: _static/roc_curves_0.png
@@ -164,6 +174,16 @@ Here is an example of some of the plots generated:
 
 |
 .. image:: _static/mwu_bar_0.png
+   :width: 60 %
+   :align: center
+
+|
+.. image:: _static/mwu_bar_0.png
+   :width: 60 %
+   :align: center
+
+|
+.. image:: _static/gene_roc_heatmap.png
    :width: 60 %
    :align: center
 

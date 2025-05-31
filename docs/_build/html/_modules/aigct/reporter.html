@@ -89,6 +89,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.file_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">new_line</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.report_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneMetricSorter</span>
 
 <div class="viewcode-block" id="VARIANT_EFFECT_SCORE_COLS">
 <a class="viewcode-back" href="../../autoapi/aigct/reporter/index.html#aigct.reporter.VARIANT_EFFECT_SCORE_COLS">[docs]</a>
@@ -122,7 +123,8 @@
         <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Total number of variants across all VEPs in analysis: &quot;</span> <span class="o">+</span>
                   <span class="nb">str</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">num_variants_included</span><span class="p">))</span>
         <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">general_metrics</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">general_metrics</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
+            <span class="n">by</span><span class="o">=</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">))</span>
         <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ROC Metrics&quot;</span><span class="p">)</span>
@@ -144,6 +146,38 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span>
                 <span class="n">out</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">mwu_metrics</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;NEG_LOG10_MWU_PVAL&quot;</span><span class="p">,</span>
                                                      <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">gene_general_metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">gene_metric_sorter</span> <span class="o">=</span> <span class="n">GeneMetricSorter</span><span class="p">(</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">gene_unique_variant_counts_df</span><span class="p">)</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Summary of Gene Level Variant Effect Metrics&quot;</span><span class="p">)</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">sorted_df</span> <span class="o">=</span> <span class="n">gene_metric_sorter</span><span class="o">.</span><span class="n">sort_gene_metrics</span><span class="p">(</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">gene_general_metrics</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">sorted_df</span><span class="p">)</span>
+        <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">gene_roc_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Gene Level ROC Metrics&quot;</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">sorted_df</span> <span class="o">=</span> <span class="n">gene_metric_sorter</span><span class="o">.</span><span class="n">sort_gene_metrics</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="o">.</span><span class="n">gene_roc_metrics</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">sorted_df</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">gene_pr_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Gene Level Precision/Recall Metrics&quot;</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">sorted_df</span> <span class="o">=</span> <span class="n">gene_metric_sorter</span><span class="o">.</span><span class="n">sort_gene_metrics</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="o">.</span><span class="n">gene_pr_metrics</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">sorted_df</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metrics</span><span class="o">.</span><span class="n">gene_mwu_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Gene Level Mann-Whitney U -log10(P value)&quot;</span><span class="p">)</span>
+            <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">sorted_df</span> <span class="o">=</span> <span class="n">gene_metric_sorter</span><span class="o">.</span><span class="n">sort_gene_metrics</span><span class="p">(</span>
+                <span class="n">metrics</span><span class="o">.</span><span class="n">gene_mwu_metrics</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_metric_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">sorted_df</span><span class="p">)</span>
             <span class="n">new_line</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
 
 

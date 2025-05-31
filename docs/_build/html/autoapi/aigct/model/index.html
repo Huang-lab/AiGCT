@@ -71,6 +71,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../query/index.html">aigct.query</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../query_util/index.html">aigct.query_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repo_qc/index.html">aigct.repo_qc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../report_util/index.html">aigct.report_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../reporter/index.html">aigct.reporter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repository/index.html">aigct.repository</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../util/index.html">aigct.util</a></li>
@@ -301,13 +302,14 @@ allele_frequency.</p>
 <dt>allele_frequency<span class="classifier">float, optional</span></dt><dd><p>Used in conjunction to allele_frequency_operator to limit variants
 to those meeting a certain allele_frequency criteria.</p>
 </dd>
-<dt>filter_name<span class="classifier">str, optional</span></dt><dd><p>The name of a system filter that can be used to limit the variants
-returned.</p>
+<dt>filter_names<span class="classifier">str | list[str], optional</span></dt><dd><p>The name(s) of a system filter that can be used to limit the variants
+returned. If more than one is given then the filters are combined
+using a logical OR.</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.gene_symbols">
-<span class="sig-name descname"><span class="pre">gene_symbols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.gene_symbols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.gene_symbols" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">gene_symbols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">pandas.Series</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.gene_symbols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.gene_symbols" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -341,8 +343,8 @@ returned.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.filter_name">
-<span class="sig-name descname"><span class="pre">filter_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.filter_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.filter_name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="aigct.model.VEQueryCriteria.filter_names">
+<span class="sig-name descname"><span class="pre">filter_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEQueryCriteria.filter_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEQueryCriteria.filter_names" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
@@ -378,16 +380,38 @@ PR_AUC, SOURCE_NAME</p>
 <dt>mwu_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Mann-Whitney U metrics containing columns: SCORE_SOURCE,
 NEG_LOG10_MWU_PVAL, SOURCE_NAME</p>
 </dd>
+<dt>gene_general_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Gene-level general metrics with columns: SCORE_SOURCE,
+GENE_SYMBOL, NUM_VARIANTS, NUM_POSITIVE_LABELS,
+NUM_NEGATIVE_LABELS, SOURCE_NAME</p>
+</dd>
+<dt>gene_roc_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Gene-level ROC metrics with columns: SCORE_SOURCE,
+GENE_SYMBOL, ROC_AUC, EXCEPTION, SOURCE_NAME</p>
+</dd>
+<dt>gene_pr_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Gene-level precision/recall metrics with columns: SCORE_SOURCE,
+GENE_SYMBOL, PR_AUC, SOURCE_NAME</p>
+</dd>
+<dt>gene_mwu_metrics<span class="classifier">DataFrame, optional</span></dt><dd><p>Gene-level Mann-Whitney U metrics with columns: SCORE_SOURCE,
+GENE_SYMBOL, NEG_LOG10_MWU_PVAL, SOURCE_NAME</p>
+</dd>
 <dt>roc_curve_coordinates<span class="classifier">DataFrame, optional</span></dt><dd><p>Columns: SCORE_SOURCE,
 FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD</p>
 </dd>
 <dt>pr_curve_coordinates<span class="classifier">DataFrame, optional</span></dt><dd><p>Columns: SCORE_SOURCE,
 PRECISION, RECALL, THRESHOLD</p>
 </dd>
+<dt>gene_roc_curve_coordinates<span class="classifier">DataFrame, optional</span></dt><dd><p>Gene-level ROC curve coordinates with columns: SCORE_SOURCE,
+GENE_SYMBOL, FALSE_POSITIVE_RATE, TRUE_POSITIVE_RATE, THRESHOLD</p>
+</dd>
+<dt>gene_pr_curve_coordinates<span class="classifier">DataFrame, optional</span></dt><dd><p>Gene-level precision/recall curve coordinates with columns:
+SCORE_SOURCE, GENE_SYMBOL, PRECISION, RECALL, THRESHOLD</p>
+</dd>
 <dt>variants_included<span class="classifier">DataFrame, optional</span></dt><dd><p>List of variants included for each vep included the user vep.
 Columns:
 SCORE_SOURCE, GENOME_ASSEMBLY, CHROMOSOME, POSITION,
 REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE</p>
+</dd>
+<dt>gene_unique_variant_counts_df<span class="classifier">DataFrame, optional</span></dt><dd><p>Count of unique variants per gene across all vepswith columns:
+GENE_SYMBOL, NUM_UNIQUE_VARIANTS</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -426,6 +450,26 @@ REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.gene_general_metrics">
+<span class="sig-name descname"><span class="pre">gene_general_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.gene_general_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.gene_general_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.gene_roc_metrics">
+<span class="sig-name descname"><span class="pre">gene_roc_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.gene_roc_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.gene_roc_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.gene_pr_metrics">
+<span class="sig-name descname"><span class="pre">gene_pr_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.gene_pr_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.gene_pr_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.gene_mwu_metrics">
+<span class="sig-name descname"><span class="pre">gene_mwu_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.gene_mwu_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.gene_mwu_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.roc_curve_coordinates">
 <span class="sig-name descname"><span class="pre">roc_curve_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.roc_curve_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.roc_curve_coordinates" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -436,8 +480,23 @@ REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.gene_roc_curve_coordinates">
+<span class="sig-name descname"><span class="pre">gene_roc_curve_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.gene_roc_curve_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.gene_roc_curve_coordinates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.gene_pr_curve_coordinates">
+<span class="sig-name descname"><span class="pre">gene_pr_curve_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.gene_pr_curve_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.gene_pr_curve_coordinates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.variants_included">
 <span class="sig-name descname"><span class="pre">variants_included</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.variants_included"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.variants_included" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisResult.gene_unique_variant_counts_df">
+<span class="sig-name descname"><span class="pre">gene_unique_variant_counts_df</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisResult.gene_unique_variant_counts_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisResult.gene_unique_variant_counts_df" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
