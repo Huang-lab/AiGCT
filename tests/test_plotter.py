@@ -68,13 +68,26 @@ def test_plot_results_gene_level_file(
     metrics = ve_analyzer.compute_metrics(
         task_code, sample_user_scores_cancer, "UserVep",
         compute_gene_metrics=True,
-        variant_effect_sources=sample_veps[2:5],
+        # variant_effect_sources=sample_veps[2:20],
         vep_min_overlap_percent=50,
         variant_vep_retention_percent=1,
-        num_top_genes=5,
+        num_top_genes=20,
         list_variants=True)
-    ve_plotter.plot_results(metrics, num_top_genes=5,
+    ve_plotter.plot_results(metrics, # num_top_genes=20,
                             dir="./demo/output") # , metrics="mwu")
+    pass
+
+
+def test_plot_results_top_labelled_file(
+        ve_analyzer: VEAnalyzer,
+        sample_user_scores_cancer: pd.DataFrame,
+        ve_plotter: VEAnalysisPlotter):
+    metrics = ve_analyzer.compute_metrics(
+        "CANCER", sample_user_scores_cancer, "UserVep",
+        vep_min_overlap_percent=50,
+        variant_vep_retention_percent=1, list_variants=True)
+    ve_plotter.plot_results(metrics, num_top_labelled_veps=10,
+                            dir="./demo/output")  # , metrics="mwu")
     pass
 
 

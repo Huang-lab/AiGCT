@@ -359,6 +359,37 @@ class VEAnalyzer:
             mwu_df["GENE_SYMBOL"] = genes
         return mwu_df
 
+    def _remove_vep_genes_with_invalid_label_counts(
+        self, ve_scores_labels_df: pd.DataFrame
+    ) -> pd.DataFrame:
+        """
+        Group by VEP and gene. Then filter out groups where all labels
+        have the same value. For ROC, PR curves, and MWU tests, we need
+        both positive and negative labels. This method removes combination
+        where all labels are the same.
+
+        Parameters
+        ----------
+        ve_scores_labels_df : pd.DataFrame
+            DataFrame containing scores and labels
+
+        Returns
+        -------
+        pd.DataFrame
+            Filtered DataFrame with only valid VEP-gene combinations
+        """
+        # Group by SCORE_SOURCE and GENE_SYMBOL
+        grouped = ve_scores_labels_df.groupby(["SCORE_SOURCE", "GENE_SYMBOL"])
+
+        # Filter to keep only groups where both 0 and 1 labels exist
+        valid_scores_labels_df = grouped.filter(
+            lambda group: (
+                (group["BINARY_LABEL"].sum() > 0) and  # Has at least one positive label
+                (group["BINARY_LABEL"].sum() < len(group))  # Has at least one negative label
+            )
+        )
+        return valid_scores_labels_df
+
     def _compute_metrics(
         self,
         task_code: str,
@@ -376,8 +407,7 @@ class VEAnalyzer:
         gene_general_metrics_df = None
         if compute_gene_metrics:
             grouped_ve_gene_scores_labels = ve_scores_labels_df.groupby(
-                ["SCORE_SOURCE", "GENE_SYMBOL"]
-            )
+                ["SCORE_SOURCE", "GENE_SYMBOL"])
             gene_general_metrics_df = grouped_ve_gene_scores_labels.apply(
                 self._compute_general_metrics, include_groups=False
             ).reset_index()
@@ -426,22 +456,29 @@ class VEAnalyzer:
         )
         return metric_dataframes
 
-    def _filter_scores_and_labels_by_top_genes(
-        self, scores_and_labels_df: pd.DataFrame, num_top_genes: int
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def _get_gene_unique_variant_counts(
+            self, scores_and_labels_df: pd.DataFrame, num_top_genes: int
+    ) -> pd.DataFrame:
         gene_unique_variant_counts_df = scores_and_labels_df.groupby(
             ["GENE_SYMBOL"]).apply(
                 self._compute_num_unique_variants, include_groups=False
         ).reset_index()
-        gene_unique_variant_counts_df = (
-            gene_unique_variant_counts_df.sort_values(
-                by="NUM_UNIQUE_VARIANTS", ascending=False
-            ).iloc[:num_top_genes]
-        )
+        gene_unique_variant_counts_df = gene_unique_variant_counts_df.sort_values(
+            by="NUM_UNIQUE_VARIANTS", ascending=False)
+        if num_top_genes is not None:
+            gene_unique_variant_counts_df = gene_unique_variant_counts_df.iloc[
+                :num_top_genes]
+        return gene_unique_variant_counts_df
+
+    def _filter_scores_and_labels_by_genes(
+        self, scores_and_labels_df: pd.DataFrame,
+        gene_unique_variant_counts_df: pd.DataFrame
+    ) -> pd.DataFrame:
         scores_and_labels_df = scores_and_labels_df.merge(
-            gene_unique_variant_counts_df, how="inner", on="GENE_SYMBOL"
+            gene_unique_variant_counts_df, how="inner",
+            on="GENE_SYMBOL"
         )
-        return gene_unique_variant_counts_df, scores_and_labels_df
+        return scores_and_labels_df
 
     def compute_metrics(
         self,
@@ -483,16 +520,18 @@ class VEAnalyzer:
             be used for them in the analysis output.
         compute_gene_metrics: bool
             Whether to compute vep/gene level metrics along with vep level
-            metrics.
+            metrics. It will increase the runtime of the analysis. vep/gene
+            combinations where all the variants have the same label are
+            removed from the analysis. vep/gene level metrics include the
+            number of unique variants in each gene, the number of positive
+            and negative labels in each gene, and the ROC AUC, Precision/
+            Recall AUC, and Mann-Whitney U p-value for each gene. The genes
+            are ranked by the number of unique variants in the analysis in
+            the gene.
         num_top_genes: int
-            If specified, only consider the top N genes by number of
-            unique variants that satisfy the selection criteria indicated
-            by the other parameters.
-        agg_level : str
-            The level at which to aggregate the metrics. Can be either
-            "vep" or "vep_gene". If "vep", then the metrics are aggregated
-            at the vep level. If "vep_gene", then the metrics are aggregated
-            at the vep/gene level.
+            If compute_gene_metrics is True and this parameter is specified,
+            only consider the top N genes by number of unique variants that
+            satisfy the selection criteria indicated by the other parameters.
         column_name_map : dict, optional
             If the column names in user_ve_scores are not the expected
             names, then this maps the column names to the expected names.
@@ -544,9 +583,6 @@ class VEAnalyzer:
         """
 
         validate_query_criteria(variant_query_criteria)
-        if not compute_gene_metrics:
-            num_top_genes = None
-
         scores_and_labels_df = self.get_analysis_scores_and_labels(
             task_code,
             user_ve_scores,
@@ -559,15 +595,20 @@ class VEAnalyzer:
             variant_vep_retention_percent,
         )
 
-        if num_top_genes is not None:
-            (
-                gene_unique_variant_counts_df,
-                scores_and_labels_df
-            ) = self._filter_scores_and_labels_by_top_genes(
-                scores_and_labels_df, num_top_genes
-            )
-        else:
+        if not compute_gene_metrics:
             gene_unique_variant_counts_df = None
+        else:
+            scores_and_labels_df = \
+                self._remove_vep_genes_with_invalid_label_counts(
+                    scores_and_labels_df
+                )
+
+            gene_unique_variant_counts_df = \
+                self._get_gene_unique_variant_counts(
+                    scores_and_labels_df, num_top_genes)
+            if num_top_genes is not None:
+                scores_and_labels_df = self._filter_scores_and_labels_by_genes(
+                    scores_and_labels_df, gene_unique_variant_counts_df)
 
         if type(metrics) is str:
             metrics = [metrics]
