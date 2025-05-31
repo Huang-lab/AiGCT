@@ -12,14 +12,17 @@ def barchart(df: pd.DataFrame, x: str, y: str, x_label: str = '',
              title: str = '', title_fontsize: int = 20,
              y_label_fontsize: int = 15,
              x_label_fontsize: int = 15,
-             label_size: int = 15, xtick_rotation: int = None,
+             y_tick_label_size: int = 15,
+             x_tick_label_size: int = 15,
+             xtick_rotation: int = None,
              xtick_rotation_mode: str = None,
              file_dpi: int = 300, bbox_inches: str = 'tight'):
     fig, ax = plt.subplots(figsize=(6, 4))
     ax = sns.barplot(df, x=x, y=y, palette=palette, hatch=hatch,
                      edgecolor=edgecolor, errorbar=errorbar,
                      estimator=estimator, hue=x)
-    ax.tick_params('both', labelsize=label_size)
+    ax.tick_params('y', labelsize=y_tick_label_size)
+    ax.tick_params('x', labelsize=x_tick_label_size)
     ax.set_ylabel(y_label, fontsize=y_label_fontsize)
     ax.set_xlabel(x_label, fontsize=x_label_fontsize)
     if xtick_rotation:

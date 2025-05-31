@@ -34,7 +34,7 @@ plot:
   file_dpi: 300
   bbox_inches: tight
   roc_pr_line:
-    num_curves_per_plot: 10
+    num_curves_per_plot: 100
     roc_title: ROC Curve
     pr_title: Precision/Recall
     x_axis_font_size: 25
@@ -44,12 +44,13 @@ plot:
     legend_font_size: 10
     legend_line_width: 3.0
   mwu_bar:
-    num_bars_per_plot: 10
+    num_bars_per_plot: 100
     title: Mann Whitney U
     title_font_size: 20
     y_label_font_size: 15
     x_label_font_size: 15
-    label_size: 15
+    y_tick_label_size: 15
+    x_tick_label_size: 8
     xtick_rotation: 60
     xtick_rotation_mode: anchor
 

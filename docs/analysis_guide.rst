@@ -49,6 +49,14 @@ Metrics is an object that contains the results of the benchmark analysis. See th
 the API documentation for the aigct.analyser.VEAnalyzer.compute_metrics method for a detailed
 explanation of the parameters passed to that method.
 
+One of the parameters to the compute_metrics method is "compute_gene_metrics".
+If set to True, it will compute gene level metrics. The gene level metrics
+include the number of unique variants in each gene, the number of positive
+and negative labels in each gene, and the ROC AUC, Precision/Recall AUC, and
+Mann-Whitney U p-value for each gene. The genes are ranked by the number of
+unique variants in the analysis in the gene. If you wish to limit the analysis
+to the top N genes, you can specify the "num_top_genes" parameter.
+
 Analysis Summary
 ----------------
 
