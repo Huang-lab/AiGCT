@@ -71,6 +71,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../query/index.html">aigct.query</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../query_util/index.html">aigct.query_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repo_qc/index.html">aigct.repo_qc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../report_util/index.html">aigct.report_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../reporter/index.html">aigct.reporter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repository/index.html">aigct.repository</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../util/index.html">aigct.util</a></li>
@@ -131,6 +132,9 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aigct.pd_util.build_dataframe_where_clause" title="aigct.pd_util.build_dataframe_where_clause"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_dataframe_where_clause</span></code></a>(→ str)</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.pd_util.merge_by_chunks" title="aigct.pd_util.merge_by_chunks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_by_chunks</span></code></a>(left_df, right_df[, chunk_size])</p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -149,6 +153,11 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="aigct.pd_util.build_dataframe_where_clause">
 <span class="sig-prename descclassname"><span class="pre">aigct.pd_util.</span></span><span class="sig-name descname"><span class="pre">build_dataframe_where_clause</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">where_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/aigct/pd_util.html#build_dataframe_where_clause"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.pd_util.build_dataframe_where_clause" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aigct.pd_util.merge_by_chunks">
+<span class="sig-prename descclassname"><span class="pre">aigct.pd_util.</span></span><span class="sig-name descname"><span class="pre">merge_by_chunks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/pd_util.html#merge_by_chunks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.pd_util.merge_by_chunks" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

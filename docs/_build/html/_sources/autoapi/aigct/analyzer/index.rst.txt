@@ -44,10 +44,10 @@ Module Contents
    .. py:method:: get_analysis_scores_and_labels(task_code: str, user_ve_scores: pandas.DataFrame = None, user_vep_name: str = 'USER', column_name_map: dict = None, variant_effect_sources: list[str] = None, include_variant_effect_sources: bool = None, variant_query_criteria: aigct.model.VEQueryCriteria = None, vep_min_overlap_percent: float = 0, variant_vep_retention_percent: float = 0) -> pandas.DataFrame
 
 
-   .. py:method:: _compute_pr(grouped_ve_scores_labels) -> tuple[pandas.DataFrame, pandas.DataFrame]
+   .. py:method:: _compute_pr(agg_level: str, grouped_ve_scores_labels) -> tuple[pandas.DataFrame, pandas.DataFrame]
 
 
-   .. py:method:: _compute_roc(grouped_ve_scores_labels) -> tuple[pandas.DataFrame, pandas.DataFrame]
+   .. py:method:: _compute_roc(agg_level: str, grouped_ve_scores_labels) -> tuple[pandas.DataFrame, pandas.DataFrame]
 
 
    .. py:method:: _compute_general_metrics(group) -> pandas.Series
@@ -55,16 +55,46 @@ Module Contents
 
 
 
+   .. py:method:: _compute_num_unique_variants(group) -> pandas.Series
+      :staticmethod:
+
+
+
    .. py:method:: _add_info_to_metric_dataframes(*dfs)
 
 
-   .. py:method:: _compute_mwu(grouped_ve_scores_labels) -> pandas.DataFrame
+   .. py:method:: _compute_mwu(agg_level: str, grouped_ve_scores_labels) -> pandas.DataFrame
 
 
-   .. py:method:: _compute_metrics(task_code: str, ve_scores_labels_df: pandas.DataFrame, metrics: list[str], list_variants: bool = False)
+   .. py:method:: _remove_vep_genes_with_invalid_label_counts(ve_scores_labels_df: pandas.DataFrame) -> pandas.DataFrame
+
+      Group by VEP and gene. Then filter out groups where all labels
+      have the same value. For ROC, PR curves, and MWU tests, we need
+      both positive and negative labels. This method removes combination
+      where all labels are the same.
+
+      Parameters
+      ----------
+      ve_scores_labels_df : pd.DataFrame
+          DataFrame containing scores and labels
+
+      Returns
+      -------
+      pd.DataFrame
+          Filtered DataFrame with only valid VEP-gene combinations
 
 
-   .. py:method:: compute_metrics(task_code: str, user_ve_scores: pandas.DataFrame = None, user_vep_name: str = 'USER', column_name_map: dict = None, variant_effect_sources: list[str] = None, include_variant_effect_sources: bool = True, variant_query_criteria: aigct.model.VEQueryCriteria = None, vep_min_overlap_percent: float = 0, variant_vep_retention_percent: float = 0, metrics: str | list[str] = ['roc', 'pr', 'mwu'], list_variants: bool = False) -> aigct.model.VEAnalysisResult
+
+   .. py:method:: _compute_metrics(task_code: str, ve_scores_labels_df: pandas.DataFrame, compute_gene_metrics: bool, metrics: list[str], list_variants: bool = False)
+
+
+   .. py:method:: _get_gene_unique_variant_counts(scores_and_labels_df: pandas.DataFrame, num_top_genes: int) -> pandas.DataFrame
+
+
+   .. py:method:: _filter_scores_and_labels_by_genes(scores_and_labels_df: pandas.DataFrame, gene_unique_variant_counts_df: pandas.DataFrame) -> pandas.DataFrame
+
+
+   .. py:method:: compute_metrics(task_code: str, user_ve_scores: pandas.DataFrame = None, user_vep_name: str = 'USER', compute_gene_metrics: bool = False, num_top_genes: int = None, column_name_map: dict = None, variant_effect_sources: list[str] = None, include_variant_effect_sources: bool = True, variant_query_criteria: aigct.model.VEQueryCriteria = None, vep_min_overlap_percent: float = 0, variant_vep_retention_percent: float = 0, metrics: str | list[str] = ['roc', 'pr', 'mwu'], list_variants: bool = False) -> aigct.model.VEAnalysisResult
 
       Generates performance metrics for an optional user supplied set of
       vep scores and for system supplied vep's. If the user doesn't provide
@@ -87,6 +117,20 @@ Module Contents
       user_vep_name : str, optional
           If user_ve_scores are provided, then this is the label to
           be used for them in the analysis output.
+      compute_gene_metrics: bool
+          Whether to compute vep/gene level metrics along with vep level
+          metrics. It will increase the runtime of the analysis. vep/gene
+          combinations where all the variants have the same label are
+          removed from the analysis. vep/gene level metrics include the
+          number of unique variants in each gene, the number of positive
+          and negative labels in each gene, and the ROC AUC, Precision/
+          Recall AUC, and Mann-Whitney U p-value for each gene. The genes
+          are ranked by the number of unique variants in the analysis in
+          the gene.
+      num_top_genes: int
+          If compute_gene_metrics is True and this parameter is specified,
+          only consider the top N genes by number of unique variants that
+          satisfy the selection criteria indicated by the other parameters.
       column_name_map : dict, optional
           If the column names in user_ve_scores are not the expected
           names, then this maps the column names to the expected names.

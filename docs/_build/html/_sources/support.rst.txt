@@ -1,4 +1,4 @@
 Support
 =======
 
-Github: http://github.com/claudiofr/AGCT_dev/issues
+Github: https://github.com/Huang-lab/AiGCT/issues

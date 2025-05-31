@@ -16,6 +16,7 @@ Attributes
 
 .. autoapisummary::
 
+   aigct.repository.MERGE_CHUNK_SIZE
    aigct.repository.TASK_SUBFOLDER
    aigct.repository.DATA_FOLDER
    aigct.repository.TASK_FOLDERS
@@ -65,11 +66,17 @@ Functions
 
 .. autoapisummary::
 
+   aigct.repository.read_repo_csv
    aigct.repository.query_by_filter
+   aigct.repository.query_by_filters
 
 
 Module Contents
 ---------------
+
+.. py:data:: MERGE_CHUNK_SIZE
+   :value: 500000
+
 
 .. py:data:: TASK_SUBFOLDER
 
@@ -148,6 +155,8 @@ Module Contents
 
 .. py:data:: TABLE_DEFS
 
+.. py:function:: read_repo_csv(file: str) -> pandas.DataFrame
+
 .. py:class:: RepoSessionContext(data_folder_root: str, table_defs: dict[str, TableDef])
 
    .. py:attribute:: _data_folder_root
@@ -211,7 +220,7 @@ Module Contents
    as required by the ParameterizedSingleton class.
 
 
-   .. py:method:: _init_once(data_folder_root: str, table_def: TableDef)
+   .. py:method:: _init_once(data_folder_root: str, table_def: TableDef, disable_cache: bool = False)
 
 
    .. py:method:: get_data_frame(task_code: str)
@@ -242,7 +251,7 @@ Module Contents
    as required by the ParameterizedSingleton class.
 
 
-   .. py:method:: _init_once(data_folder_root: str)
+   .. py:method:: _init_once(data_folder_root: str, disable_cache: bool = False)
 
 
 .. py:class:: VariantCache
@@ -342,7 +351,12 @@ Module Contents
    .. py:method:: get_by_task_filter_name(task_code: str, filter_name: str) -> aigct.model.VariantFilter
 
 
+   .. py:method:: get_by_task_filter_names(task_code: str, filter_names: list[str]) -> list[aigct.model.VariantFilter]
+
+
 .. py:function:: query_by_filter(query_df: pandas.DataFrame, filter: pandas.Series, filter_gene_df: pandas.DataFrame, filter_variant_df: pandas.DataFrame) -> pandas.DataFrame
+
+.. py:function:: query_by_filters(query_df: pandas.DataFrame, filters: list[aigct.model.VariantFilter]) -> pandas.DataFrame
 
 .. py:class:: VariantRepository(session_context: RepoSessionContext)
 
@@ -359,9 +373,12 @@ Module Contents
 
 
 
-.. py:class:: VariantEffectLabelRepository(session_context: RepoSessionContext, variant_repo: VariantRepository, filter_repo: VariantFilterRepository)
+.. py:class:: VariantEffectLabelRepository(session_context: RepoSessionContext, variant_task_repo: VariantTaskRepository, variant_repo: VariantRepository, filter_repo: VariantFilterRepository)
 
    .. py:attribute:: _cache
+
+
+   .. py:attribute:: _task_repo
 
 
    .. py:attribute:: _filter_repo
@@ -371,6 +388,9 @@ Module Contents
 
 
    .. py:method:: get_all_by_task(task_code: str) -> pandas.DataFrame
+
+
+   .. py:method:: get_all_for_all_tasks() -> pandas.DataFrame
 
 
    .. py:method:: get(task_code: str, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
@@ -379,9 +399,12 @@ Module Contents
 
 
 
-.. py:class:: VariantEffectScoreRepository(session_context: RepoSessionContext, variant_repo: VariantRepository, filter_repo: VariantFilterRepository)
+.. py:class:: VariantEffectScoreRepository(session_context: RepoSessionContext, task_repo: VariantTaskRepository, variant_repo: VariantRepository, filter_repo: VariantFilterRepository)
 
    .. py:attribute:: _cache
+
+
+   .. py:attribute:: _task_repo
 
 
    .. py:attribute:: _filter_repo
@@ -393,6 +416,12 @@ Module Contents
    .. py:method:: get_all_by_task(task_code: str) -> pandas.DataFrame
 
 
+   .. py:method:: get_all_by_task_slim(task_code: str) -> pandas.DataFrame
+
+
    .. py:method:: get(task_code: str, variant_effect_sources: list[str] | str = None, include_variant_effect_sources: bool = True, qry: aigct.model.VEQueryCriteria = None) -> pandas.DataFrame
+
+
+   .. py:method:: get_all_for_all_tasks() -> pandas.DataFrame
 
 

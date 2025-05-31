@@ -71,6 +71,7 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">aigct.query</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../query_util/index.html">aigct.query_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repo_qc/index.html">aigct.repo_qc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../report_util/index.html">aigct.report_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../reporter/index.html">aigct.reporter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repository/index.html">aigct.repository</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../util/index.html">aigct.util</a></li>
@@ -198,7 +199,7 @@ or presentation ready to the caller.</p>
 <dl class="simple">
 <dt>qry<span class="classifier">VEQueryCriteria</span></dt><dd><p>See description of VEQueryCriteria in model package.
 Specifies criteria that would limit the set of variants
-to be retrieved. The filter_name attribute is ignored.</p>
+to be retrieved. The filter_names attribute is ignored.</p>
 </dd>
 </dl>
 </section>
@@ -210,7 +211,7 @@ to be retrieved. The filter_name attribute is ignored.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="aigct.query.VEBenchmarkQueryMgr.get_variant_effect_sources">
-<span class="sig-name descname"><span class="pre">get_variant_effect_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_variant_effect_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_sources" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_variant_effect_sources</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_variant_effect_sources"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_sources" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -223,7 +224,7 @@ to be retrieved. The filter_name attribute is ignored.</p>
 <span class="sig-name descname"><span class="pre">get_variant_effect_source_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant_effect_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_variant_effect_sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEQueryCriteria" title="aigct.model.VEQueryCriteria"><span class="pre">aigct.model.VEQueryCriteria</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_variant_effect_source_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_source_stats" title="Link to this definition"></a></dt>
 <dd><p>Get all variant effect sources for a task along with the
 number of variants, number of positive labels,
-number of negative labels for each source.</p>
+number of negative labels, number of genes for each source.</p>
 <section id="id1">
 <h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <p>task_code : str</p>
@@ -248,11 +249,28 @@ to be retrieved.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aigct.query.VEBenchmarkQueryMgr.get_variant_effect_scores">
-<span class="sig-name descname"><span class="pre">get_variant_effect_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant_effect_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_variant_effect_sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEQueryCriteria" title="aigct.model.VEQueryCriteria"><span class="pre">aigct.model.VEQueryCriteria</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_variant_effect_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_scores" title="Link to this definition"></a></dt>
-<dd><p>Fetches variant effect scores for variant effect sources.</p>
+<dt class="sig sig-object py" id="aigct.query.VEBenchmarkQueryMgr.get_all_variant_effect_source_stats">
+<span class="sig-name descname"><span class="pre">get_all_variant_effect_source_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_all_variant_effect_source_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_all_variant_effect_source_stats" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.query.VEBenchmarkQueryMgr.get_all_task_variant_effect_label_stats">
+<span class="sig-name descname"><span class="pre">get_all_task_variant_effect_label_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_all_task_variant_effect_label_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_all_task_variant_effect_label_stats" title="Link to this definition"></a></dt>
+<dd><p>Returns one row per task with number of variants,
+number of positive labels, number of negative labels,
+number of genes.</p>
 <section id="id3">
-<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<h3>Returns<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>DataFrame</p>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.query.VEBenchmarkQueryMgr.get_variant_effect_scores">
+<span class="sig-name descname"><span class="pre">get_variant_effect_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant_effect_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_variant_effect_sources</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEQueryCriteria" title="aigct.model.VEQueryCriteria"><span class="pre">aigct.model.VEQueryCriteria</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_variant_effect_scores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_scores" title="Link to this definition"></a></dt>
+<dd><p>Fetches variant effect scores for variant effect sources.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>task_code<span class="classifier">str</span></dt><dd><p>task code</p>
 </dd>
@@ -269,8 +287,8 @@ to be retrieved.</p>
 </dd>
 </dl>
 </section>
-<section id="id4">
-<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <p>DataFrame</p>
 </section>
 </dd></dl>
@@ -280,8 +298,8 @@ to be retrieved.</p>
 <span class="sig-name descname"><span class="pre">get_variants_by_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEQueryCriteria" title="aigct.model.VEQueryCriteria"><span class="pre">aigct.model.VEQueryCriteria</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_variants_by_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_variants_by_task" title="Link to this definition"></a></dt>
 <dd><p>Fetches variants by task. The optional parameters are
 filter criteria used to limit the set of variants returned.</p>
-<section id="id5">
-<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <p>task_code : str</p>
 <dl class="simple">
 <dt>qry<span class="classifier">VEQueryCriteria, optional</span></dt><dd><p>See description of VEQueryCriteria in model package.
@@ -290,8 +308,8 @@ to be retrieved.</p>
 </dd>
 </dl>
 </section>
-<section id="id6">
-<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="id7">
+<h3>Returns<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <p>DataFrame</p>
 </section>
 </dd></dl>
@@ -302,8 +320,8 @@ to be retrieved.</p>
 <dd><p>Fetches the distribution of variants by gene or chromsome.
 For each gene/chromosome lists number of variants for which we have
 labels along with the number of positive and negative label counts.</p>
-<section id="id7">
-<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="id8">
+<h3>Parameters<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>task_code<span class="classifier">str</span></dt><dd><p>Task code</p>
 </dd>
@@ -316,8 +334,8 @@ to be retrieved.</p>
 </dd>
 </dl>
 </section>
-<section id="id8">
-<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<section id="id9">
+<h3>Returns<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <p>DataFrame</p>
 </section>
 </dd></dl>
@@ -326,8 +344,8 @@ to be retrieved.</p>
 <dt class="sig sig-object py" id="aigct.query.VEBenchmarkQueryMgr.get_variant_filter">
 <span class="sig-name descname"><span class="pre">get_variant_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../model/index.html#aigct.model.VariantFilter" title="aigct.model.VariantFilter"><span class="pre">aigct.model.VariantFilter</span></a></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_variant_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_variant_filter" title="Link to this definition"></a></dt>
 <dd><p>Return a variant filter for a task by name.</p>
-<section id="id9">
-<h3>Returns<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>VariantFilter</dt><dd><p>Object containing list of genes/variant id’s included in the
 filter. See description of the object.</p>
@@ -341,8 +359,8 @@ filter. See description of the object.</p>
 <span class="sig-name descname"><span class="pre">get_all_variant_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/aigct/query.html#VEBenchmarkQueryMgr.get_all_variant_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.query.VEBenchmarkQueryMgr.get_all_variant_filters" title="Link to this definition"></a></dt>
 <dd><p>Return basic descriptive information about all variant filters
 for a task.</p>
-<section id="id10">
-<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<section id="id11">
+<h3>Returns<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
 <dl class="simple">
 <dt>dict[str, pd.DataFrame]</dt><dd><p>A dictionary of 3 data frames with the following keys:
 filter_df - Data frame of filters containing CODE, NAME,

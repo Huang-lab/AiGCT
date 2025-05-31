@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aigct.file_util &mdash; AIGCT 0.1.0 documentation</title>
+  <title>aigct.report_util &mdash; AIGCT 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -20,8 +20,8 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="aigct.init_app" href="../init_app/index.html" />
-    <link rel="prev" title="aigct.exporter" href="../exporter/index.html" /> 
+    <link rel="next" title="aigct.reporter" href="../reporter/index.html" />
+    <link rel="prev" title="aigct.repo_qc" href="../repo_qc/index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -60,7 +60,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../date_util/index.html">aigct.date_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../etl/index.html">aigct.etl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../exporter/index.html">aigct.exporter</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">aigct.file_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../file_util/index.html">aigct.file_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../init_app/index.html">aigct.init_app</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../install_db/index.html">aigct.install_db</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../install_util/index.html">aigct.install_util</a></li>
@@ -71,7 +71,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../query/index.html">aigct.query</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../query_util/index.html">aigct.query_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repo_qc/index.html">aigct.repo_qc</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../report_util/index.html">aigct.report_util</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aigct.report_util</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../reporter/index.html">aigct.reporter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../repository/index.html">aigct.repository</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../util/index.html">aigct.util</a></li>
@@ -100,9 +100,9 @@
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
           <li class="breadcrumb-item"><a href="../index.html">aigct</a></li>
-      <li class="breadcrumb-item active">aigct.file_util</li>
+      <li class="breadcrumb-item active">aigct.report_util</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/autoapi/aigct/file_util/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/autoapi/aigct/report_util/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -110,43 +110,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-aigct.file_util">
-<span id="aigct-file-util"></span><h1>aigct.file_util<a class="headerlink" href="#module-aigct.file_util" title="Link to this heading"></a></h1>
-<p>Dependency injector utilities. Bogus implementation to mimick a proper
-DI provider. This class could be reimplemented if we decide to use
-a proper one in the future.</p>
-<section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+  <section id="module-aigct.report_util">
+<span id="aigct-report-util"></span><h1>aigct.report_util<a class="headerlink" href="#module-aigct.report_util" title="Link to this heading"></a></h1>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.file_util.new_line" title="aigct.file_util.new_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_line</span></code></a>(out[, num_nls])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aigct.file_util.unique_file_name" title="aigct.file_util.unique_file_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unique_file_name</span></code></a>(*args[, suffix])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.file_util.create_folder" title="aigct.file_util.create_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_folder</span></code></a>(folder)</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.report_util.GeneMetricSorter" title="aigct.report_util.GeneMetricSorter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeneMetricSorter</span></code></a></p></td>
+<td><p>Sort the gene metrics dataframe by variant effect source ascending</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="aigct.file_util.new_line">
-<span class="sig-prename descclassname"><span class="pre">aigct.file_util.</span></span><span class="sig-name descname"><span class="pre">new_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/file_util.html#new_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.file_util.new_line" title="Link to this definition"></a></dt>
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.report_util.GeneMetricSorter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.report_util.</span></span><span class="sig-name descname"><span class="pre">GeneMetricSorter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gene_variant_counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_top_genes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/report_util.html#GeneMetricSorter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.report_util.GeneMetricSorter" title="Link to this definition"></a></dt>
+<dd><p>Sort the gene metrics dataframe by variant effect source ascending
+and descending by the number of unique variants
+per gene. This will ensure that the gene metrics are presented
+in a consistent order across all gene metric dataframes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.report_util.GeneMetricSorter.sort_gene_metrics">
+<span class="sig-name descname"><span class="pre">sort_gene_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gene_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/report_util.html#GeneMetricSorter.sort_gene_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.report_util.GeneMetricSorter.sort_gene_metrics" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="aigct.file_util.unique_file_name">
-<span class="sig-prename descclassname"><span class="pre">aigct.file_util.</span></span><span class="sig-name descname"><span class="pre">unique_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/file_util.html#unique_file_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.file_util.unique_file_name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="aigct.file_util.create_folder">
-<span class="sig-prename descclassname"><span class="pre">aigct.file_util.</span></span><span class="sig-name descname"><span class="pre">create_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/file_util.html#create_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.file_util.create_folder" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+</dd></dl>
 
 </section>
 </section>
@@ -155,8 +145,8 @@ a proper one in the future.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../exporter/index.html" class="btn btn-neutral float-left" title="aigct.exporter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../init_app/index.html" class="btn btn-neutral float-right" title="aigct.init_app" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../repo_qc/index.html" class="btn btn-neutral float-left" title="aigct.repo_qc" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../reporter/index.html" class="btn btn-neutral float-right" title="aigct.reporter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
