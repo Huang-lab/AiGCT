@@ -178,11 +178,6 @@ Here is an example of some of the plots generated:
    :align: center
 
 |
-.. image:: _static/mwu_bar_0.png
-   :width: 60 %
-   :align: center
-
-|
 .. image:: _static/gene_roc_heatmap.png
    :width: 60 %
    :align: center
