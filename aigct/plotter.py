@@ -3,9 +3,11 @@ import matplotlib.pyplot as plt
 from IPython.display import display
 # import seaborn as sns
 # import plotly.express as px
+from matplotlib.ticker import MaxNLocator
 import pandas as pd
 import os
 from .model import (
+    VEAnalysisCalibrationResult,
     VEAnalysisResult
 )
 from .util import Config
@@ -451,6 +453,379 @@ class VEAnalysisPlotter:
         else:
             display(style)
 
+    def _plot_score_vs_pathogenic_fraction(self, results, annotate: bool = False,
+                                           dir: str = None):
+        """
+        Plot the fraction of pathogenic variants versus mean score as a line
+        plot.
 
+        Parameters
+        ----------
+        results : VEAnalysisCalibrationResult
+            Calibration result object containing score bins and pathogenic
+            fractions
+        dir : str, optional
+            Directory to save the plot file
+        """
+        title = "Pathogenic fraction by score"
+        sorted_df = results.score_pathogenic_fraction_df.sort_values(
+            "MEAN_SCORE")
+        pathogenic_fraction = (
+            sorted_df["NUM_POSITIVE_LABELS"] / sorted_df["NUM_VARIANTS"]
+            ).round(1)
+        mean_score = sorted_df["MEAN_SCORE"].round(2)
 
+        # Create the plot
+        plt.figure(figsize=(10, 6))
+        
+        # Plot pathogenic fraction vs mean score as a line plot
+        plt.plot(mean_score, pathogenic_fraction, 
+                 marker='o', linestyle='-', linewidth=2, 
+                 markersize=6, color='blue')
 
+        if annotate:
+            for row in sorted_df.itertuples():
+                plt.annotate(row.SCORE_RANGE,
+                             (row.MEAN_SCORE,
+                              row.NUM_POSITIVE_LABELS/row.NUM_VARIANTS),
+                             xytext=(5, 5),  # Offset from point
+                             textcoords='offset points',
+                             fontsize=8,
+                             ha='left',
+                             va='bottom',
+                             bbox=dict(boxstyle='round,pad=0.3',
+                                       facecolor='yellow',
+                                       alpha=0.7),
+                             rotation=45)  # Rotate text to avoid overlap
+        
+        # Add diagonal reference line (y=x)
+        x_min, x_max = plt.xlim()
+        y_min, y_max = plt.ylim()
+        reference_line_x = [x_min, x_max]
+        reference_line_y = [y_min, y_max]
+        plt.plot(reference_line_x, reference_line_y, linestyle='--',
+                 color='gray', alpha=0.7)
+
+        # Set labels and title
+        plt.xlabel('Score', fontsize=14)
+        plt.ylabel('Pathogenic Fraction', fontsize=14)
+        plt.title(title, fontsize=16)
+        
+        # Set y-axis limits
+        plt.ylim(0, 1.05)
+        
+        # Add grid
+        plt.grid(True, linestyle='--', alpha=0.7)
+        
+        # Save or display the plot
+        if dir is None:
+            plt.show()
+        else:
+            file_path = os.path.join(dir, "pathogenic_fraction_by_score.png")
+            plt.savefig(file_path, dpi=self._config.file_dpi,
+                        bbox_inches=self._config.bbox_inches)
+            plt.savefig(file_path.replace(".png", ".svg"),
+                        format='svg',
+                        bbox_inches=self._config.bbox_inches)
+        
+        plt.close()
+
+    def _plot_precision_recall_vs_thresholds1(
+            self, results: VEAnalysisCalibrationResult, dir: str = None):
+        """
+        Plot precision, recall, and F1 score versus threshold values.
+        
+        Parameters
+        ----------
+        results : VEAnalysisCalibrationResult
+            Calibration result object containing precision-recall curve data
+        dir : str, optional
+            Directory to save the plot file
+        """
+        # Get precision-recall curve data
+        pr_curve_coords = results.negative_pr_curve_coordinates
+        
+        # Sort by threshold
+        pr_curve_coords = pr_curve_coords.sort_values('THRESHOLD')
+        
+        # Calculate F1 score
+        precision = pr_curve_coords['PRECISION']
+        recall = pr_curve_coords['RECALL']
+        f1_scores = 2 * (precision * recall) / (precision + recall + 1e-8)  # avoid division by zero
+        
+        # Create the plot
+        plt.figure(figsize=(10, 6))
+        
+        # Plot precision, recall, and F1 score vs threshold
+        plt.plot(pr_curve_coords['THRESHOLD'], precision, 
+                 label='Precision', color='blue', linewidth=2)
+        plt.plot(pr_curve_coords['THRESHOLD'], recall, 
+                 label='Recall', color='green', linewidth=2)
+        plt.plot(pr_curve_coords['THRESHOLD'], f1_scores, 
+                 label='F1 Score', color='red', linewidth=2)
+        
+        # Set labels and title
+        plt.xlabel('Decision Threshold', fontsize=14)
+        plt.ylabel('Score', fontsize=14)
+        plt.title('Performance Metrics vs. Decision Threshold', fontsize=16)
+        
+        # Add legend
+        plt.legend(fontsize=12)
+        
+        # Add grid
+        plt.grid(True, linestyle='--', alpha=0.7)
+        
+        # Set y-axis limits
+        plt.ylim(0, 1.05)
+        
+        # Save or display the plot
+        if dir is None:
+            plt.show()
+        else:
+            file_path = os.path.join(dir, "precision_recall_vs_threshold.png")
+            plt.savefig(file_path, dpi=self._config.file_dpi, 
+                        bbox_inches=self._config.bbox_inches)
+            plt.savefig(file_path.replace(".png", ".svg"), 
+                        format='svg', 
+                        bbox_inches=self._config.bbox_inches)
+        
+        plt.close()
+
+    def _plot_precision_recall_vs_threshold(
+            self, results: VEAnalysisCalibrationResult,
+            threshold_boundary: float = 0.5,
+            precision_cutoff: float = 0.9,
+            dir: str = None):
+        """
+        Plot precision, recall, and F1 score versus threshold values.
+        
+        Parameters
+        ----------
+        results : VEAnalysisCalibrationResult
+            Calibration result object containing precision-recall curve data
+        dir : str, optional
+            Directory to save the plot file
+        """
+        # Get precision-recall curve data
+        pr_curve_coords = results.negative_pr_curve_coordinates.query(
+                "THRESHOLD <= @threshold_boundary")
+        
+        # Sort by threshold
+        pr_curve_coords = pr_curve_coords.sort_values('THRESHOLD')
+        
+        # Calculate F1 score
+        precision = pr_curve_coords['PRECISION']
+        recall = pr_curve_coords['RECALL']
+        
+        # Create the plot
+        plt.figure(figsize=(10, 6))
+        
+        # Plot precision, recall, and F1 score vs threshold
+        plt.plot(pr_curve_coords['THRESHOLD'], precision, 
+                 label='Benign Precision', color='blue', linewidth=2)
+        plt.plot(pr_curve_coords['THRESHOLD'], recall, 
+                 label='Benign Recall', color='blue', linewidth=2,
+                 linestyle='dashdot')
+        if len(pr_curve_coords) > 1 and precision.max() >= precision_cutoff \
+                and precision.min() <= precision_cutoff:
+            plt.axvline(x=pr_curve_coords[precision >= precision_cutoff]['THRESHOLD'].min(),
+                        color='gray', linestyle='--', linewidth=1, alpha=0.7)
+        
+        pr_curve_coords = results.positive_pr_curve_coordinates.query(
+                "THRESHOLD >= @threshold_boundary")
+        
+        # Sort by threshold
+        pr_curve_coords = pr_curve_coords.sort_values('THRESHOLD')
+        
+        # Calculate F1 score
+        precision = pr_curve_coords['PRECISION']
+        recall = pr_curve_coords['RECALL']
+        
+        # Plot precision, recall, and F1 score vs threshold
+        plt.plot(pr_curve_coords['THRESHOLD'], precision, 
+                 label='Pathogenic Precision', color='red', linewidth=2)
+        plt.plot(pr_curve_coords['THRESHOLD'], recall, 
+                 label='Pathogenic Recall', color='red', linewidth=2,
+                 linestyle='dashdot')
+        
+        if len(pr_curve_coords) > 1 and precision.max() >= precision_cutoff \
+                and precision.min() <= precision_cutoff:
+            plt.axvline(x=pr_curve_coords[precision >= precision_cutoff]['THRESHOLD'].min(),
+                        color='gray', linestyle='--', linewidth=1, alpha=0.7)
+
+        plt.axhline(y=precision_cutoff,
+                    color='gray', linestyle='--', linewidth=1, alpha=0.7)
+        
+        # Set labels and title
+        plt.xlabel('Decision Threshold', fontsize=14)
+        plt.ylabel('Precision or Recall', fontsize=14)
+        plt.title('Performance Metrics vs. Decision Threshold', fontsize=16)
+        
+        # Add legend
+        plt.legend(fontsize=12)
+        
+        # Set y-axis limits
+        plt.ylim(0, 1.05)
+        
+        # Save or display the plot
+        if dir is None:
+            plt.show()
+        else:
+            file_path = os.path.join(dir, "precision_recall_vs_threshold.png")
+            plt.savefig(file_path, dpi=self._config.file_dpi, 
+                        bbox_inches=self._config.bbox_inches)
+            plt.savefig(file_path.replace(".png", ".svg"), 
+                        format='svg', 
+                        bbox_inches=self._config.bbox_inches)
+        
+        plt.close()
+
+    def _plot_score_vs_variant_counts(self,
+                                      results: VEAnalysisCalibrationResult,
+                                      bins: int,
+                                      dir: str = None):
+        """
+        Plot true histograms showing the distribution of RANK_SCORE values
+        for positive (BINARY_LABEL=1) and negative (BINARY_LABEL=0) variants.
+        
+        Parameters
+        ----------
+        results : VEAnalysisCalibrationResult
+            Calibration result object containing variant scores and labels
+        dir : str, optional
+            Directory to save the plot file
+        """
+        # Get the raw data with individual variant scores
+        df = results.scores_and_labels_df
+        
+        # Separate positive and negative variants
+        positive_variants = df[df['BINARY_LABEL'] == 1]['RANK_SCORE']
+        negative_variants = df[df['BINARY_LABEL'] == 0]['RANK_SCORE']
+        
+        # Create figure
+        plt.figure(figsize=(10, 6))
+        ax = plt.gca()
+        
+        # Define common histogram parameters
+        alpha = 0.6
+        
+        # Plot histograms on the same axis with counts (not density)
+        plt.hist(negative_variants, bins=bins, alpha=alpha, color='blue',
+                 label=f'Benign variants (n={len(negative_variants)})')
+        plt.hist(positive_variants, bins=bins, alpha=alpha, color='red',
+                 label=f'Pathogenic variants (n={len(positive_variants)})')
+
+        # Force y-axis ticks to be integers
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        
+        # Add formatting
+        plt.xlabel('Variant Score', fontsize=14)
+        plt.ylabel('Variant Count', fontsize=14)
+        plt.title('Distribution of Variant Scores by Pathogenicity',
+                  fontsize=16)
+        plt.grid(True, linestyle='--', alpha=0.7)
+        plt.legend(fontsize=12, loc='upper left')
+        
+        # Save or display the plot
+        if dir is None:
+            plt.show()
+        else:
+            file_path = os.path.join(dir, "score_variant_distribution.png")
+            plt.savefig(file_path, dpi=self._config.file_dpi,
+                        bbox_inches=self._config.bbox_inches)
+            plt.savefig(file_path.replace(".png", ".svg"),
+                        format='svg', 
+                        bbox_inches=self._config.bbox_inches)
+        
+        plt.close()
+
+    def plot_calibration_curves(self, results: VEAnalysisCalibrationResult,
+                                pathogenic_benign_variant_count_bins = 30,
+                                pr_threshold_boundary = 0.5,
+                                precision_cutoff = 0.9,
+                                dir: str = None):
+        """
+        Parameters
+        ----------
+        results : VEAnalysisResult
+            Analysis result object
+        variant_effect_source: str
+            Specifies either the user vep name if the user supplied user
+            vep scores in the call to VEAnalyzer.compute_metrics or the
+            name of a system vep to plot.
+        dir : str, optional
+            Directory to place the plot files. The files will
+            be placed in a subdirectory off of this directory
+            whose name begins with ve_analysis_plots and suffixed
+            by a unique timestamp. If not specified will plot
+            to screen.
+        """
+
+        if dir is not None:
+            dir = unique_file_name(dir, "ve_calibration_plots_")
+            create_folder(dir)
+        self._plot_score_vs_pathogenic_fraction(results,
+                                                dir=dir)
+        self._plot_score_vs_variant_counts(
+            results, pathogenic_benign_variant_count_bins, dir
+            )
+        self._plot_metrics_vs_threshold(results, dir=dir)
+
+    def _plot_metrics_vs_threshold(
+            self, results: VEAnalysisCalibrationResult,
+            dir: str = None):
+        """
+        Plot precision, recall, F1 score, and ROC metrics versus threshold values.
+        
+        Parameters
+        ----------
+        results : VEAnalysisCalibrationResult
+            Calibration result object containing precision-recall and ROC curve data
+        dir : str, optional
+            Directory to save the plot file
+        """
+        # Create the plot
+        plt.figure(figsize=(12, 8))
+
+        # Plot Precision vs Threshold
+        pr_coords = results.pr_curve_coordinates.sort_values('THRESHOLD')[:-1]
+        plt.plot(pr_coords['THRESHOLD'], pr_coords['PRECISION'], 
+                 label='Precision', color='blue', linewidth=2)
+        plt.plot(pr_coords['THRESHOLD'], pr_coords['RECALL'], 
+                 label='Recall', color='green', linewidth=2)
+
+        roc_coords = results.roc_curve_coordinates.sort_values(
+            'THRESHOLD')[:-1]
+        plt.plot(roc_coords['THRESHOLD'], roc_coords['TRUE_POSITIVE_RATE'], 
+                 label='True Positive Rate (ROC)', color='orange', linewidth=2)
+        plt.plot(roc_coords['THRESHOLD'], roc_coords['FALSE_POSITIVE_RATE'], 
+                 label='False Positive Rate (ROC)', color='red', linewidth=2)
+
+        # Plot F1 Score vs Threshold
+        f1_coords = results.f1_curve_coordinates.sort_values('THRESHOLD')[:-1]
+        plt.plot(f1_coords['THRESHOLD'], f1_coords['F1_SCORE'], 
+                 label='F1 Score', color='purple', linewidth=2)
+
+        # Set labels and title
+        plt.xlabel('Decision Threshold', fontsize=14)
+        plt.ylabel('Metric Value', fontsize=14)
+        plt.title('Performance Metrics vs. Decision Threshold', fontsize=16)
+
+        # Add legend
+        plt.legend(fontsize=12, loc='best')
+
+        # Set y-axis limits
+        plt.ylim(0, 1.05)
+
+        # Save or display the plot
+        if dir is None:
+            plt.show()
+        else:
+            file_path = os.path.join(dir, "metrics_vs_threshold.png")
+            plt.savefig(file_path, dpi=self._config.file_dpi, 
+                        bbox_inches=self._config.bbox_inches)
+            plt.savefig(file_path.replace(".png", ".svg"), 
+                        format='svg', 
+                        bbox_inches=self._config.bbox_inches)
+        
+        plt.close()

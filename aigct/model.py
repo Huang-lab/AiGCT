@@ -235,3 +235,40 @@ class PkViolations:
     variant_dups: pd.DataFrame
     variant_effect_source_dups: pd.DataFrame
     task_violations: dict[str, TaskPkViolations]
+
+
+@dataclass
+class VEAnalysisCalibrationResult:
+    """
+    Represents the result of calling VEAnalyzer. compute_calibration_metrics.
+
+    Attributes
+    ----------
+    num_variants_included : int
+        The total number of unique variants included in the calibration analysis.
+    vep_name : str
+        Name of the variant effect predictor (VEP) used in the calibration.
+    positive_pr_curve_coordinates : DataFrame
+        Precision-Recall curve coordinates for positive variants with columns:
+        SCORE_SOURCE, PRECISION, RECALL, THRESHOLD
+    negative_pr_curve_coordinates : DataFrame
+        Precision-Recall curve coordinates for negative variants with columns:
+        SCORE_SOURCE, PRECISION, RECALL, THRESHOLD
+    score_pathogenic_fraction_df : DataFrame
+        Pathogenic fraction by score bin with columns:
+        SCORE_RANGE, MEAN_SCORE, NUM_VARIANTS, NUM_PATHOGENIC, 
+        NUM_NEGATIVE_LABELS, PATHOGENIC_FRACTION
+    scores_and_labels_df : DataFrame
+        List of variants included in the calibration analysis with columns:
+        GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+        REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE,
+        BINARY_LABEL, RANK_SCORE
+    """
+
+    num_variants_included: int
+    vep_name: str
+    pr_curve_coordinates: pd.DataFrame
+    roc_curve_coordinates: pd.DataFrame
+    f1_curve_coordinates: pd.DataFrame
+    score_pathogenic_fraction_df: pd.DataFrame
+    scores_and_labels_df: pd.DataFrame

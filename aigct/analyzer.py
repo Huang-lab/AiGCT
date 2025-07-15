@@ -3,7 +3,7 @@ import numpy as np
 from scipy import stats
 from pandas.api.types import is_string_dtype
 from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, auc
-from .model import VEQueryCriteria, VEAnalysisResult
+from .model import VEAnalysisCalibrationResult, VEQueryCriteria, VEAnalysisResult
 from .repository import (
     VariantEffectScoreRepository,
     VariantEffectLabelRepository,
@@ -177,7 +177,9 @@ class VEAnalyzer:
             if include_gene_metrics:
                 genes.append(score_source_gene[1])
             prs, recs, thresholds = precision_recall_curve(
-                scores_labels_df["BINARY_LABEL"], scores_labels_df["RANK_SCORE"]
+                scores_labels_df["BINARY_LABEL"],
+                scores_labels_df["RANK_SCORE"],
+                drop_intermediate=False,
             )
             aucs.append(auc(recs, prs))
             precision_recall_score_sources.extend([score_source] *
@@ -653,3 +655,206 @@ class VEAnalyzer:
             included_variants_df,
             gene_unique_variant_counts_df
         )
+
+    def _compute_pr_calibration_curves(
+        self,
+        task_code: str,
+        scores_and_labels_df: pd.DataFrame,
+    ):
+        positive_ve_scores_and_labels_df = scores_and_labels_df.query(
+            "BINARY_LABEL == 1")
+
+        grouped_ve_scores_labels = positive_ve_scores_and_labels_df.groupby(
+            ["SCORE_SOURCE"])
+        pr_df, positive_pr_curve_coords_df = self._compute_pr(
+            "vep", grouped_ve_scores_labels)
+  
+        negative_ve_scores_and_labels_df = scores_and_labels_df.query(
+            "BINARY_LABEL == 0")
+
+        grouped_ve_scores_labels = negative_ve_scores_and_labels_df.groupby(
+            ["SCORE_SOURCE"])
+        pr_df, negative_pr_curve_coords_df = self._compute_pr(
+            "vep", grouped_ve_scores_labels)
+        return positive_pr_curve_coords_df, negative_pr_curve_coords_df
+
+    def _compute_metrics_vs_threshold(
+        self,
+        scores_and_labels_df: pd.DataFrame,
+    ):
+        grouped_ve_scores_labels = scores_and_labels_df.groupby(
+            ["SCORE_SOURCE"])
+        pr_df, pr_curve_coords_df = self._compute_pr(
+            "vep", grouped_ve_scores_labels)
+        roc_df, roc_curve_coords_df = self._compute_roc(
+            "vep", grouped_ve_scores_labels)
+        f1_curve_coords_df = pd.DataFrame()
+        f1_curve_coords_df["F1_SCORE"] = \
+            2 * ((pr_curve_coords_df["PRECISION"] *
+                 pr_curve_coords_df["RECALL"]) /
+                 (pr_curve_coords_df["PRECISION"] +
+                  pr_curve_coords_df["RECALL"] + 1e-8))
+        f1_curve_coords_df["THRESHOLD"] = pr_curve_coords_df["THRESHOLD"]
+        # f1_scores = 2 * (precision * recall) / (precision + recall + 1e-8)
+        return pr_curve_coords_df, roc_curve_coords_df, f1_curve_coords_df
+
+    def compute_calibration_metrics(
+        self,
+        task_code: str,
+        user_ve_scores: pd.DataFrame = None,
+        user_vep_name: str = "USER",
+        column_name_map: dict = None,
+        variant_effect_source: str = None,
+        pathogenic_fraction_bins: int = 30,
+        variant_query_criteria: VEQueryCriteria = None,
+    ) -> VEAnalysisCalibrationResult:
+        """
+        Generates performance metrics for an optional user supplied set of
+        vep scores and for system supplied vep's. If the user doesn't provide
+        vep scores, will only generate metrics for system veps. Returns
+        an object containing all the metrics which can then be used to
+        generate plots, reports, or csv data files.
+
+        Parameters
+        ----------
+        task_code : str
+            Task code
+        user_ve_scores : DataFrame, optional
+            An optional dataframe of user variant effect prediction
+            scores. Expected to have the following columns:
+            GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+            REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE.
+            The GENOME_ASSEMBLY must be hg38 in current release.
+            RANK_SCORE is a numeric prediction score. It does not have
+            to be standardized or normalized.
+        user_vep_name : str, optional
+            If user_ve_scores are provided, then this is the label to
+            be used for them in the analysis output.
+        column_name_map : dict, optional
+            If the column names in user_ve_scores are not the expected
+            names, then this maps the column names to the expected names.
+        variant_effect_source : str, optional
+            If specified it would restrict the analysis to the
+            system supplied vep's in this list.
+        variant_query_criteria : VEQueryCriteria, optional
+            See description of VEQueryCriteria in model package.
+            Specifies criteria that would limit the set of variants
+            to be included in the analysis.
+
+        Returns
+        -------
+        VEAnalysisResult
+            Object containing computed metrics
+        """
+
+        if user_ve_scores is not None and len(user_ve_scores) > 0:
+            if variant_effect_source is not None:
+                raise Exception(
+                    "Cannot provide a variant_effect_source when user scores"
+                    "are provided"
+                )
+        elif variant_effect_source is None:
+            raise Exception(
+                "Must provide a variant_effect_source when user scores"
+                "are not provided"
+            )
+        vep_name = variant_effect_source if variant_effect_source is not None \
+            else user_vep_name
+
+        validate_query_criteria(variant_query_criteria)
+        scores_and_labels_df = self.get_analysis_scores_and_labels(
+            task_code,
+            user_ve_scores,
+            user_vep_name,
+            column_name_map,
+            variant_effect_sources=[variant_effect_source]
+            if variant_effect_source is not None else None,
+            include_variant_effect_sources=True
+            if variant_effect_source is not None else None,
+            variant_query_criteria=variant_query_criteria,
+        )
+        binned_scores_df = \
+            self._group_scores_into_bins(scores_and_labels_df,
+                                         pathogenic_fraction_bins)
+        """
+        positive_pr_curve_coords_df, negative_pr_curve_coords_df = \
+            self._compute_pr_calibration_curves(task_code,
+                                                scores_and_labels_df)
+        """
+        pr_curve_coords_df, roc_curve_coords_df, \
+            f1_curve_coords_df = self._compute_metrics_vs_threshold(
+                scores_and_labels_df)
+
+        return VEAnalysisCalibrationResult(
+            len(scores_and_labels_df),
+            vep_name,
+            pr_curve_coords_df,
+            roc_curve_coords_df,
+            f1_curve_coords_df,
+            binned_scores_df,
+            scores_and_labels_df[VARIANT_PK_COLUMNS + ["BINARY_LABEL",
+                                                       "RANK_SCORE"]]
+        )
+
+    def _group_scores_into_bins(
+        self, scores_and_labels_df: pd.DataFrame, num_bins: int = 10
+    ) -> pd.DataFrame:
+        """
+        Compute the fraction of pathogenic variants in different score bins.
+
+        Parameters
+        ----------
+        scores_and_labels_df : pd.DataFrame
+            DataFrame containing scores and labels
+        num_bins : int, default 10
+            Number of bins to divide the score range into
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame with bins and pathogenic fractions
+        """
+        # Create a copy to avoid modifying the original
+        df = scores_and_labels_df.copy()
+
+        # Create bins using quantile-based discretization
+        df['SCORE_BIN'], bin_edges = pd.qcut(
+            df['RANK_SCORE'], 
+            num_bins,
+            retbins=True,
+            labels=False,
+            duplicates='drop'
+        )
+
+        bin_boundaries = [(bin_edges[i], bin_edges[i+1])
+                          for i in range(len(bin_edges)-1)]
+
+        # Create bin labels from bin edges
+        bin_labels = [f"{boundary[0]:.2f}-{boundary[1]:.2f}" 
+                      for boundary in bin_boundaries]
+
+        # Compute statistics for each bin
+        bin_stats = df.groupby('SCORE_BIN').agg(
+            NUM_VARIANTS=('BINARY_LABEL', 'count'),
+            NUM_POSITIVE_LABELS=('BINARY_LABEL', 'sum'),
+            NUM_NEGATIVE_LABELS=('BINARY_LABEL', lambda x: (1 - x).sum()),
+            MEAN_SCORE=('RANK_SCORE', 'mean')
+        ).reset_index()
+
+        # Label bins
+        bin_stats['SCORE_RANGE'] = bin_stats['SCORE_BIN'].apply(
+            lambda x: bin_labels[int(x)])
+        bin_stats['LEFT_BOUNDARY_EXCLUSIVE'] = bin_stats['SCORE_BIN'].apply(
+            lambda x: bin_boundaries[int(x)][0])
+        bin_stats['RIGHT_BOUNDARY_INCLUSIVE'] = bin_stats['SCORE_BIN'].apply(
+            lambda x: bin_boundaries[int(x)][1])
+
+        # Select and reorder columns
+        result_df = bin_stats[[
+            'SCORE_RANGE', 'LEFT_BOUNDARY_EXCLUSIVE',
+            'RIGHT_BOUNDARY_INCLUSIVE', 'MEAN_SCORE',
+            'NUM_VARIANTS', 'NUM_POSITIVE_LABELS', 'NUM_NEGATIVE_LABELS'
+        ]]
+
+        return result_df
+
