@@ -77,7 +77,7 @@
   <h1>Source code for aigct.exporter</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">VEAnalysisResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">VEAnalysisCalibrationResult</span><span class="p">,</span> <span class="n">VEAnalysisResult</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.file_util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">unique_file_name</span><span class="p">,</span>
     <span class="n">create_folder</span>
@@ -144,6 +144,38 @@
         <span class="k">if</span> <span class="n">results</span><span class="o">.</span><span class="n">gene_pr_curve_coordinates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">results</span><span class="o">.</span><span class="n">gene_pr_curve_coordinates</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;gene_pr_curve_coords.csv&quot;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalysisExporter.export_calibration_results">
+<a class="viewcode-back" href="../../autoapi/aigct/exporter/index.html#aigct.exporter.VEAnalysisExporter.export_calibration_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_calibration_results</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">VEAnalysisCalibrationResult</span><span class="p">,</span> <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the results of a calibration analysis to data files.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        results : VEAnalysisCalibrationResult</span>
+<span class="sd">            Calibration result object returned by calling</span>
+<span class="sd">            VEAnalyzer.compute_calibration_metrics.</span>
+<span class="sd">        dir : str</span>
+<span class="sd">            Directory to place the data files. The files will</span>
+<span class="sd">            be placed in a subdirectory off of this directory</span>
+<span class="sd">            whose name begins with ve_calibration_data and suffixed</span>
+<span class="sd">            by a unique timestamp.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">dir</span> <span class="o">=</span> <span class="n">unique_file_name</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;ve_calibration_data_&quot;</span><span class="p">)</span>
+        <span class="n">create_folder</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">pr_curve_coordinates_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;pr_curve_coords.csv&quot;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">f1_curve_coordinates_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;f1_curve_coords.csv&quot;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">score_pathogenic_fraction_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;binned_scores.csv&quot;</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">scores_and_labels_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;included_variants.csv&quot;</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

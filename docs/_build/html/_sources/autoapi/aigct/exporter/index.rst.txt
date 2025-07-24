@@ -36,3 +36,20 @@ Module Contents
 
 
 
+   .. py:method:: export_calibration_results(results: aigct.model.VEAnalysisCalibrationResult, dir: str)
+
+      Export the results of a calibration analysis to data files.
+
+      Parameters
+      ----------
+      results : VEAnalysisCalibrationResult
+          Calibration result object returned by calling
+          VEAnalyzer.compute_calibration_metrics.
+      dir : str
+          Directory to place the data files. The files will
+          be placed in a subdirectory off of this directory
+          whose name begins with ve_calibration_data and suffixed
+          by a unique timestamp.
+
+
+

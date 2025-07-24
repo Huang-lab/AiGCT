@@ -327,6 +327,95 @@ as well as for each system vep.</p>
 </section>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.analyzer.VEAnalyzer._compute_pr_calibration_curves">
+<span class="sig-name descname"><span class="pre">_compute_pr_calibration_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores_and_labels_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/analyzer.html#VEAnalyzer._compute_pr_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.analyzer.VEAnalyzer._compute_pr_calibration_curves" title="Link to this definition"></a></dt>
+<dd><p>Obsolute method. To be removed in future releases.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.analyzer.VEAnalyzer._compute_metrics_vs_threshold">
+<span class="sig-name descname"><span class="pre">_compute_metrics_vs_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scores_and_labels_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/analyzer.html#VEAnalyzer._compute_metrics_vs_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.analyzer.VEAnalyzer._compute_metrics_vs_threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.analyzer.VEAnalyzer.compute_calibration_metrics">
+<span class="sig-name descname"><span class="pre">compute_calibration_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_ve_scores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_vep_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'USER'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_name_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant_effect_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pathogenic_fraction_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant_query_criteria</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEQueryCriteria" title="aigct.model.VEQueryCriteria"><span class="pre">aigct.model.VEQueryCriteria</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></span><a class="reference internal" href="../../../_modules/aigct/analyzer.html#VEAnalyzer.compute_calibration_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.analyzer.VEAnalyzer.compute_calibration_metrics" title="Link to this definition"></a></dt>
+<dd><p>Generates calibration related metrics for either a user
+supplied set of vep scores or for a system supplied vep. These
+metrics are used to determine how accurate a vep predicts
+pathogenic variants. Returns an object containing all
+the metrics which can then be used to
+generate plots, reports, or csv data files by calling the
+VEPlotter.plot_calibration_curves method.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>task_code<span class="classifier">str</span></dt><dd><p>Task code</p>
+</dd>
+<dt>user_ve_scores<span class="classifier">DataFrame, optional</span></dt><dd><p>An optional dataframe of user variant effect prediction
+scores. Expected to have the following columns:
+GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE.
+The GENOME_ASSEMBLY must be hg38 in current release.
+RANK_SCORE is a numeric prediction score. It does not have
+to be standardized or normalized.
+If specified the analysis would be performed on these scores
+instead of a system supplied vep.</p>
+</dd>
+<dt>user_vep_name<span class="classifier">str, optional</span></dt><dd><p>If user_ve_scores are provided, then this is the label to
+be used for them in the analysis output.</p>
+</dd>
+<dt>column_name_map<span class="classifier">dict, optional</span></dt><dd><p>If the column names in user_ve_scores are not the expected
+names, then this maps the column names to the expected names.</p>
+</dd>
+<dt>variant_effect_source<span class="classifier">str, optional</span></dt><dd><p>You specify either user_ve_scores or variant_effect_source.
+If specified it would perform the analysis on this system
+supplied vep.</p>
+</dd>
+<dt>pathogenic_fraction_bins<span class="classifier">int, optional</span></dt><dd><p>The number of bins to use when grouping the scores into
+bins. It will split the variants into equal sized bins based
+on the score and then compute the mean score and pathogenic
+fraction for each bin.</p>
+</dd>
+<dt>variant_query_criteria<span class="classifier">VEQueryCriteria, optional</span></dt><dd><p>See description of VEQueryCriteria in model package.
+Specifies criteria that would limit the set of variants
+to be included in the analysis.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>VEAnalysisCalibrationResult</dt><dd><p>Object containing computed metrics</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.analyzer.VEAnalyzer._group_scores_into_bins">
+<span class="sig-name descname"><span class="pre">_group_scores_into_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scores_and_labels_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/analyzer.html#VEAnalyzer._group_scores_into_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.analyzer.VEAnalyzer._group_scores_into_bins" title="Link to this definition"></a></dt>
+<dd><p>Groups the scores and labels into equal width bins based on
+the score.</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>scores_and_labels_df<span class="classifier">pd.DataFrame</span></dt><dd><p>DataFrame containing scores and labels</p>
+</dd>
+<dt>num_bins<span class="classifier">int, default 10</span></dt><dd><p>Number of bins to divide the score range into</p>
+</dd>
+</dl>
+</section>
+<section id="id6">
+<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>pd.DataFrame</dt><dd><p>DataFrame with bins and pathogenic fractions</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
 </dd></dl>
 
 </section>

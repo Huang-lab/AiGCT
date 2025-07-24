@@ -80,7 +80,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_string_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">precision_recall_curve</span><span class="p">,</span> <span class="n">auc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">VEQueryCriteria</span><span class="p">,</span> <span class="n">VEAnalysisResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">VEAnalysisCalibrationResult</span><span class="p">,</span> <span class="n">VEQueryCriteria</span><span class="p">,</span> <span class="n">VEAnalysisResult</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.repository</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">VariantEffectScoreRepository</span><span class="p">,</span>
     <span class="n">VariantEffectLabelRepository</span><span class="p">,</span>
@@ -276,7 +276,9 @@
             <span class="k">if</span> <span class="n">include_gene_metrics</span><span class="p">:</span>
                 <span class="n">genes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score_source_gene</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">prs</span><span class="p">,</span> <span class="n">recs</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="n">precision_recall_curve</span><span class="p">(</span>
-                <span class="n">scores_labels_df</span><span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">],</span> <span class="n">scores_labels_df</span><span class="p">[</span><span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">]</span>
+                <span class="n">scores_labels_df</span><span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">],</span>
+                <span class="n">scores_labels_df</span><span class="p">[</span><span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">],</span>
+                <span class="n">drop_intermediate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">aucs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">auc</span><span class="p">(</span><span class="n">recs</span><span class="p">,</span> <span class="n">prs</span><span class="p">))</span>
             <span class="n">precision_recall_score_sources</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">score_source</span><span class="p">]</span> <span class="o">*</span>
@@ -782,7 +784,235 @@
             <span class="n">included_variants_df</span><span class="p">,</span>
             <span class="n">gene_unique_variant_counts_df</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._compute_pr_calibration_curves">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._compute_pr_calibration_curves">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_pr_calibration_curves</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">scores_and_labels_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obsolute method. To be removed in future releases.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">positive_ve_scores_and_labels_df</span> <span class="o">=</span> <span class="n">scores_and_labels_df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="s2">&quot;BINARY_LABEL == 1&quot;</span><span class="p">)</span>
+
+        <span class="n">grouped_ve_scores_labels</span> <span class="o">=</span> <span class="n">positive_ve_scores_and_labels_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">])</span>
+        <span class="n">pr_df</span><span class="p">,</span> <span class="n">positive_pr_curve_coords_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_pr</span><span class="p">(</span>
+            <span class="s2">&quot;vep&quot;</span><span class="p">,</span> <span class="n">grouped_ve_scores_labels</span><span class="p">)</span>
+  
+        <span class="n">negative_ve_scores_and_labels_df</span> <span class="o">=</span> <span class="n">scores_and_labels_df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="s2">&quot;BINARY_LABEL == 0&quot;</span><span class="p">)</span>
+
+        <span class="n">grouped_ve_scores_labels</span> <span class="o">=</span> <span class="n">negative_ve_scores_and_labels_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">])</span>
+        <span class="n">pr_df</span><span class="p">,</span> <span class="n">negative_pr_curve_coords_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_pr</span><span class="p">(</span>
+            <span class="s2">&quot;vep&quot;</span><span class="p">,</span> <span class="n">grouped_ve_scores_labels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">positive_pr_curve_coords_df</span><span class="p">,</span> <span class="n">negative_pr_curve_coords_df</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._compute_metrics_vs_threshold">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._compute_metrics_vs_threshold">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_metrics_vs_threshold</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scores_and_labels_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">grouped_ve_scores_labels</span> <span class="o">=</span> <span class="n">scores_and_labels_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;SCORE_SOURCE&quot;</span><span class="p">])</span>
+        <span class="n">pr_df</span><span class="p">,</span> <span class="n">pr_curve_coords_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_pr</span><span class="p">(</span>
+            <span class="s2">&quot;vep&quot;</span><span class="p">,</span> <span class="n">grouped_ve_scores_labels</span><span class="p">)</span>
+        <span class="n">roc_df</span><span class="p">,</span> <span class="n">roc_curve_coords_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_roc</span><span class="p">(</span>
+            <span class="s2">&quot;vep&quot;</span><span class="p">,</span> <span class="n">grouped_ve_scores_labels</span><span class="p">)</span>
+        <span class="n">f1_curve_coords_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">f1_curve_coords_df</span><span class="p">[</span><span class="s2">&quot;F1_SCORE&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="mi">2</span> <span class="o">*</span> <span class="p">((</span><span class="n">pr_curve_coords_df</span><span class="p">[</span><span class="s2">&quot;PRECISION&quot;</span><span class="p">]</span> <span class="o">*</span>
+                 <span class="n">pr_curve_coords_df</span><span class="p">[</span><span class="s2">&quot;RECALL&quot;</span><span class="p">])</span> <span class="o">/</span>
+                 <span class="p">(</span><span class="n">pr_curve_coords_df</span><span class="p">[</span><span class="s2">&quot;PRECISION&quot;</span><span class="p">]</span> <span class="o">+</span>
+                  <span class="n">pr_curve_coords_df</span><span class="p">[</span><span class="s2">&quot;RECALL&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">))</span>
+        <span class="n">f1_curve_coords_df</span><span class="p">[</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pr_curve_coords_df</span><span class="p">[</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span>
+        <span class="c1"># f1_scores = 2 * (precision * recall) / (precision + recall + 1e-8)</span>
+        <span class="k">return</span> <span class="n">pr_curve_coords_df</span><span class="p">,</span> <span class="n">roc_curve_coords_df</span><span class="p">,</span> <span class="n">f1_curve_coords_df</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer.compute_calibration_metrics">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer.compute_calibration_metrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_calibration_metrics</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">user_ve_scores</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">user_vep_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;USER&quot;</span><span class="p">,</span>
+        <span class="n">column_name_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variant_effect_source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pathogenic_fraction_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">variant_query_criteria</span><span class="p">:</span> <span class="n">VEQueryCriteria</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VEAnalysisCalibrationResult</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates calibration related metrics for either a user</span>
+<span class="sd">        supplied set of vep scores or for a system supplied vep. These</span>
+<span class="sd">        metrics are used to determine how accurate a vep predicts</span>
+<span class="sd">        pathogenic variants. Returns an object containing all</span>
+<span class="sd">        the metrics which can then be used to</span>
+<span class="sd">        generate plots, reports, or csv data files by calling the</span>
+<span class="sd">        VEPlotter.plot_calibration_curves method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task_code : str</span>
+<span class="sd">            Task code</span>
+<span class="sd">        user_ve_scores : DataFrame, optional</span>
+<span class="sd">            An optional dataframe of user variant effect prediction</span>
+<span class="sd">            scores. Expected to have the following columns:</span>
+<span class="sd">            GENOME_ASSEMBLY, CHROMOSOME, POSITION,</span>
+<span class="sd">            REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE, RANK_SCORE.</span>
+<span class="sd">            The GENOME_ASSEMBLY must be hg38 in current release.</span>
+<span class="sd">            RANK_SCORE is a numeric prediction score. It does not have</span>
+<span class="sd">            to be standardized or normalized.</span>
+<span class="sd">            If specified the analysis would be performed on these scores</span>
+<span class="sd">            instead of a system supplied vep.</span>
+<span class="sd">        user_vep_name : str, optional</span>
+<span class="sd">            If user_ve_scores are provided, then this is the label to</span>
+<span class="sd">            be used for them in the analysis output.</span>
+<span class="sd">        column_name_map : dict, optional</span>
+<span class="sd">            If the column names in user_ve_scores are not the expected</span>
+<span class="sd">            names, then this maps the column names to the expected names.</span>
+<span class="sd">        variant_effect_source : str, optional</span>
+<span class="sd">            You specify either user_ve_scores or variant_effect_source.</span>
+<span class="sd">            If specified it would perform the analysis on this system</span>
+<span class="sd">            supplied vep.</span>
+<span class="sd">        pathogenic_fraction_bins : int, optional</span>
+<span class="sd">            The number of bins to use when grouping the scores into</span>
+<span class="sd">            bins. It will split the variants into equal sized bins based</span>
+<span class="sd">            on the score and then compute the mean score and pathogenic</span>
+<span class="sd">            fraction for each bin.</span>
+<span class="sd">        variant_query_criteria : VEQueryCriteria, optional</span>
+<span class="sd">            See description of VEQueryCriteria in model package.</span>
+<span class="sd">            Specifies criteria that would limit the set of variants</span>
+<span class="sd">            to be included in the analysis.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        VEAnalysisCalibrationResult</span>
+<span class="sd">            Object containing computed metrics</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">user_ve_scores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">user_ve_scores</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">variant_effect_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;Cannot provide a variant_effect_source when user scores&quot;</span>
+                    <span class="s2">&quot;are provided&quot;</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">variant_effect_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Must provide a variant_effect_source when user scores&quot;</span>
+                <span class="s2">&quot;are not provided&quot;</span>
+            <span class="p">)</span>
+        <span class="n">vep_name</span> <span class="o">=</span> <span class="n">variant_effect_source</span> <span class="k">if</span> <span class="n">variant_effect_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="n">user_vep_name</span>
+
+        <span class="n">validate_query_criteria</span><span class="p">(</span><span class="n">variant_query_criteria</span><span class="p">)</span>
+        <span class="n">scores_and_labels_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_analysis_scores_and_labels</span><span class="p">(</span>
+            <span class="n">task_code</span><span class="p">,</span>
+            <span class="n">user_ve_scores</span><span class="p">,</span>
+            <span class="n">user_vep_name</span><span class="p">,</span>
+            <span class="n">column_name_map</span><span class="p">,</span>
+            <span class="n">variant_effect_sources</span><span class="o">=</span><span class="p">[</span><span class="n">variant_effect_source</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">variant_effect_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">include_variant_effect_sources</span><span class="o">=</span><span class="kc">True</span>
+            <span class="k">if</span> <span class="n">variant_effect_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">variant_query_criteria</span><span class="o">=</span><span class="n">variant_query_criteria</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">binned_scores_df</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_group_scores_into_bins</span><span class="p">(</span><span class="n">scores_and_labels_df</span><span class="p">,</span>
+                                         <span class="n">pathogenic_fraction_bins</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        positive_pr_curve_coords_df, negative_pr_curve_coords_df = \</span>
+<span class="sd">            self._compute_pr_calibration_curves(task_code,</span>
+<span class="sd">                                                scores_and_labels_df)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pr_curve_coords_df</span><span class="p">,</span> <span class="n">roc_curve_coords_df</span><span class="p">,</span> \
+            <span class="n">f1_curve_coords_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_metrics_vs_threshold</span><span class="p">(</span>
+                <span class="n">scores_and_labels_df</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">VEAnalysisCalibrationResult</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">scores_and_labels_df</span><span class="p">),</span>
+            <span class="n">vep_name</span><span class="p">,</span>
+            <span class="n">pr_curve_coords_df</span><span class="p">,</span>
+            <span class="n">f1_curve_coords_df</span><span class="p">,</span>
+            <span class="n">binned_scores_df</span><span class="p">,</span>
+            <span class="n">scores_and_labels_df</span><span class="p">[</span><span class="n">VARIANT_PK_COLUMNS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;BINARY_LABEL&quot;</span><span class="p">,</span>
+                                                       <span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">]]</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VEAnalyzer._group_scores_into_bins">
+<a class="viewcode-back" href="../../autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._group_scores_into_bins">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_group_scores_into_bins</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">scores_and_labels_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">num_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Groups the scores and labels into equal width bins based on</span>
+<span class="sd">        the score.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        scores_and_labels_df : pd.DataFrame</span>
+<span class="sd">            DataFrame containing scores and labels</span>
+<span class="sd">        num_bins : int, default 10</span>
+<span class="sd">            Number of bins to divide the score range into</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame with bins and pathogenic fractions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create a copy to avoid modifying the original</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">scores_and_labels_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Create bins using quantile-based discretization</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;SCORE_BIN&#39;</span><span class="p">],</span> <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">],</span>
+            <span class="n">num_bins</span><span class="p">,</span>
+            <span class="n">retbins</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">duplicates</span><span class="o">=</span><span class="s1">&#39;drop&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">bin_boundaries</span> <span class="o">=</span> <span class="p">[(</span><span class="n">bin_edges</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">bin_edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                          <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bin_edges</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+
+        <span class="c1"># Create bin labels from bin edges</span>
+        <span class="n">bin_labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span> 
+                      <span class="k">for</span> <span class="n">boundary</span> <span class="ow">in</span> <span class="n">bin_boundaries</span><span class="p">]</span>
+
+        <span class="c1"># Compute statistics for each bin</span>
+        <span class="n">bin_stats</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;SCORE_BIN&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+            <span class="n">NUM_VARIANTS</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">),</span>
+            <span class="n">NUM_POSITIVE_LABELS</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">),</span>
+            <span class="n">NUM_NEGATIVE_LABELS</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;BINARY_LABEL&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+            <span class="n">MEAN_SCORE</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RANK_SCORE&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="c1"># Label bins</span>
+        <span class="n">bin_stats</span><span class="p">[</span><span class="s1">&#39;SCORE_RANGE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin_stats</span><span class="p">[</span><span class="s1">&#39;SCORE_BIN&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">bin_labels</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span>
+        <span class="n">bin_stats</span><span class="p">[</span><span class="s1">&#39;LEFT_BOUNDARY_EXCLUSIVE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin_stats</span><span class="p">[</span><span class="s1">&#39;SCORE_BIN&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">bin_boundaries</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">bin_stats</span><span class="p">[</span><span class="s1">&#39;RIGHT_BOUNDARY_INCLUSIVE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin_stats</span><span class="p">[</span><span class="s1">&#39;SCORE_BIN&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">bin_boundaries</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)][</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Select and reorder columns</span>
+        <span class="n">result_df</span> <span class="o">=</span> <span class="n">bin_stats</span><span class="p">[[</span>
+            <span class="s1">&#39;SCORE_RANGE&#39;</span><span class="p">,</span> <span class="s1">&#39;LEFT_BOUNDARY_EXCLUSIVE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;RIGHT_BOUNDARY_INCLUSIVE&#39;</span><span class="p">,</span> <span class="s1">&#39;MEAN_SCORE&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;NUM_VARIANTS&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_POSITIVE_LABELS&#39;</span><span class="p">,</span> <span class="s1">&#39;NUM_NEGATIVE_LABELS&#39;</span>
+        <span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">result_df</span></div>
 </div>
+
 
 </pre></div>
 

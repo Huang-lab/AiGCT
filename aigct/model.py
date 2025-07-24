@@ -240,24 +240,31 @@ class PkViolations:
 @dataclass
 class VEAnalysisCalibrationResult:
     """
-    Represents the result of calling VEAnalyzer. compute_calibration_metrics.
+    Represents the result of calling VEAnalyzer.compute_calibration_metrics.
 
     Attributes
     ----------
     num_variants_included : int
-        The total number of unique variants included in the calibration analysis.
+        The total number of unique variants included in the calibration
+        analysis.
     vep_name : str
         Name of the variant effect predictor (VEP) used in the calibration.
-    positive_pr_curve_coordinates : DataFrame
-        Precision-Recall curve coordinates for positive variants with columns:
+        It could be system vep or a user supplied vep name.
+    pr_curve_coordinates_df : DataFrame
+        Precision-Recall curve coordinates for variants with columns:
         SCORE_SOURCE, PRECISION, RECALL, THRESHOLD
-    negative_pr_curve_coordinates : DataFrame
-        Precision-Recall curve coordinates for negative variants with columns:
-        SCORE_SOURCE, PRECISION, RECALL, THRESHOLD
+    f1_curve_coordinates_df : DataFrame
+        f1 score curve coordinates for variants with columns:
+        F1_SCORE, THRESHOLD
     score_pathogenic_fraction_df : DataFrame
-        Pathogenic fraction by score bin with columns:
-        SCORE_RANGE, MEAN_SCORE, NUM_VARIANTS, NUM_PATHOGENIC, 
-        NUM_NEGATIVE_LABELS, PATHOGENIC_FRACTION
+        Statistics about positive and negative variants in different score
+        bins. The variants are grouped into equal sized bins based on their
+        score and the mean score and fraction of positive (pathogenic)
+        variants in each bin is computed.
+        Columns:
+        SCORE_RANGE, LEFT_BOUNDARY_EXCLUSIVE,
+        RIGHT_BOUNDARY_INCLUSIVE, MEAN_SCORE,
+        NUM_VARIANTS, NUM_POSITIVE_LABELS, NUM_NEGATIVE_LABELS
     scores_and_labels_df : DataFrame
         List of variants included in the calibration analysis with columns:
         GENOME_ASSEMBLY, CHROMOSOME, POSITION,
@@ -267,8 +274,7 @@ class VEAnalysisCalibrationResult:
 
     num_variants_included: int
     vep_name: str
-    pr_curve_coordinates: pd.DataFrame
-    roc_curve_coordinates: pd.DataFrame
-    f1_curve_coordinates: pd.DataFrame
+    pr_curve_coordinates_df: pd.DataFrame
+    f1_curve_coordinates_df: pd.DataFrame
     score_pathogenic_fraction_df: pd.DataFrame
     scores_and_labels_df: pd.DataFrame

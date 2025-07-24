@@ -661,6 +661,9 @@ class VEAnalyzer:
         task_code: str,
         scores_and_labels_df: pd.DataFrame,
     ):
+        """
+        Obsolute method. To be removed in future releases.
+        """
         positive_ve_scores_and_labels_df = scores_and_labels_df.query(
             "BINARY_LABEL == 1")
 
@@ -709,11 +712,13 @@ class VEAnalyzer:
         variant_query_criteria: VEQueryCriteria = None,
     ) -> VEAnalysisCalibrationResult:
         """
-        Generates performance metrics for an optional user supplied set of
-        vep scores and for system supplied vep's. If the user doesn't provide
-        vep scores, will only generate metrics for system veps. Returns
-        an object containing all the metrics which can then be used to
-        generate plots, reports, or csv data files.
+        Generates calibration related metrics for either a user
+        supplied set of vep scores or for a system supplied vep. These
+        metrics are used to determine how accurate a vep predicts
+        pathogenic variants. Returns an object containing all
+        the metrics which can then be used to
+        generate plots, reports, or csv data files by calling the
+        VEPlotter.plot_calibration_curves method.
 
         Parameters
         ----------
@@ -727,6 +732,8 @@ class VEAnalyzer:
             The GENOME_ASSEMBLY must be hg38 in current release.
             RANK_SCORE is a numeric prediction score. It does not have
             to be standardized or normalized.
+            If specified the analysis would be performed on these scores
+            instead of a system supplied vep.
         user_vep_name : str, optional
             If user_ve_scores are provided, then this is the label to
             be used for them in the analysis output.
@@ -734,8 +741,14 @@ class VEAnalyzer:
             If the column names in user_ve_scores are not the expected
             names, then this maps the column names to the expected names.
         variant_effect_source : str, optional
-            If specified it would restrict the analysis to the
-            system supplied vep's in this list.
+            You specify either user_ve_scores or variant_effect_source.
+            If specified it would perform the analysis on this system
+            supplied vep.
+        pathogenic_fraction_bins : int, optional
+            The number of bins to use when grouping the scores into
+            bins. It will split the variants into equal sized bins based
+            on the score and then compute the mean score and pathogenic
+            fraction for each bin.
         variant_query_criteria : VEQueryCriteria, optional
             See description of VEQueryCriteria in model package.
             Specifies criteria that would limit the set of variants
@@ -743,7 +756,7 @@ class VEAnalyzer:
 
         Returns
         -------
-        VEAnalysisResult
+        VEAnalysisCalibrationResult
             Object containing computed metrics
         """
 
@@ -789,7 +802,6 @@ class VEAnalyzer:
             len(scores_and_labels_df),
             vep_name,
             pr_curve_coords_df,
-            roc_curve_coords_df,
             f1_curve_coords_df,
             binned_scores_df,
             scores_and_labels_df[VARIANT_PK_COLUMNS + ["BINARY_LABEL",
@@ -800,7 +812,8 @@ class VEAnalyzer:
         self, scores_and_labels_df: pd.DataFrame, num_bins: int = 10
     ) -> pd.DataFrame:
         """
-        Compute the fraction of pathogenic variants in different score bins.
+        Groups the scores and labels into equal width bins based on
+        the score.
 
         Parameters
         ----------
@@ -818,8 +831,8 @@ class VEAnalyzer:
         df = scores_and_labels_df.copy()
 
         # Create bins using quantile-based discretization
-        df['SCORE_BIN'], bin_edges = pd.qcut(
-            df['RANK_SCORE'], 
+        df['SCORE_BIN'], bin_edges = pd.cut(
+            df['RANK_SCORE'],
             num_bins,
             retbins=True,
             labels=False,

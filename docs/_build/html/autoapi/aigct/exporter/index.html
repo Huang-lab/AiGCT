@@ -146,6 +146,25 @@ by a unique timestamp.</p>
 </section>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.exporter.VEAnalysisExporter.export_calibration_results">
+<span class="sig-name descname"><span class="pre">export_calibration_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/exporter.html#VEAnalysisExporter.export_calibration_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.exporter.VEAnalysisExporter.export_calibration_results" title="Link to this definition"></a></dt>
+<dd><p>Export the results of a calibration analysis to data files.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>results<span class="classifier">VEAnalysisCalibrationResult</span></dt><dd><p>Calibration result object returned by calling
+VEAnalyzer.compute_calibration_metrics.</p>
+</dd>
+<dt>dir<span class="classifier">str</span></dt><dd><p>Directory to place the data files. The files will
+be placed in a subdirectory off of this directory
+whose name begins with ve_calibration_data and suffixed
+by a unique timestamp.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
 </dd></dl>
 
 </section>

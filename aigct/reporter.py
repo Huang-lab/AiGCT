@@ -1,5 +1,6 @@
 import pandas as pd
 from .model import (
+    VEAnalysisCalibrationResult,
     VEAnalysisResult
 )
 from .repository import (
@@ -116,6 +117,50 @@ class VEAnalysisReporter:
                 self._write_summary(out, metrics)
         else:
             self._write_summary(sys.stdout, metrics)
+
+    def write_calibration_summary(self, metrics: VEAnalysisCalibrationResult,
+                                  dir: str = None):
+        """
+        Generate a report summarizing the results of a calibration
+        analysis. It will be written either to the screen or to a file.
+
+        Parameters
+        ----------
+        results : VEAnalysisCalibrationResult
+            Calibration result object returned by calling
+            VEAnalyzer.compute_calibration_metrics.
+        dir : str, optional
+            Directory to place the report file. The file name will
+            begin with variant_bm_calibration_summary and suffixed
+            by a unique timestamp. If not specified will print to the
+            screen.
+        """
+        if dir is not None:
+            outfile = os.path.join(dir, now_str_compact(
+                "variant_bm_calibration_summary")
+                                   + ".txt")
+            with open(outfile, "w") as out:
+                self._write_calibration_summary(out, metrics)
+        else:
+            self._write_calibration_summary(sys.stdout, metrics)
+
+    def _write_calibration_summary(
+            self, out, metrics: VEAnalysisCalibrationResult):
+        new_line(out)
+        out.write("Summary calibration metrics for Variant Effect " +
+                  "Prediction Benchmark: " + now_str_basic_format())
+        new_line(out, 2)
+        out.write("VEP Analyzed: " + metrics.vep_name)
+        new_line(out, 2)
+        out.write("Total number of variants in analysis: " +
+                  str(metrics.num_variants_included))
+        new_line(out, 2)
+        out.write("Binned Scores and Labels")
+        new_line(out, 2)
+        self._write_metric_dataframe(
+            out, metrics.score_pathogenic_fraction_df.sort_values(
+                by="MEAN_SCORE"))
+        
         
         
         
