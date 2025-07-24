@@ -193,7 +193,7 @@ Issue the following to export the raw analysis result data underlying the
 plots and tables to csv files that can be used to produce your own plots or to do
 further analysis.
 
-    container.exporter.plot_results(metrics, "<export_dir>")
+    container.exporter.export_results(metrics, "<export_dir>")
 
 The second parameter is the name of a directory where you want the results to be exported.
 It will generate a series of files in a uniquely named subdirectory of this directory.

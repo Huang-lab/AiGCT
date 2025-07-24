@@ -29,6 +29,9 @@ Module Contents
    .. py:attribute:: _mwu_config
 
 
+   .. py:attribute:: _calibration_line_config
+
+
    .. py:method:: _plot_roc_curves(aucs: pandas.DataFrame, user_vep_name: str, curve_coords: pandas.DataFrame, batch_no: int, num_batches: int, num_top_labelled_veps: int, ves_color_palette: dict, file_name: str = None)
 
 
@@ -108,5 +111,114 @@ Module Contents
 
 
    .. py:method:: _display_gene_metric_table(metrics_df: pandas.DataFrame, metric_column: str, metric_display_name: str, title: str, file_name: str = None)
+
+
+   .. py:method:: _plot_score_vs_pathogenic_fraction(axes, results, annotate: bool = False, dir: str = None)
+
+      Plot the fraction of pathogenic variants versus mean score as a line
+      plot.
+
+      Parameters
+      ----------
+      axes : matplotlib.axes.Axes
+          Matplotlib axes object to plot on
+      results : VEAnalysisCalibrationResult
+          Calibration result object containing score bins
+      annotate : bool, optional
+          If True, annotate each point with the score range
+      dir : str, optional
+          Directory to save the plot file
+
+
+
+   .. py:method:: _plot_precision_recall_vs_thresholds1(results: aigct.model.VEAnalysisCalibrationResult, dir: str = None)
+
+      Obsolete to be removed.
+      Plot precision, recall, and F1 score versus threshold values.
+
+      Parameters
+      ----------
+      results : VEAnalysisCalibrationResult
+          Calibration result object containing precision-recall curve data
+      dir : str, optional
+          Directory to save the plot file
+
+
+
+   .. py:method:: _plot_precision_recall_vs_threshold(results: aigct.model.VEAnalysisCalibrationResult, threshold_boundary: float = 0.5, precision_cutoff: float = 0.9, dir: str = None)
+
+      Obsolete to be removed.
+      Plot precision, recall, and F1 score versus threshold values.
+
+      Parameters
+      ----------
+      results : VEAnalysisCalibrationResult
+          Calibration result object containing precision-recall curve data
+      dir : str, optional
+          Directory to save the plot file
+
+
+
+   .. py:method:: _plot_score_vs_variant_counts(axes, results: aigct.model.VEAnalysisCalibrationResult, bins: int, dir: str = None)
+
+      Plot histograms showing the distribution of RANK_SCORE values
+      for positive (BINARY_LABEL=1) and negative (BINARY_LABEL=0) variants.
+
+      Parameters
+      ----------
+      results : VEAnalysisCalibrationResult
+          Calibration result object containing variant scores and labels
+      axes : matplotlib.axes.Axes
+          Matplotlib axes object to plot on
+      bins : int
+          Number of bins to use for the histogram
+      dir : str, optional
+          Directory to save the plot file
+
+
+
+   .. py:method:: plot_calibration_curves(results: aigct.model.VEAnalysisCalibrationResult, target_precision: float = None, target_recall: float = None, target_f1: float = None, dir: str = None)
+
+      Plot the results of calling VEAnalyzer.compute_calibration_metrics.
+      Generates 3 plots:
+      1. Pathogenic fraction by score interval
+      2. Distribution of variant scores by pathogenicity
+      3. Precision, recall, and F1 score versus threshold values
+
+      The first 2 plots are vertically stacked in a single figure.
+
+      Parameters
+      ----------
+      results : VEAnalysisCalibrationResult
+          Calibration result object returned by calling
+          VEAnalyzer.compute_calibration_metrics.
+      target_precision: float, optional
+          If specified, will plot a vertical line at the threshold
+          that achieves the target precision.
+      target_recall: float, optional
+          If specified, will plot a vertical line at the threshold
+          that achieves the target recall.
+      target_f1: float, optional
+          If specified, will plot a vertical line at the threshold
+          that achieves the target f1 score.
+      dir : str, optional
+          Directory to place the plot files. The files will
+          be placed in a subdirectory off of this directory
+          whose name begins with ve_calibration_plots and suffixed
+          by a unique timestamp. If not specified will plot
+          to screen.
+
+
+
+   .. py:method:: _plot_binned_data(results: aigct.model.VEAnalysisCalibrationResult, dir: str = None)
+
+      Plot the binned data as 2 subplots vertically stacked.
+
+
+
+   .. py:method:: _plot_metrics_vs_threshold(results: aigct.model.VEAnalysisCalibrationResult, target_precision: float = None, target_recall: float = None, target_f1: float = None, dir: str = None)
+
+      Plot precision, recall, F1 score, versus threshold values.
+
 
 

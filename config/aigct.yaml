@@ -53,4 +53,13 @@ plot:
     x_tick_label_size: 8
     xtick_rotation: 60
     xtick_rotation_mode: anchor
+  calibration_line:
+    pathogenic_fraction_title: Pathogenic Fraction by Score
+    metrics_vs_threshold_title: Metrics vs Threshold
+    x_axis_font_size: 25
+    y_axis_font_size: 25
+    label_size: 20
+    title_font_size: 30
+    legend_font_size: 10
+    legend_line_width: 3.0
 

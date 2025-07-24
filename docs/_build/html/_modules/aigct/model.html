@@ -474,6 +474,70 @@
     <span class="n">task_violations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TaskPkViolations</span><span class="p">]</span></div>
 </div>
 
+
+
+<span class="nd">@dataclass</span>
+<div class="viewcode-block" id="VEAnalysisCalibrationResult">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisCalibrationResult">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VEAnalysisCalibrationResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the result of calling VEAnalyzer.compute_calibration_metrics.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    num_variants_included : int</span>
+<span class="sd">        The total number of unique variants included in the calibration</span>
+<span class="sd">        analysis.</span>
+<span class="sd">    vep_name : str</span>
+<span class="sd">        Name of the variant effect predictor (VEP) used in the calibration.</span>
+<span class="sd">        It could be system vep or a user supplied vep name.</span>
+<span class="sd">    pr_curve_coordinates_df : DataFrame</span>
+<span class="sd">        Precision-Recall curve coordinates for variants with columns:</span>
+<span class="sd">        SCORE_SOURCE, PRECISION, RECALL, THRESHOLD</span>
+<span class="sd">    f1_curve_coordinates_df : DataFrame</span>
+<span class="sd">        f1 score curve coordinates for variants with columns:</span>
+<span class="sd">        F1_SCORE, THRESHOLD</span>
+<span class="sd">    score_pathogenic_fraction_df : DataFrame</span>
+<span class="sd">        Statistics about positive and negative variants in different score</span>
+<span class="sd">        bins. The variants are grouped into equal sized bins based on their</span>
+<span class="sd">        score and the mean score and fraction of positive (pathogenic)</span>
+<span class="sd">        variants in each bin is computed.</span>
+<span class="sd">        Columns:</span>
+<span class="sd">        SCORE_RANGE, LEFT_BOUNDARY_EXCLUSIVE,</span>
+<span class="sd">        RIGHT_BOUNDARY_INCLUSIVE, MEAN_SCORE,</span>
+<span class="sd">        NUM_VARIANTS, NUM_POSITIVE_LABELS, NUM_NEGATIVE_LABELS</span>
+<span class="sd">    scores_and_labels_df : DataFrame</span>
+<span class="sd">        List of variants included in the calibration analysis with columns:</span>
+<span class="sd">        GENOME_ASSEMBLY, CHROMOSOME, POSITION,</span>
+<span class="sd">        REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE,</span>
+<span class="sd">        BINARY_LABEL, RANK_SCORE</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VEAnalysisCalibrationResult.num_variants_included">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisCalibrationResult.num_variants_included">[docs]</a>
+    <span class="n">num_variants_included</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="VEAnalysisCalibrationResult.vep_name">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisCalibrationResult.vep_name">[docs]</a>
+    <span class="n">vep_name</span><span class="p">:</span> <span class="nb">str</span></div>
+
+<div class="viewcode-block" id="VEAnalysisCalibrationResult.pr_curve_coordinates_df">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisCalibrationResult.pr_curve_coordinates_df">[docs]</a>
+    <span class="n">pr_curve_coordinates_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisCalibrationResult.f1_curve_coordinates_df">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisCalibrationResult.f1_curve_coordinates_df">[docs]</a>
+    <span class="n">f1_curve_coordinates_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisCalibrationResult.score_pathogenic_fraction_df">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisCalibrationResult.score_pathogenic_fraction_df">[docs]</a>
+    <span class="n">score_pathogenic_fraction_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+
+<div class="viewcode-block" id="VEAnalysisCalibrationResult.scores_and_labels_df">
+<a class="viewcode-back" href="../../autoapi/aigct/model/index.html#aigct.model.VEAnalysisCalibrationResult.scores_and_labels_df">[docs]</a>
+    <span class="n">scores_and_labels_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></div>
+</div>
+
 </pre></div>
 
            </div>

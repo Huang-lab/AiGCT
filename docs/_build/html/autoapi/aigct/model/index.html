@@ -140,6 +140,9 @@ behavior associated with them.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aigct.model.PkViolations" title="aigct.model.PkViolations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PkViolations</span></code></a></p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VEAnalysisCalibrationResult</span></code></a></p></td>
+<td><p>Represents the result of calling VEAnalyzer.compute_calibration_metrics.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -560,6 +563,73 @@ GENE_SYMBOL, NUM_UNIQUE_VARIANTS</p>
 <span class="sig-name descname"><span class="pre">task_violations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#aigct.model.TaskPkViolations" title="aigct.model.TaskPkViolations"><span class="pre">TaskPkViolations</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../../_modules/aigct/model.html#PkViolations.task_violations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.PkViolations.task_violations" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisCalibrationResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.model.</span></span><span class="sig-name descname"><span class="pre">VEAnalysisCalibrationResult</span></span><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisCalibrationResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisCalibrationResult" title="Link to this definition"></a></dt>
+<dd><p>Represents the result of calling VEAnalyzer.compute_calibration_metrics.</p>
+<section id="id5">
+<h3>Attributes<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>num_variants_included<span class="classifier">int</span></dt><dd><p>The total number of unique variants included in the calibration
+analysis.</p>
+</dd>
+<dt>vep_name<span class="classifier">str</span></dt><dd><p>Name of the variant effect predictor (VEP) used in the calibration.
+It could be system vep or a user supplied vep name.</p>
+</dd>
+<dt>pr_curve_coordinates_df<span class="classifier">DataFrame</span></dt><dd><p>Precision-Recall curve coordinates for variants with columns:
+SCORE_SOURCE, PRECISION, RECALL, THRESHOLD</p>
+</dd>
+<dt>f1_curve_coordinates_df<span class="classifier">DataFrame</span></dt><dd><p>f1 score curve coordinates for variants with columns:
+F1_SCORE, THRESHOLD</p>
+</dd>
+<dt>score_pathogenic_fraction_df<span class="classifier">DataFrame</span></dt><dd><p>Statistics about positive and negative variants in different score
+bins. The variants are grouped into equal sized bins based on their
+score and the mean score and fraction of positive (pathogenic)
+variants in each bin is computed.
+Columns:
+SCORE_RANGE, LEFT_BOUNDARY_EXCLUSIVE,
+RIGHT_BOUNDARY_INCLUSIVE, MEAN_SCORE,
+NUM_VARIANTS, NUM_POSITIVE_LABELS, NUM_NEGATIVE_LABELS</p>
+</dd>
+<dt>scores_and_labels_df<span class="classifier">DataFrame</span></dt><dd><p>List of variants included in the calibration analysis with columns:
+GENOME_ASSEMBLY, CHROMOSOME, POSITION,
+REFERENCE_NUCLEOTIDE, ALTERNATE_NUCLEOTIDE,
+BINARY_LABEL, RANK_SCORE</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisCalibrationResult.num_variants_included">
+<span class="sig-name descname"><span class="pre">num_variants_included</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisCalibrationResult.num_variants_included"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisCalibrationResult.num_variants_included" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisCalibrationResult.vep_name">
+<span class="sig-name descname"><span class="pre">vep_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisCalibrationResult.vep_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisCalibrationResult.vep_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisCalibrationResult.pr_curve_coordinates_df">
+<span class="sig-name descname"><span class="pre">pr_curve_coordinates_df</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisCalibrationResult.pr_curve_coordinates_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisCalibrationResult.pr_curve_coordinates_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisCalibrationResult.f1_curve_coordinates_df">
+<span class="sig-name descname"><span class="pre">f1_curve_coordinates_df</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisCalibrationResult.f1_curve_coordinates_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisCalibrationResult.f1_curve_coordinates_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisCalibrationResult.score_pathogenic_fraction_df">
+<span class="sig-name descname"><span class="pre">score_pathogenic_fraction_df</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisCalibrationResult.score_pathogenic_fraction_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisCalibrationResult.score_pathogenic_fraction_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.model.VEAnalysisCalibrationResult.scores_and_labels_df">
+<span class="sig-name descname"><span class="pre">scores_and_labels_df</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.DataFrame</span></em><a class="reference internal" href="../../../_modules/aigct/model.html#VEAnalysisCalibrationResult.scores_and_labels_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.model.VEAnalysisCalibrationResult.scores_and_labels_df" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
 </dd></dl>
 
 </section>

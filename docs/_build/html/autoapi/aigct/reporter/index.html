@@ -172,6 +172,31 @@ screen.</p>
 </section>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.reporter.VEAnalysisReporter.write_calibration_summary">
+<span class="sig-name descname"><span class="pre">write_calibration_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/reporter.html#VEAnalysisReporter.write_calibration_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.reporter.VEAnalysisReporter.write_calibration_summary" title="Link to this definition"></a></dt>
+<dd><p>Generate a report summarizing the results of a calibration
+analysis. It will be written either to the screen or to a file.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>results<span class="classifier">VEAnalysisCalibrationResult</span></dt><dd><p>Calibration result object returned by calling
+VEAnalyzer.compute_calibration_metrics.</p>
+</dd>
+<dt>dir<span class="classifier">str, optional</span></dt><dd><p>Directory to place the report file. The file name will
+begin with variant_bm_calibration_summary and suffixed
+by a unique timestamp. If not specified will print to the
+screen.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.reporter.VEAnalysisReporter._write_calibration_summary">
+<span class="sig-name descname"><span class="pre">_write_calibration_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/reporter.html#VEAnalysisReporter._write_calibration_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.reporter.VEAnalysisReporter._write_calibration_summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>

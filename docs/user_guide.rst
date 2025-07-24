@@ -6,4 +6,5 @@ User Guides
    :caption: Contents:
 
    analysis_guide
+   calibration_guide
    query_guide

@@ -143,6 +143,11 @@
 <span class="sig-name descname"><span class="pre">_mwu_config</span></span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._mwu_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._mwu_config" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._calibration_line_config">
+<span class="sig-name descname"><span class="pre">_calibration_line_config</span></span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._calibration_line_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._calibration_line_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._plot_roc_curves">
 <span class="sig-name descname"><span class="pre">_plot_roc_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aucs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_vep_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curve_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_no</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_batches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_top_labelled_veps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ves_color_palette</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._plot_roc_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._plot_roc_curves" title="Link to this definition"></a></dt>
@@ -249,6 +254,124 @@ in each gene included in the analysis.</p>
 <dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._display_gene_metric_table">
 <span class="sig-name descname"><span class="pre">_display_gene_metric_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_display_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._display_gene_metric_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._display_gene_metric_table" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._plot_score_vs_pathogenic_fraction">
+<span class="sig-name descname"><span class="pre">_plot_score_vs_pathogenic_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._plot_score_vs_pathogenic_fraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._plot_score_vs_pathogenic_fraction" title="Link to this definition"></a></dt>
+<dd><p>Plot the fraction of pathogenic variants versus mean score as a line
+plot.</p>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>axes<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Matplotlib axes object to plot on</p>
+</dd>
+<dt>results<span class="classifier">VEAnalysisCalibrationResult</span></dt><dd><p>Calibration result object containing score bins</p>
+</dd>
+<dt>annotate<span class="classifier">bool, optional</span></dt><dd><p>If True, annotate each point with the score range</p>
+</dd>
+<dt>dir<span class="classifier">str, optional</span></dt><dd><p>Directory to save the plot file</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._plot_precision_recall_vs_thresholds1">
+<span class="sig-name descname"><span class="pre">_plot_precision_recall_vs_thresholds1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._plot_precision_recall_vs_thresholds1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._plot_precision_recall_vs_thresholds1" title="Link to this definition"></a></dt>
+<dd><p>Obsolete to be removed.
+Plot precision, recall, and F1 score versus threshold values.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>results<span class="classifier">VEAnalysisCalibrationResult</span></dt><dd><p>Calibration result object containing precision-recall curve data</p>
+</dd>
+<dt>dir<span class="classifier">str, optional</span></dt><dd><p>Directory to save the plot file</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._plot_precision_recall_vs_threshold">
+<span class="sig-name descname"><span class="pre">_plot_precision_recall_vs_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_boundary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision_cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._plot_precision_recall_vs_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._plot_precision_recall_vs_threshold" title="Link to this definition"></a></dt>
+<dd><p>Obsolete to be removed.
+Plot precision, recall, and F1 score versus threshold values.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>results<span class="classifier">VEAnalysisCalibrationResult</span></dt><dd><p>Calibration result object containing precision-recall curve data</p>
+</dd>
+<dt>dir<span class="classifier">str, optional</span></dt><dd><p>Directory to save the plot file</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._plot_score_vs_variant_counts">
+<span class="sig-name descname"><span class="pre">_plot_score_vs_variant_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._plot_score_vs_variant_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._plot_score_vs_variant_counts" title="Link to this definition"></a></dt>
+<dd><p>Plot histograms showing the distribution of RANK_SCORE values
+for positive (BINARY_LABEL=1) and negative (BINARY_LABEL=0) variants.</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>results<span class="classifier">VEAnalysisCalibrationResult</span></dt><dd><p>Calibration result object containing variant scores and labels</p>
+</dd>
+<dt>axes<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Matplotlib axes object to plot on</p>
+</dd>
+<dt>bins<span class="classifier">int</span></dt><dd><p>Number of bins to use for the histogram</p>
+</dd>
+<dt>dir<span class="classifier">str, optional</span></dt><dd><p>Directory to save the plot file</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter.plot_calibration_curves">
+<span class="sig-name descname"><span class="pre">plot_calibration_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_recall</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_f1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter.plot_calibration_curves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter.plot_calibration_curves" title="Link to this definition"></a></dt>
+<dd><p>Plot the results of calling VEAnalyzer.compute_calibration_metrics.
+Generates 3 plots:
+1. Pathogenic fraction by score interval
+2. Distribution of variant scores by pathogenicity
+3. Precision, recall, and F1 score versus threshold values</p>
+<p>The first 2 plots are vertically stacked in a single figure.</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>results<span class="classifier">VEAnalysisCalibrationResult</span></dt><dd><p>Calibration result object returned by calling
+VEAnalyzer.compute_calibration_metrics.</p>
+</dd>
+<dt>target_precision: float, optional</dt><dd><p>If specified, will plot a vertical line at the threshold
+that achieves the target precision.</p>
+</dd>
+<dt>target_recall: float, optional</dt><dd><p>If specified, will plot a vertical line at the threshold
+that achieves the target recall.</p>
+</dd>
+<dt>target_f1: float, optional</dt><dd><p>If specified, will plot a vertical line at the threshold
+that achieves the target f1 score.</p>
+</dd>
+<dt>dir<span class="classifier">str, optional</span></dt><dd><p>Directory to place the plot files. The files will
+be placed in a subdirectory off of this directory
+whose name begins with ve_calibration_plots and suffixed
+by a unique timestamp. If not specified will plot
+to screen.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._plot_binned_data">
+<span class="sig-name descname"><span class="pre">_plot_binned_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._plot_binned_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._plot_binned_data" title="Link to this definition"></a></dt>
+<dd><p>Plot the binned data as 2 subplots vertically stacked.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.plotter.VEAnalysisPlotter._plot_metrics_vs_threshold">
+<span class="sig-name descname"><span class="pre">_plot_metrics_vs_threshold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../model/index.html#aigct.model.VEAnalysisCalibrationResult" title="aigct.model.VEAnalysisCalibrationResult"><span class="pre">aigct.model.VEAnalysisCalibrationResult</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_recall</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_f1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/plotter.html#VEAnalysisPlotter._plot_metrics_vs_threshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.plotter.VEAnalysisPlotter._plot_metrics_vs_threshold" title="Link to this definition"></a></dt>
+<dd><p>Plot precision, recall, F1 score, versus threshold values.</p>
+</dd></dl>
 
 </dd></dl>
 
