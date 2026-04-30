@@ -21,6 +21,7 @@ from .file_util import (
 from .plot_util import (barchart, create_feature_palette,
                         get_colors, heatmap)
 from .report_util import GeneMetricSorter
+from adjustText import adjust_text
 
 
 class VEAnalysisPlotter:
@@ -460,6 +461,8 @@ class VEAnalysisPlotter:
             display(style)
 
     def _plot_score_vs_pathogenic_fraction(self, axes, results,
+                                           x_lower_limit: float = None,
+                                           x_upper_limit: float = None,
                                            annotate: bool = False,
                                            dir: str = None):
         """
@@ -522,7 +525,8 @@ class VEAnalysisPlotter:
         axes.set_xticklabels([])
         axes.tick_params(axis='y', labelsize=config.label_size)
 
-        # Set y-axis limits
+        # Set axis limits
+        axes.set_xlim(x_lower_limit, x_upper_limit)
         axes.set_ylim(0, 1.05)
 
         # Add grid
@@ -686,6 +690,8 @@ class VEAnalysisPlotter:
     def _plot_score_vs_variant_counts(self, axes,
                                       results: VEAnalysisCalibrationResult,
                                       bins: int,
+                                      x_lower_limit: float = None,
+                                      x_upper_limit: float = None,
                                       dir: str = None):
         """
         Plot histograms showing the distribution of RANK_SCORE values
@@ -723,6 +729,9 @@ class VEAnalysisPlotter:
         # Force y-axis ticks to be integers
         axes.yaxis.set_major_locator(MaxNLocator(integer=True))
         
+        # Set axis limits
+        axes.set_xlim(x_lower_limit, x_upper_limit)
+
         # Add formatting
         axes.tick_params(axis='both', labelsize=config.label_size)
         axes.set_xlabel('Score', fontsize=config.label_size)
@@ -781,12 +790,21 @@ class VEAnalysisPlotter:
         # Create vertically stacked subplots
         fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))
 
+        min_score = results.scores_and_labels_df["RANK_SCORE"].min()
+        max_score = results.scores_and_labels_df["RANK_SCORE"].max()
+        score_range = max_score - min_score
+        x_lower_limit = min_score - 0.01 * score_range
+        x_upper_limit = max_score + 0.01 * score_range
+
         # Subplot 1
         self._plot_score_vs_pathogenic_fraction(ax1, results,
+                                                x_lower_limit,
+                                                x_upper_limit,
                                                 dir=dir)
         # Subplot 2
         self._plot_score_vs_variant_counts(
-            ax2, results, len(results.score_pathogenic_fraction_df), dir
+            ax2, results, len(results.score_pathogenic_fraction_df),
+            x_lower_limit, x_upper_limit, dir
             )
 
         # Adjust layout for better spacing
@@ -840,31 +858,80 @@ class VEAnalysisPlotter:
         plt.plot(f1_coords['THRESHOLD'], f1_coords['F1_SCORE'],
                  label='F1 Score', color='purple', linewidth=2)
 
-        if target_precision is not None:
-            targ_precision = pr_coords[pr_coords["PRECISION"] >=
-                                       target_precision]['PRECISION'].min()
-            if not np.isnan(targ_precision):
-                plt.axvline(x=pr_coords[pr_coords["PRECISION"] ==
-                                        targ_precision]
-                            ["THRESHOLD"].iloc[0],
-                            color='blue', linestyle='--', linewidth=2,
-                            alpha=0.7)
         if target_recall is not None:
             targ_recall = pr_coords[pr_coords["RECALL"] >=
                                     target_recall]['RECALL'].min()
             if not np.isnan(targ_recall):
-                plt.axvline(x=pr_coords[pr_coords["RECALL"] == targ_recall]
-                            ["THRESHOLD"].iloc[0],
+                targ_recall_threshold = pr_coords[
+                    pr_coords["RECALL"] ==
+                    targ_recall]["THRESHOLD"].iloc[0]
+                plt.axvline(x=targ_recall_threshold,
                             color='green', linestyle='--', linewidth=2,
                             alpha=0.7)
-        if target_f1 is not None:
-            targ_f1 = f1_coords[f1_coords["F1_SCORE"] >=
-                                target_f1]['F1_SCORE'].min()
-            if not np.isnan(targ_f1):
-                plt.axvline(x=f1_coords[f1_coords["F1_SCORE"] == targ_f1]
-                            ["THRESHOLD"].iloc[0],
-                            color='purple', linestyle='--', linewidth=2,
+                # Add annotation near the bottom, just to the right of the
+                # threshold
+                plt.annotate(
+                    f"{targ_recall_threshold:.2f}",
+                    xy=(targ_recall_threshold,
+                        config.recall_annotation_offset),
+                    xytext=(10, 0),  # 10 points to the right
+                    textcoords='offset points',
+                    fontsize=config.label_size,
+                    color='green',
+                    ha='left',
+                    va='bottom',
+                    bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                              alpha=0.8)
+                )
+
+        max_f1 = f1_coords['F1_SCORE'].max()
+        if not np.isnan(max_f1):
+            targ_f1_threshold = f1_coords[
+                f1_coords["F1_SCORE"] ==
+                max_f1]["THRESHOLD"].iloc[0]
+            plt.axvline(x=targ_f1_threshold,
+                        color='purple', linestyle='--', linewidth=2,
+                        alpha=0.7)
+            # Add annotation near the bottom, just to the right of the
+            # threshold
+            plt.annotate(
+                f"{targ_f1_threshold:.2f}",
+                xy=(targ_f1_threshold, config.f1_annotation_offset),
+                xytext=(10, 0),  # 10 points to the right
+                textcoords='offset points',
+                fontsize=config.label_size,
+                color='purple',
+                ha='left',
+                va='bottom',
+                bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                          alpha=0.8)
+            )
+
+        if target_precision is not None:
+            targ_precision = pr_coords[pr_coords["PRECISION"] >=
+                                       target_precision]['PRECISION'].min()
+            if not np.isnan(targ_precision):
+                targ_precision_threshold = pr_coords[
+                    pr_coords["PRECISION"] ==
+                    targ_precision]["THRESHOLD"].iloc[0]
+                plt.axvline(x=targ_precision_threshold,
+                            color='blue', linestyle='--', linewidth=2,
                             alpha=0.7)
+                # Add annotation near the bottom, just to the right of the
+                # threshold
+                plt.annotate(
+                    f"{targ_precision_threshold:.2f}",
+                    xy=(targ_precision_threshold,
+                        config.precision_annotation_offset),
+                    xytext=(10, 0),  # 10 points to the right
+                    textcoords='offset points',
+                    fontsize=config.label_size,
+                    color='blue',
+                    ha='left',
+                    va='bottom',
+                    bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                              alpha=0.8)
+                )
 
         # Set labels and title
         plt.tick_params(axis='both', labelsize=config.label_size)

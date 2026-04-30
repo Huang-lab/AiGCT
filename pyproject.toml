@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aigct"
-version = "0.1a1.dev3"
+version = "1.0.0"
 authors = [
   { name="Claudio Fratarcangeli", email="claudiofr@yahoo.com" },
 ]
@@ -52,5 +52,5 @@ exclude = [
 #    "config/*"
 #]
 [project.urls]
-Homepage = "https://github.com/claudiofr/AGCT_dev"
-Issues = "https://github.com/claudiofr/AGCT_dev/issues"
+Homepage = "https://github.com/Huang-lab/AiGCT"
+Issues = "https://github.com/Huang-lab/AiGCT/issues"

@@ -1,0 +1,4 @@
+#!/bin/bash
+#set -x
+source ./venv_aigct/bin/activate
+

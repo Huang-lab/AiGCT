@@ -2,17 +2,18 @@
 
 log:
   # Log file directory
-  dir: ./log
+  dir: ~/gitrepo/agct_dev/demo/log
 
 # Directory to store output files generated from a benchmark
 # analysis run. For example, the VEAnalysisReporter,
 # VEAnalysisExporter, VEAnalysisPlotter write files there.
-output_dir: ./output
+output_dir: ~/gitrepo/agct_dev/demo/output
 
 repository:
   # Root directory for the repository data .csv files. The
   # repository "data" directory is a subdirectory off of this directory.
-  root_dir: .
+  # root_dir: ~/gitrepo/agct_dev
+  root_dir: ~/gitrepo/aigct_data1/repo1
   source_url: https://mtsinai-my.sharepoint.com/:u:/r/personal/kuan-lin_huang_mssm_edu/Documents/Huang_lab/manuscripts/AIPrecisionGenomics/demo/aigct-0.1a1.dev3.tar.gz?csf=1&web=1&e=Wenb4L
   version: 0.1.0.dev1
 
@@ -34,7 +35,7 @@ plot:
   file_dpi: 300
   bbox_inches: tight
   roc_pr_line:
-    num_curves_per_plot: 10
+    num_curves_per_plot: 100
     roc_title: ROC Curve
     pr_title: Precision/Recall
     x_axis_font_size: 25
@@ -44,12 +45,13 @@ plot:
     legend_font_size: 10
     legend_line_width: 3.0
   mwu_bar:
-    num_bars_per_plot: 10
+    num_bars_per_plot: 100
     title: Mann Whitney U
     title_font_size: 20
     y_label_font_size: 15
     x_label_font_size: 15
-    label_size: 15
+    y_tick_label_size: 15
+    x_tick_label_size: 8
     xtick_rotation: 60
     xtick_rotation_mode: anchor
   calibration_line:
