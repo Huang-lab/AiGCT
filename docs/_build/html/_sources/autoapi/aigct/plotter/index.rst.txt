@@ -113,7 +113,7 @@ Module Contents
    .. py:method:: _display_gene_metric_table(metrics_df: pandas.DataFrame, metric_column: str, metric_display_name: str, title: str, file_name: str = None)
 
 
-   .. py:method:: _plot_score_vs_pathogenic_fraction(axes, results, annotate: bool = False, dir: str = None)
+   .. py:method:: _plot_score_vs_pathogenic_fraction(axes, results, x_lower_limit: float = None, x_upper_limit: float = None, annotate: bool = False, dir: str = None)
 
       Plot the fraction of pathogenic variants versus mean score as a line
       plot.
@@ -159,7 +159,7 @@ Module Contents
 
 
 
-   .. py:method:: _plot_score_vs_variant_counts(axes, results: aigct.model.VEAnalysisCalibrationResult, bins: int, dir: str = None)
+   .. py:method:: _plot_score_vs_variant_counts(axes, results: aigct.model.VEAnalysisCalibrationResult, bins: int, x_lower_limit: float = None, x_upper_limit: float = None, dir: str = None)
 
       Plot histograms showing the distribution of RANK_SCORE values
       for positive (BINARY_LABEL=1) and negative (BINARY_LABEL=0) variants.
