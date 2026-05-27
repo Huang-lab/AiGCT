@@ -28,16 +28,18 @@ def test_plot_results_vep_file(
         ve_analyzer: VEAnalyzer,
         ve_plotter: VEAnalysisPlotter):
     ve_src = "ALPHAM"
-    # ve_src = "MAVEN"
+    ve_src = "MAVEN"
     task = "CANCER"
     task = "DDD"
     task="CLINVAR"
     # task="ADRD"
+    criteria = VEQueryCriteria(filter_names="ONEPLUS")
     metrics = ve_analyzer.compute_calibration_metrics(
         task, column_name_map=None,
-        variant_effect_source=ve_src, variant_query_criteria=None,
+        variant_effect_source=ve_src,
+        variant_query_criteria=criteria,
         pathogenic_fraction_bins=15)
-    ve_plotter.plot_calibration_curves(metrics, 0.9, 0.8, 0.7,
+    ve_plotter.plot_calibration_curves(metrics, 0.8, 0.8, 0.7,
                                        dir="./demo/output")
     metrics = ve_analyzer.compute_metrics(
         task, variant_effect_sources=[ve_src])

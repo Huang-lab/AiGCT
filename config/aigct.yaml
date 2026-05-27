@@ -14,7 +14,7 @@ repository:
   # repository "data" directory is a subdirectory off of this directory.
   # root_dir: ~/gitrepo/agct_dev
   root_dir: ~/gitrepo/aigct_data1/repo1
-  source_url: 
+  source_url: https://zenodo.org/records/14879093/files/repo_v1_0_0.tar.gz?download=1&preview=1
 
 plot:
   line_width: 2

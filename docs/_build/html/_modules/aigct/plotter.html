@@ -98,6 +98,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.plot_util</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">barchart</span><span class="p">,</span> <span class="n">create_feature_palette</span><span class="p">,</span>
                         <span class="n">get_colors</span><span class="p">,</span> <span class="n">heatmap</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.report_util</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneMetricSorter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">adjustText</span><span class="w"> </span><span class="kn">import</span> <span class="n">adjust_text</span>
 
 
 <div class="viewcode-block" id="VEAnalysisPlotter">
@@ -592,6 +593,8 @@
 <div class="viewcode-block" id="VEAnalysisPlotter._plot_score_vs_pathogenic_fraction">
 <a class="viewcode-back" href="../../autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter._plot_score_vs_pathogenic_fraction">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_score_vs_pathogenic_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span>
+                                           <span class="n">x_lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                           <span class="n">x_upper_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                            <span class="n">annotate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                                            <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -654,7 +657,8 @@
         <span class="n">axes</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([])</span>
         <span class="n">axes</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">)</span>
 
-        <span class="c1"># Set y-axis limits</span>
+        <span class="c1"># Set axis limits</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lower_limit</span><span class="p">,</span> <span class="n">x_upper_limit</span><span class="p">)</span>
         <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">)</span>
 
         <span class="c1"># Add grid</span>
@@ -827,6 +831,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_plot_score_vs_variant_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span>
                                       <span class="n">results</span><span class="p">:</span> <span class="n">VEAnalysisCalibrationResult</span><span class="p">,</span>
                                       <span class="n">bins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                      <span class="n">x_lower_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                                      <span class="n">x_upper_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                                       <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot histograms showing the distribution of RANK_SCORE values</span>
@@ -864,6 +870,9 @@
         <span class="c1"># Force y-axis ticks to be integers</span>
         <span class="n">axes</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
         
+        <span class="c1"># Set axis limits</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_lower_limit</span><span class="p">,</span> <span class="n">x_upper_limit</span><span class="p">)</span>
+
         <span class="c1"># Add formatting</span>
         <span class="n">axes</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">)</span>
         <span class="n">axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Score&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">)</span>
@@ -928,12 +937,21 @@
         <span class="c1"># Create vertically stacked subplots</span>
         <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
 
+        <span class="n">min_score</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">scores_and_labels_df</span><span class="p">[</span><span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">max_score</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">scores_and_labels_df</span><span class="p">[</span><span class="s2">&quot;RANK_SCORE&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">score_range</span> <span class="o">=</span> <span class="n">max_score</span> <span class="o">-</span> <span class="n">min_score</span>
+        <span class="n">x_lower_limit</span> <span class="o">=</span> <span class="n">min_score</span> <span class="o">-</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">score_range</span>
+        <span class="n">x_upper_limit</span> <span class="o">=</span> <span class="n">max_score</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">score_range</span>
+
         <span class="c1"># Subplot 1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plot_score_vs_pathogenic_fraction</span><span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span>
+                                                <span class="n">x_lower_limit</span><span class="p">,</span>
+                                                <span class="n">x_upper_limit</span><span class="p">,</span>
                                                 <span class="nb">dir</span><span class="o">=</span><span class="nb">dir</span><span class="p">)</span>
         <span class="c1"># Subplot 2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_plot_score_vs_variant_counts</span><span class="p">(</span>
-            <span class="n">ax2</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">score_pathogenic_fraction_df</span><span class="p">),</span> <span class="nb">dir</span>
+            <span class="n">ax2</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">score_pathogenic_fraction_df</span><span class="p">),</span>
+            <span class="n">x_lower_limit</span><span class="p">,</span> <span class="n">x_upper_limit</span><span class="p">,</span> <span class="nb">dir</span>
             <span class="p">)</span>
 
         <span class="c1"># Adjust layout for better spacing</span>
@@ -990,31 +1008,80 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f1_coords</span><span class="p">[</span><span class="s1">&#39;THRESHOLD&#39;</span><span class="p">],</span> <span class="n">f1_coords</span><span class="p">[</span><span class="s1">&#39;F1_SCORE&#39;</span><span class="p">],</span>
                  <span class="n">label</span><span class="o">=</span><span class="s1">&#39;F1 Score&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">target_precision</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">targ_precision</span> <span class="o">=</span> <span class="n">pr_coords</span><span class="p">[</span><span class="n">pr_coords</span><span class="p">[</span><span class="s2">&quot;PRECISION&quot;</span><span class="p">]</span> <span class="o">&gt;=</span>
-                                       <span class="n">target_precision</span><span class="p">][</span><span class="s1">&#39;PRECISION&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">targ_precision</span><span class="p">):</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">pr_coords</span><span class="p">[</span><span class="n">pr_coords</span><span class="p">[</span><span class="s2">&quot;PRECISION&quot;</span><span class="p">]</span> <span class="o">==</span>
-                                        <span class="n">targ_precision</span><span class="p">]</span>
-                            <span class="p">[</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ymax</span><span class="o">=</span><span class="n">targ_precision</span><span class="p">,</span>
-                            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">target_recall</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">targ_recall</span> <span class="o">=</span> <span class="n">pr_coords</span><span class="p">[</span><span class="n">pr_coords</span><span class="p">[</span><span class="s2">&quot;RECALL&quot;</span><span class="p">]</span> <span class="o">&gt;=</span>
                                     <span class="n">target_recall</span><span class="p">][</span><span class="s1">&#39;RECALL&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">targ_recall</span><span class="p">):</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">pr_coords</span><span class="p">[</span><span class="n">pr_coords</span><span class="p">[</span><span class="s2">&quot;RECALL&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">targ_recall</span><span class="p">]</span>
-                            <span class="p">[</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ymax</span><span class="o">=</span><span class="n">targ_recall</span><span class="p">,</span>
+                <span class="n">targ_recall_threshold</span> <span class="o">=</span> <span class="n">pr_coords</span><span class="p">[</span>
+                    <span class="n">pr_coords</span><span class="p">[</span><span class="s2">&quot;RECALL&quot;</span><span class="p">]</span> <span class="o">==</span>
+                    <span class="n">targ_recall</span><span class="p">][</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">targ_recall_threshold</span><span class="p">,</span>
                             <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                             <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_f1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">targ_f1</span> <span class="o">=</span> <span class="n">f1_coords</span><span class="p">[</span><span class="n">f1_coords</span><span class="p">[</span><span class="s2">&quot;F1_SCORE&quot;</span><span class="p">]</span> <span class="o">&gt;=</span>
-                                <span class="n">target_f1</span><span class="p">][</span><span class="s1">&#39;F1_SCORE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">targ_f1</span><span class="p">):</span>
-                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">f1_coords</span><span class="p">[</span><span class="n">f1_coords</span><span class="p">[</span><span class="s2">&quot;F1_SCORE&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">targ_f1</span><span class="p">]</span>
-                            <span class="p">[</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ymax</span><span class="o">=</span><span class="n">targ_f1</span><span class="p">,</span>
-                            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="c1"># Add annotation near the bottom, just to the right of the</span>
+                <span class="c1"># threshold</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">targ_recall_threshold</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">targ_recall_threshold</span><span class="p">,</span>
+                        <span class="n">config</span><span class="o">.</span><span class="n">recall_annotation_offset</span><span class="p">),</span>
+                    <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># 10 points to the right</span>
+                    <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;offset points&#39;</span><span class="p">,</span>
+                    <span class="n">fontsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                    <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                    <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
+                    <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s1">&#39;round,pad=0.2&#39;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                              <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">max_f1</span> <span class="o">=</span> <span class="n">f1_coords</span><span class="p">[</span><span class="s1">&#39;F1_SCORE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">max_f1</span><span class="p">):</span>
+            <span class="n">targ_f1_threshold</span> <span class="o">=</span> <span class="n">f1_coords</span><span class="p">[</span>
+                <span class="n">f1_coords</span><span class="p">[</span><span class="s2">&quot;F1_SCORE&quot;</span><span class="p">]</span> <span class="o">==</span>
+                <span class="n">max_f1</span><span class="p">][</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">targ_f1_threshold</span><span class="p">,</span>
+                        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+            <span class="c1"># Add annotation near the bottom, just to the right of the</span>
+            <span class="c1"># threshold</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">targ_f1_threshold</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">targ_f1_threshold</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">f1_annotation_offset</span><span class="p">),</span>
+                <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># 10 points to the right</span>
+                <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;offset points&#39;</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">,</span>
+                <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
+                <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s1">&#39;round,pad=0.2&#39;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                          <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">target_precision</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">targ_precision</span> <span class="o">=</span> <span class="n">pr_coords</span><span class="p">[</span><span class="n">pr_coords</span><span class="p">[</span><span class="s2">&quot;PRECISION&quot;</span><span class="p">]</span> <span class="o">&gt;=</span>
+                                       <span class="n">target_precision</span><span class="p">][</span><span class="s1">&#39;PRECISION&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">targ_precision</span><span class="p">):</span>
+                <span class="n">targ_precision_threshold</span> <span class="o">=</span> <span class="n">pr_coords</span><span class="p">[</span>
+                    <span class="n">pr_coords</span><span class="p">[</span><span class="s2">&quot;PRECISION&quot;</span><span class="p">]</span> <span class="o">==</span>
+                    <span class="n">targ_precision</span><span class="p">][</span><span class="s2">&quot;THRESHOLD&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">targ_precision_threshold</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                             <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+                <span class="c1"># Add annotation near the bottom, just to the right of the</span>
+                <span class="c1"># threshold</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">targ_precision_threshold</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">targ_precision_threshold</span><span class="p">,</span>
+                        <span class="n">config</span><span class="o">.</span><span class="n">precision_annotation_offset</span><span class="p">),</span>
+                    <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># 10 points to the right</span>
+                    <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;offset points&#39;</span><span class="p">,</span>
+                    <span class="n">fontsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+                    <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
+                    <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span>
+                    <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s1">&#39;round,pad=0.2&#39;</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                              <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+                <span class="p">)</span>
 
         <span class="c1"># Set labels and title</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_size</span><span class="p">)</span>
