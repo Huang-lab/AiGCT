@@ -14,7 +14,7 @@ repository:
   # repository "data" directory is a subdirectory off of this directory.
   # root_dir: ~/gitrepo/agct_dev
   root_dir: ~/gitrepo/aigct_data1/repo1
-  source_url: https://mtsinai-my.sharepoint.com/:u:/r/personal/kuan-lin_huang_mssm_edu/Documents/Huang_lab/manuscripts/AIPrecisionGenomics/demo/aigct-0.1a1.dev3.tar.gz?csf=1&web=1&e=Wenb4L
+  source_url: https://zenodo.org/records/19928885/files/aigct_repo.tar.gz?download=1
   version: 0.1.0.dev1
 
 plot:
