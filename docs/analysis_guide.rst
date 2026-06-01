@@ -137,9 +137,9 @@ method for a detailed explanation of the parameters passed to that method.
 Plot Results
 ------------
 
-Issue the following to plot the results.
+Issue the following to plot the results.::
 
-    container.plotter.plot_results(metric)
+    container.plotter.plot_results(metrics)
 
 This will generate a series of presentation ready plots and tables:
 
@@ -191,7 +191,7 @@ Export Results
 
 Issue the following to export the raw analysis result data underlying the 
 plots and tables to csv files that can be used to produce your own plots or to do
-further analysis.
+further analysis.::
 
     container.exporter.export_results(metrics, "<export_dir>")
 

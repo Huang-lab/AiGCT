@@ -16,6 +16,7 @@ Submodules
    /autoapi/aigct/container/index
    /autoapi/aigct/context/index
    /autoapi/aigct/date_util/index
+   /autoapi/aigct/db_model/index
    /autoapi/aigct/etl/index
    /autoapi/aigct/exporter/index
    /autoapi/aigct/file_util/index

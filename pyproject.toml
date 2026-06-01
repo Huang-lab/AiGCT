@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aigct"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
   { name="Claudio Fratarcangeli", email="claudiofr@yahoo.com" },
 ]
@@ -29,6 +29,7 @@ dependencies = [
   "Jinja2>=3.1.5",
   "dask>=2025.3.0",
   "pyarrow>=19.0.1",
+  "adjustText==1.3.0"
 ]
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
@@ -45,7 +46,8 @@ exclude = [
   "data1",
   "TGCA.V1",
   "temp",
-  "venv_aigct"
+  "venv_aigct",
+  "db"
 ]
 #[tool.hatch.build]
 #include = [

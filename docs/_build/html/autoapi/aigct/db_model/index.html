@@ -1,0 +1,741 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aigct.db_model &mdash; AIGCT 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="aigct.etl" href="../etl/index.html" />
+    <link rel="prev" title="aigct.date_util" href="../date_util/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AIGCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_dictionary.html">Data Dictionary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">aigct</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../analyzer/index.html">aigct.analyzer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../check_install/index.html">aigct.check_install</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../config/index.html">aigct.config</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../container/index.html">aigct.container</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../context/index.html">aigct.context</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../date_util/index.html">aigct.date_util</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">aigct.db_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../etl/index.html">aigct.etl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../exporter/index.html">aigct.exporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../file_util/index.html">aigct.file_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../init_app/index.html">aigct.init_app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../install_db/index.html">aigct.install_db</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../install_util/index.html">aigct.install_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../model/index.html">aigct.model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pd_util/index.html">aigct.pd_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plot_util/index.html">aigct.plot_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../plotter/index.html">aigct.plotter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../query/index.html">aigct.query</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../query_util/index.html">aigct.query_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../repo_qc/index.html">aigct.repo_qc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../report_util/index.html">aigct.report_util</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reporter/index.html">aigct.reporter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../repository/index.html">aigct.repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../util/index.html">aigct.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../support.html">Support</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AIGCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">aigct</a></li>
+      <li class="breadcrumb-item active">aigct.db_model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/aigct/db_model/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-aigct.db_model">
+<span id="aigct-db-model"></span><h1>aigct.db_model<a class="headerlink" href="#module-aigct.db_model" title="Link to this heading"></a></h1>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.db_model.Base" title="aigct.db_model.Base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Base</span></code></a></p></td>
+<td><p>Base class used for declarative class definitions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.db_model.VariantEffectSource" title="aigct.db_model.VariantEffectSource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantEffectSource</span></code></a></p></td>
+<td><p>Base class used for declarative class definitions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aigct.db_model.VariantEffectTaskAuc" title="aigct.db_model.VariantEffectTaskAuc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantEffectTaskAuc</span></code></a></p></td>
+<td><p>Base class used for declarative class definitions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.db_model.VariantEffectGeneAuc" title="aigct.db_model.VariantEffectGeneAuc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantEffectGeneAuc</span></code></a></p></td>
+<td><p>Base class used for declarative class definitions.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.db_model.Base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.db_model.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#Base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.Base" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">sqlalchemy.orm.DeclarativeBase</span></code></p>
+<p>Base class used for declarative class definitions.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> allows for the creation of new
+declarative bases in such a way that is compatible with type checkers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>The above <code class="docutils literal notranslate"><span class="pre">Base</span></code> class is now usable as the base for new declarative
+mappings.  The superclass makes use of the <code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code>
+method to set up new classes and metaclasses aren’t used.</p>
+<p>When first used, the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class instantiates a new
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> to be used with the base, assuming one was not
+provided explicitly. The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class supports
+class-level attributes which act as parameters for the construction of this
+registry; such as to indicate a specific <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code>
+collection as well as a specific value for
+<a href="#id1"><span class="problematic" id="id2">:paramref:`_orm.registry.type_annotation_map`</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">BigInteger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+<span class="n">bigint</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;bigint&quot;</span><span class="p">]</span>
+<span class="n">my_metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">my_metadata</span>
+    <span class="n">type_annotation_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nb">str</span><span class="p">:</span> <span class="n">String</span><span class="p">()</span><span class="o">.</span><span class="n">with_variant</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="s2">&quot;mysql&quot;</span><span class="p">,</span> <span class="s2">&quot;mariadb&quot;</span><span class="p">),</span>
+        <span class="n">bigint</span><span class="p">:</span> <span class="n">BigInteger</span><span class="p">(),</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Class-level attributes which may be specified include:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> – optional <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection.
+If a <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> is constructed automatically, this
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will be used to construct it.
+Otherwise, the local <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will supersede
+that used by an existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> passed using the
+<a href="#id3"><span class="problematic" id="id4">:paramref:`_orm.DeclarativeBase.registry`</span></a> parameter.</p></li>
+<li><p><strong>type_annotation_map</strong> – optional type annotation map that will be
+passed to the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> as
+<a href="#id5"><span class="problematic" id="id6">:paramref:`_orm.registry.type_annotation_map`</span></a>.</p></li>
+<li><p><strong>registry</strong> – supply a pre-existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> directly.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0: </span>Added <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>, so that declarative
+base classes may be constructed in such a way that is also recognized
+by <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0484/"><strong>PEP 484</strong></a> type checkers.   As a result, <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>
+and other subclassing-oriented APIs should be seen as
+superseding previous “class returned by a function” APIs, namely
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_orm.registry.generate_base()</span></code>,
+where the base class returned cannot be recognized by type checkers
+without using plugins.</p>
+</div>
+<p><strong>__init__ behavior</strong></p>
+<p>In a plain Python class, the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method in the class
+hierarchy is <code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>, which accepts no arguments. However,
+when the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass is first declared, the
+class is given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method that links to the
+<a href="#id7"><span class="problematic" id="id8">:paramref:`_orm.registry.constructor`</span></a> constructor function, if no
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method is already present; this is the usual declarative
+constructor that will assign keyword arguments as attributes on the
+instance, assuming those attributes are established at the class level
+(i.e. are mapped, or are linked to a descriptor). This constructor is
+<strong>never accessed by a mapped class without being called explicitly via
+super()</strong>, as mapped classes are themselves given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method
+directly which calls <a href="#id9"><span class="problematic" id="id10">:paramref:`_orm.registry.constructor`</span></a>, so in the
+default case works independently of what the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>
+method does.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.0.1: </span><code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> has a default
+constructor that links to <a href="#id11"><span class="problematic" id="id12">:paramref:`_orm.registry.constructor`</span></a> by
+default, so that calls to <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> can access this
+constructor. Previously, due to an implementation mistake, this default
+constructor was missing, and calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> would invoke
+<code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>.</p>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass may also declare an explicit
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method which will replace the use of the
+<a href="#id13"><span class="problematic" id="id14">:paramref:`_orm.registry.constructor`</span></a> function at this level:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+</pre></div>
+</div>
+<p>Mapped classes still will not invoke this constructor implicitly; it
+remains only accessible by calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that this is a different behavior from what functions like the legacy
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> would do; the base created by those functions
+would always install <a href="#id15"><span class="problematic" id="id16">:paramref:`_orm.registry.constructor`</span></a> for
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.db_model.</span></span><span class="sig-name descname"><span class="pre">VariantEffectSource</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aigct.db_model.Base" title="aigct.db_model.Base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Base class used for declarative class definitions.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> allows for the creation of new
+declarative bases in such a way that is compatible with type checkers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>The above <code class="docutils literal notranslate"><span class="pre">Base</span></code> class is now usable as the base for new declarative
+mappings.  The superclass makes use of the <code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code>
+method to set up new classes and metaclasses aren’t used.</p>
+<p>When first used, the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class instantiates a new
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> to be used with the base, assuming one was not
+provided explicitly. The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class supports
+class-level attributes which act as parameters for the construction of this
+registry; such as to indicate a specific <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code>
+collection as well as a specific value for
+<a href="#id17"><span class="problematic" id="id18">:paramref:`_orm.registry.type_annotation_map`</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">BigInteger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+<span class="n">bigint</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;bigint&quot;</span><span class="p">]</span>
+<span class="n">my_metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">my_metadata</span>
+    <span class="n">type_annotation_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nb">str</span><span class="p">:</span> <span class="n">String</span><span class="p">()</span><span class="o">.</span><span class="n">with_variant</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="s2">&quot;mysql&quot;</span><span class="p">,</span> <span class="s2">&quot;mariadb&quot;</span><span class="p">),</span>
+        <span class="n">bigint</span><span class="p">:</span> <span class="n">BigInteger</span><span class="p">(),</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Class-level attributes which may be specified include:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> – optional <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection.
+If a <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> is constructed automatically, this
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will be used to construct it.
+Otherwise, the local <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will supersede
+that used by an existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> passed using the
+<a href="#id19"><span class="problematic" id="id20">:paramref:`_orm.DeclarativeBase.registry`</span></a> parameter.</p></li>
+<li><p><strong>type_annotation_map</strong> – optional type annotation map that will be
+passed to the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> as
+<a href="#id21"><span class="problematic" id="id22">:paramref:`_orm.registry.type_annotation_map`</span></a>.</p></li>
+<li><p><strong>registry</strong> – supply a pre-existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> directly.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0: </span>Added <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>, so that declarative
+base classes may be constructed in such a way that is also recognized
+by <span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0484/"><strong>PEP 484</strong></a> type checkers.   As a result, <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>
+and other subclassing-oriented APIs should be seen as
+superseding previous “class returned by a function” APIs, namely
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_orm.registry.generate_base()</span></code>,
+where the base class returned cannot be recognized by type checkers
+without using plugins.</p>
+</div>
+<p><strong>__init__ behavior</strong></p>
+<p>In a plain Python class, the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method in the class
+hierarchy is <code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>, which accepts no arguments. However,
+when the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass is first declared, the
+class is given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method that links to the
+<a href="#id23"><span class="problematic" id="id24">:paramref:`_orm.registry.constructor`</span></a> constructor function, if no
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method is already present; this is the usual declarative
+constructor that will assign keyword arguments as attributes on the
+instance, assuming those attributes are established at the class level
+(i.e. are mapped, or are linked to a descriptor). This constructor is
+<strong>never accessed by a mapped class without being called explicitly via
+super()</strong>, as mapped classes are themselves given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method
+directly which calls <a href="#id25"><span class="problematic" id="id26">:paramref:`_orm.registry.constructor`</span></a>, so in the
+default case works independently of what the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>
+method does.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.0.1: </span><code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> has a default
+constructor that links to <a href="#id27"><span class="problematic" id="id28">:paramref:`_orm.registry.constructor`</span></a> by
+default, so that calls to <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> can access this
+constructor. Previously, due to an implementation mistake, this default
+constructor was missing, and calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> would invoke
+<code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>.</p>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass may also declare an explicit
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method which will replace the use of the
+<a href="#id29"><span class="problematic" id="id30">:paramref:`_orm.registry.constructor`</span></a> function at this level:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+</pre></div>
+</div>
+<p>Mapped classes still will not invoke this constructor implicitly; it
+remains only accessible by calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that this is a different behavior from what functions like the legacy
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> would do; the base created by those functions
+would always install <a href="#id31"><span class="problematic" id="id32">:paramref:`_orm.registry.constructor`</span></a> for
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource.__tablename__">
+<span class="sig-name descname"><span class="pre">__tablename__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'variant_effect_source'</span></em><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource.__tablename__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource.__tablename__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource.code">
+<span class="sig-name descname"><span class="pre">code</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource.code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource.code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource.name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource.source_type">
+<span class="sig-name descname"><span class="pre">source_type</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource.source_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource.source_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource.description"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource.description" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource.task_aucs">
+<span class="sig-name descname"><span class="pre">task_aucs</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource.task_aucs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource.task_aucs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectSource.gene_aucs">
+<span class="sig-name descname"><span class="pre">gene_aucs</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectSource.gene_aucs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectSource.gene_aucs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.db_model.</span></span><span class="sig-name descname"><span class="pre">VariantEffectTaskAuc</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aigct.db_model.Base" title="aigct.db_model.Base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Base class used for declarative class definitions.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> allows for the creation of new
+declarative bases in such a way that is compatible with type checkers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>The above <code class="docutils literal notranslate"><span class="pre">Base</span></code> class is now usable as the base for new declarative
+mappings.  The superclass makes use of the <code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code>
+method to set up new classes and metaclasses aren’t used.</p>
+<p>When first used, the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class instantiates a new
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> to be used with the base, assuming one was not
+provided explicitly. The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class supports
+class-level attributes which act as parameters for the construction of this
+registry; such as to indicate a specific <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code>
+collection as well as a specific value for
+<a href="#id33"><span class="problematic" id="id34">:paramref:`_orm.registry.type_annotation_map`</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">BigInteger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+<span class="n">bigint</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;bigint&quot;</span><span class="p">]</span>
+<span class="n">my_metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">my_metadata</span>
+    <span class="n">type_annotation_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nb">str</span><span class="p">:</span> <span class="n">String</span><span class="p">()</span><span class="o">.</span><span class="n">with_variant</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="s2">&quot;mysql&quot;</span><span class="p">,</span> <span class="s2">&quot;mariadb&quot;</span><span class="p">),</span>
+        <span class="n">bigint</span><span class="p">:</span> <span class="n">BigInteger</span><span class="p">(),</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Class-level attributes which may be specified include:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> – optional <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection.
+If a <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> is constructed automatically, this
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will be used to construct it.
+Otherwise, the local <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will supersede
+that used by an existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> passed using the
+<a href="#id35"><span class="problematic" id="id36">:paramref:`_orm.DeclarativeBase.registry`</span></a> parameter.</p></li>
+<li><p><strong>type_annotation_map</strong> – optional type annotation map that will be
+passed to the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> as
+<a href="#id37"><span class="problematic" id="id38">:paramref:`_orm.registry.type_annotation_map`</span></a>.</p></li>
+<li><p><strong>registry</strong> – supply a pre-existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> directly.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0: </span>Added <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>, so that declarative
+base classes may be constructed in such a way that is also recognized
+by <span class="target" id="index-2"></span><a class="pep reference external" href="https://peps.python.org/pep-0484/"><strong>PEP 484</strong></a> type checkers.   As a result, <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>
+and other subclassing-oriented APIs should be seen as
+superseding previous “class returned by a function” APIs, namely
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_orm.registry.generate_base()</span></code>,
+where the base class returned cannot be recognized by type checkers
+without using plugins.</p>
+</div>
+<p><strong>__init__ behavior</strong></p>
+<p>In a plain Python class, the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method in the class
+hierarchy is <code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>, which accepts no arguments. However,
+when the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass is first declared, the
+class is given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method that links to the
+<a href="#id39"><span class="problematic" id="id40">:paramref:`_orm.registry.constructor`</span></a> constructor function, if no
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method is already present; this is the usual declarative
+constructor that will assign keyword arguments as attributes on the
+instance, assuming those attributes are established at the class level
+(i.e. are mapped, or are linked to a descriptor). This constructor is
+<strong>never accessed by a mapped class without being called explicitly via
+super()</strong>, as mapped classes are themselves given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method
+directly which calls <a href="#id41"><span class="problematic" id="id42">:paramref:`_orm.registry.constructor`</span></a>, so in the
+default case works independently of what the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>
+method does.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.0.1: </span><code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> has a default
+constructor that links to <a href="#id43"><span class="problematic" id="id44">:paramref:`_orm.registry.constructor`</span></a> by
+default, so that calls to <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> can access this
+constructor. Previously, due to an implementation mistake, this default
+constructor was missing, and calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> would invoke
+<code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>.</p>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass may also declare an explicit
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method which will replace the use of the
+<a href="#id45"><span class="problematic" id="id46">:paramref:`_orm.registry.constructor`</span></a> function at this level:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+</pre></div>
+</div>
+<p>Mapped classes still will not invoke this constructor implicitly; it
+remains only accessible by calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that this is a different behavior from what functions like the legacy
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> would do; the base created by those functions
+would always install <a href="#id47"><span class="problematic" id="id48">:paramref:`_orm.registry.constructor`</span></a> for
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc.__tablename__">
+<span class="sig-name descname"><span class="pre">__tablename__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'variant_effect_task_auc'</span></em><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc.__tablename__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc.__tablename__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc.task_code">
+<span class="sig-name descname"><span class="pre">task_code</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc.task_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc.task_code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc.score_source">
+<span class="sig-name descname"><span class="pre">score_source</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc.score_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc.score_source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc.auc">
+<span class="sig-name descname"><span class="pre">auc</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc.auc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc.auc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc.num_positive">
+<span class="sig-name descname"><span class="pre">num_positive</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc.num_positive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc.num_positive" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc.num_negative">
+<span class="sig-name descname"><span class="pre">num_negative</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc.num_negative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc.num_negative" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectTaskAuc.source">
+<span class="sig-name descname"><span class="pre">source</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectTaskAuc.source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectTaskAuc.source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.db_model.</span></span><span class="sig-name descname"><span class="pre">VariantEffectGeneAuc</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#aigct.db_model.Base" title="aigct.db_model.Base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+<p>Base class used for declarative class definitions.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> allows for the creation of new
+declarative bases in such a way that is compatible with type checkers:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>The above <code class="docutils literal notranslate"><span class="pre">Base</span></code> class is now usable as the base for new declarative
+mappings.  The superclass makes use of the <code class="docutils literal notranslate"><span class="pre">__init_subclass__()</span></code>
+method to set up new classes and metaclasses aren’t used.</p>
+<p>When first used, the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class instantiates a new
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> to be used with the base, assuming one was not
+provided explicitly. The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> class supports
+class-level attributes which act as parameters for the construction of this
+registry; such as to indicate a specific <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code>
+collection as well as a specific value for
+<a href="#id49"><span class="problematic" id="id50">:paramref:`_orm.registry.type_annotation_map`</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">BigInteger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+<span class="n">bigint</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="s2">&quot;bigint&quot;</span><span class="p">]</span>
+<span class="n">my_metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">my_metadata</span>
+    <span class="n">type_annotation_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nb">str</span><span class="p">:</span> <span class="n">String</span><span class="p">()</span><span class="o">.</span><span class="n">with_variant</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">255</span><span class="p">),</span> <span class="s2">&quot;mysql&quot;</span><span class="p">,</span> <span class="s2">&quot;mariadb&quot;</span><span class="p">),</span>
+        <span class="n">bigint</span><span class="p">:</span> <span class="n">BigInteger</span><span class="p">(),</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Class-level attributes which may be specified include:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metadata</strong> – optional <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection.
+If a <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> is constructed automatically, this
+<code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will be used to construct it.
+Otherwise, the local <code class="xref py py-class docutils literal notranslate"><span class="pre">_schema.MetaData</span></code> collection will supersede
+that used by an existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> passed using the
+<a href="#id51"><span class="problematic" id="id52">:paramref:`_orm.DeclarativeBase.registry`</span></a> parameter.</p></li>
+<li><p><strong>type_annotation_map</strong> – optional type annotation map that will be
+passed to the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> as
+<a href="#id53"><span class="problematic" id="id54">:paramref:`_orm.registry.type_annotation_map`</span></a>.</p></li>
+<li><p><strong>registry</strong> – supply a pre-existing <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.registry</span></code> directly.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0: </span>Added <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>, so that declarative
+base classes may be constructed in such a way that is also recognized
+by <span class="target" id="index-3"></span><a class="pep reference external" href="https://peps.python.org/pep-0484/"><strong>PEP 484</strong></a> type checkers.   As a result, <code class="xref py py-class docutils literal notranslate"><span class="pre">DeclarativeBase</span></code>
+and other subclassing-oriented APIs should be seen as
+superseding previous “class returned by a function” APIs, namely
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_orm.registry.generate_base()</span></code>,
+where the base class returned cannot be recognized by type checkers
+without using plugins.</p>
+</div>
+<p><strong>__init__ behavior</strong></p>
+<p>In a plain Python class, the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method in the class
+hierarchy is <code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>, which accepts no arguments. However,
+when the <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass is first declared, the
+class is given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method that links to the
+<a href="#id55"><span class="problematic" id="id56">:paramref:`_orm.registry.constructor`</span></a> constructor function, if no
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method is already present; this is the usual declarative
+constructor that will assign keyword arguments as attributes on the
+instance, assuming those attributes are established at the class level
+(i.e. are mapped, or are linked to a descriptor). This constructor is
+<strong>never accessed by a mapped class without being called explicitly via
+super()</strong>, as mapped classes are themselves given an <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method
+directly which calls <a href="#id57"><span class="problematic" id="id58">:paramref:`_orm.registry.constructor`</span></a>, so in the
+default case works independently of what the base-most <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>
+method does.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 2.0.1: </span><code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> has a default
+constructor that links to <a href="#id59"><span class="problematic" id="id60">:paramref:`_orm.registry.constructor`</span></a> by
+default, so that calls to <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> can access this
+constructor. Previously, due to an implementation mistake, this default
+constructor was missing, and calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code> would invoke
+<code class="docutils literal notranslate"><span class="pre">object.__init__()</span></code>.</p>
+</div>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">_orm.DeclarativeBase</span></code> subclass may also declare an explicit
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code> method which will replace the use of the
+<a href="#id61"><span class="problematic" id="id62">:paramref:`_orm.registry.constructor`</span></a> function at this level:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Base</span><span class="p">(</span><span class="n">DeclarativeBase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+</pre></div>
+</div>
+<p>Mapped classes still will not invoke this constructor implicitly; it
+remains only accessible by calling <code class="docutils literal notranslate"><span class="pre">super().__init__()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that this is a different behavior from what functions like the legacy
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_orm.declarative_base()</span></code> would do; the base created by those functions
+would always install <a href="#id63"><span class="problematic" id="id64">:paramref:`_orm.registry.constructor`</span></a> for
+<code class="docutils literal notranslate"><span class="pre">__init__()</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.__tablename__">
+<span class="sig-name descname"><span class="pre">__tablename__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'variant_effect_gene_auc'</span></em><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.__tablename__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.__tablename__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.task_code">
+<span class="sig-name descname"><span class="pre">task_code</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.task_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.task_code" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.score_source">
+<span class="sig-name descname"><span class="pre">score_source</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.score_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.score_source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.gene_symbol">
+<span class="sig-name descname"><span class="pre">gene_symbol</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.gene_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.gene_symbol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.auc">
+<span class="sig-name descname"><span class="pre">auc</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.auc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.auc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.num_positive">
+<span class="sig-name descname"><span class="pre">num_positive</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.num_positive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.num_positive" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.num_negative">
+<span class="sig-name descname"><span class="pre">num_negative</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.num_negative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.num_negative" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.db_model.VariantEffectGeneAuc.source">
+<span class="sig-name descname"><span class="pre">source</span></span><a class="reference internal" href="../../../_modules/aigct/db_model.html#VariantEffectGeneAuc.source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.db_model.VariantEffectGeneAuc.source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../date_util/index.html" class="btn btn-neutral float-left" title="aigct.date_util" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../etl/index.html" class="btn btn-neutral float-right" title="aigct.etl" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Claudio Fratarcangeli, Ian Lee.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

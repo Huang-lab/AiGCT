@@ -2,3 +2,4 @@ demo/output/*
 temp
 data1
 **/__pycache__/
+db
