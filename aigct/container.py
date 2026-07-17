@@ -1,4 +1,5 @@
 from .repository import (
+    VariantEffectAnalysisRepository,
     VariantEffectScoreRepository,
     VariantEffectLabelRepository,
     RepoSessionContext,
@@ -40,7 +41,8 @@ class VEBenchmarkContainer:
               conf_file):
             self.config = Config(yaml.safe_load(conf_file))
         self._repo_session_context = RepoSessionContext(
-            self.config.repository.root_dir, TABLE_DEFS)
+            self.config.repository.root_dir, TABLE_DEFS,
+            self.config.db.url)
         self._variant_task_repo = VariantTaskRepository(
             self._repo_session_context)
         self._variant_repo = VariantRepository(self._repo_session_context)
@@ -62,6 +64,9 @@ class VEBenchmarkContainer:
         self._variant_filter_repo = VariantFilterRepository(
             self._repo_session_context
         )
+        self._variant_analysis_repo = VariantEffectAnalysisRepository(
+            self._repo_session_context
+        )
         self._analyzer = VEAnalyzer(
             self._score_repo,
             self._label_repo,
@@ -71,7 +76,8 @@ class VEBenchmarkContainer:
                                               self._variant_task_repo,
                                               self._variant_effect_source_repo,
                                               self._score_repo,
-                                              self._variant_filter_repo)
+                                              self._variant_filter_repo,
+                                              self._variant_analysis_repo)
         self._reporter = VEAnalysisReporter()
         self._plotter = VEAnalysisPlotter(self.config.plot)
         self._exporter = VEAnalysisExporter()

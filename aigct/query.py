@@ -8,6 +8,7 @@ or presentation ready to the caller.
 """
 
 from .repository import (
+    VariantEffectAnalysisRepository,
     VariantEffectLabelRepository,
     VariantRepository,
     VariantTaskRepository,
@@ -60,7 +61,8 @@ class VEBenchmarkQueryMgr:
                  variant_task_repo: VariantTaskRepository,
                  variant_effect_source_repo: VariantEffectSourceRepository,
                  variant_effect_score_repo: VariantEffectScoreRepository,
-                 variant_filter_repo: VariantFilterRepository
+                 variant_filter_repo: VariantFilterRepository,
+                 variant_analysis_repo: VariantEffectAnalysisRepository
                  ):
         self._variant_effect_label_repo = variant_effect_label_repo
         self._variant_repo = variant_repo
@@ -68,6 +70,7 @@ class VEBenchmarkQueryMgr:
         self._variant_effect_source_repo = variant_effect_source_repo
         self._variant_effect_score_repo = variant_effect_score_repo
         self._variant_filter_repo = variant_filter_repo
+        self._variant_analysis_repo = variant_analysis_repo
 
     def get_tasks(self) -> pd.DataFrame:
         """Get all tasks"""
@@ -321,3 +324,20 @@ class VEBenchmarkQueryMgr:
             each filter
         """
         return self._variant_filter_repo.get_by_task(task_code)
+
+    def get_variant_effect_metrics_by_task(self, task_code: str) -> pd.DataFrame:
+        return self._variant_analysis_repo.get_variant_effect_metrics_by_task(
+            task_code)
+
+    def get_variant_effect_gene_metrics_by_task_gene(
+            self, task_code: str, gene_symbol: str) -> pd.DataFrame:
+        return self._variant_analysis_repo.get_variant_effect_gene_metrics_by_task_gene(
+            task_code, gene_symbol)
+
+    def get_all_variant_effect_source(self) -> pd.DataFrame:
+        return self._variant_analysis_repo.get_all_variant_effect_source()
+
+    def get_variant_effect_source_by_task(
+            self, task_code: str) -> pd.DataFrame:
+        return self._variant_analysis_repo.get_variant_effect_source_by_task(
+            task_code)

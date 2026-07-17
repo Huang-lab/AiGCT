@@ -341,9 +341,9 @@ class VEAnalyzer:
                         "Cannot compute mann-whitney u values "
                         + "because all labels have same value"
                     )
-                neg_log10_mwu_pval = -np.log10(
-                    stats.mannwhitneyu(negative_scores, positive_scores).pvalue
-                )
+                mwu_pval = stats.mannwhitneyu(negative_scores, positive_scores).pvalue
+                mwu_pval = max(mwu_pval, np.finfo(float).tiny)
+                neg_log10_mwu_pval = -np.log10(mwu_pval)
                 neg_log10_mwu_pvals.append(neg_log10_mwu_pval)
                 exceps.append(np.nan)
             except Exception as e:

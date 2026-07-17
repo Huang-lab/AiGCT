@@ -89,3 +89,32 @@ def test_get_by_filters(
     assert len(variants1) > len(variants2)
     pass
 
+
+def test_get_variant_effect_metrics_by_task(
+        ve_bm_query_mgr: VEBenchmarkQueryMgr):
+    task_code = "CANCER"
+    roc_auc_df = ve_bm_query_mgr.get_variant_effect_metrics_by_task(task_code)
+    assert len(roc_auc_df) > 0
+    pass
+
+
+def test_get_variant_effect_gene_metrics_by_task_gene(
+        ve_bm_query_mgr: VEBenchmarkQueryMgr):
+    task_code = "CANCER"
+    gene = 'BCL2'
+    roc_auc_df = ve_bm_query_mgr.get_variant_effect_gene_metrics_by_task_gene(
+        task_code, gene)
+    assert len(roc_auc_df) > 0
+    pass
+
+
+def test_get_all_variant_effect_source(
+        ve_bm_query_mgr: VEBenchmarkQueryMgr):
+    df = ve_bm_query_mgr.get_all_variant_effect_source()
+    assert len(df) > 0
+
+
+def test_get_variant_effect_source_by_task(
+        ve_bm_query_mgr: VEBenchmarkQueryMgr):
+    df = ve_bm_query_mgr.get_variant_effect_source_by_task("CANCER")
+    assert len(df) > 0

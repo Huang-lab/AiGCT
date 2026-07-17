@@ -16,6 +16,8 @@ repository:
   root_dir: ~/gitrepo/aigct_data1/repo1
   source_url: https://zenodo.org/records/19928885/files/aigct_repo.tar.gz?download=1
   version: 0.1.0.dev1
+db:
+  url: "sqlite:///./db/aigct.db"
 
 plot:
   line_width: 2

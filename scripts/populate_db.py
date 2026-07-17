@@ -10,23 +10,25 @@ Run from the repo root:
 
 import os
 import sys
-import pandas as pd
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session
-from aigct.container import VEBenchmarkContainer  # noqa: E402
-from aigct.db_model import (
-    Base, VariantEffectSource, VariantEffectTaskAuc,
-    VariantEffectGeneAuc)  # noqa: E402
 
 # Allow imports from the repo root regardless of where the script is invoked.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
+import pandas as pd
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import Session
+from aigct.container import VEBenchmarkContainer
+from aigct.db_model import (
+    Base, VariantEffectSource, VariantEffectTaskAuc,
+    VariantEffectGeneAuc)
+
 VES_CSV = "/home/claudiof/gitrepo/aigct_data1/repo1/data/variant_effect_source.csv"
 CONFIG_PATH = os.path.join(REPO_ROOT, "config", "aigct.yaml")
 DB_PATH = os.path.join(REPO_ROOT, "db", "aigct.db")
 
-TASK_CODES = ["CANCER", "ADRD", "CHD", "DDD", "ASD", "CLINVAR"]
+TASK_CODES = ["ADRD", "CANCER", "CHD", "DDD", "ASD", "CLINVAR"]
+# TASK_CODES = ["CLINVAR"]
 
 
 def _enable_fk(dbapi_conn, _):
@@ -58,12 +60,18 @@ def _load_task_auc(session: Session, task_code: str, metrics) -> None:
         on="SCORE_SOURCE",
         how="left",
     )
+    df = df.merge(
+        metrics.mwu_metrics[["SCORE_SOURCE", "NEG_LOG10_MWU_PVAL"]],
+        on="SCORE_SOURCE",
+        how="left",
+    )
     for _, row in df.iterrows():
         session.merge(
             VariantEffectTaskAuc(
                 task_code=task_code,
                 score_source=row["SCORE_SOURCE"],
                 auc=row["ROC_AUC"] if pd.notna(row["ROC_AUC"]) else None,
+                neg_log10_mwu_pval=row["NEG_LOG10_MWU_PVAL"] if pd.notna(row["NEG_LOG10_MWU_PVAL"]) else None,
                 num_positive=int(row["NUM_POSITIVE_LABELS"]),
                 num_negative=int(row["NUM_NEGATIVE_LABELS"]),
             )
@@ -84,6 +92,11 @@ def _load_gene_auc(session: Session, task_code: str, metrics) -> None:
         on=["SCORE_SOURCE", "GENE_SYMBOL"],
         how="left",
     )
+    df = df.merge(
+        metrics.gene_mwu_metrics[["SCORE_SOURCE", "GENE_SYMBOL", "NEG_LOG10_MWU_PVAL"]],
+        on=["SCORE_SOURCE", "GENE_SYMBOL"],
+        how="left",
+    )
     for _, row in df.iterrows():
         session.merge(
             VariantEffectGeneAuc(
@@ -91,6 +104,7 @@ def _load_gene_auc(session: Session, task_code: str, metrics) -> None:
                 score_source=row["SCORE_SOURCE"],
                 gene_symbol=row["GENE_SYMBOL"],
                 auc=row["ROC_AUC"] if pd.notna(row["ROC_AUC"]) else None,
+                neg_log10_mwu_pval=row["NEG_LOG10_MWU_PVAL"] if pd.notna(row["NEG_LOG10_MWU_PVAL"]) else None,
                 num_positive=int(row["NUM_POSITIVE_LABELS"]),
                 num_negative=int(row["NUM_NEGATIVE_LABELS"]),
             )
@@ -109,6 +123,12 @@ def main():
     analyzer = container.analyzer
 
     with Session(engine) as session:
+        print("\nDeleting existing rows...")
+        session.query(VariantEffectGeneAuc).delete()
+        session.query(VariantEffectTaskAuc).delete()
+        session.query(VariantEffectSource).delete()
+        session.commit()
+
         print("\nLoading variant_effect_source...")
         _load_variant_effect_sources(session)
 
@@ -117,8 +137,9 @@ def main():
             metrics = analyzer.compute_metrics(
                 task_code,
                 compute_gene_metrics=True,
-                vep_min_overlap_percent=50,
-                variant_vep_retention_percent=1,
+                vep_min_overlap_percent=80,
+                variant_vep_retention_percent=100,
+                # metrics="mwu"
             )
             _load_task_auc(session, task_code, metrics)
             _load_gene_auc(session, task_code, metrics)

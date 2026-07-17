@@ -7,6 +7,12 @@ details of the repository structure.
 import os
 import pandas as pd
 import dask.dataframe as dd
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import text
+
+from aigct.db_model import Base
+
 from .util import ParameterizedSingleton
 import threading
 from dataclasses import dataclass, field
@@ -40,7 +46,6 @@ class TableDef:
     def __post_init__(self):
         self.columns = self.pk_columns + self.non_pk_columns
         self.full_file_name = os.path.join(self.folder, self.file_name)
-    
 
 
 VARIANT_PK_COLUMNS = [
@@ -143,13 +148,25 @@ def read_repo_csv(file: str) -> pd.DataFrame:
 class RepoSessionContext:
 
     def __init__(self, data_folder_root: str,
-                 table_defs: dict[str, TableDef]):
+                 table_defs: dict[str, TableDef],
+                 db_url: str = None):
         self._data_folder_root = data_folder_root
         self._table_defs = table_defs
+        self._db_url = db_url
+        if db_url is not None:
+            self._engine = create_engine(db_url)
 
     @property
     def data_folder_root(self):
         return self._data_folder_root
+
+    @property
+    def db_url(self):
+        return self._db_url
+
+    @property
+    def engine(self):
+        return self._engine
 
     def table_def(self, table_name: str):
         return self._table_defs[table_name]
@@ -585,3 +602,77 @@ class VariantEffectScoreRepository:
         return pd.concat(scores_dfs)
 
 
+class VariantEffectAnalysisRepository:
+
+    def __init__(self, session_context: RepoSessionContext):
+        self._engine = session_context.engine
+
+    def get_variant_effect_metrics_by_task(
+            self, task_code: str) -> pd.DataFrame:
+        session = sessionmaker(bind=self._engine)
+        with session() as session:
+            sql = text("""
+            select score_source, auc, neg_log10_mwu_pval,
+                        num_positive, num_negative
+            from variant_effect_task_auc
+            where task_code = :task_code
+            """)
+            # Execute the query with a parameter
+            result = session.execute(
+                sql,
+                {"task_code": task_code})
+            df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            # Process the results
+            return df
+
+    def get_variant_effect_gene_metrics_by_task_gene(
+            self, task_code: str, gene_symbol: str) -> pd.DataFrame:
+        session = sessionmaker(bind=self._engine)
+        with session() as session:
+            sql = text("""
+            select score_source, gene_symbol, auc,
+                       neg_log10_mwu_pval, num_positive, num_negative
+            from variant_effect_gene_auc
+            where task_code = :task_code
+                and gene_symbol = :gene_symbol
+            """)
+            # Execute the query with a parameter
+            result = session.execute(
+                sql,
+                {"task_code": task_code, "gene_symbol": gene_symbol})
+            df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            # Process the results
+            return df
+
+    def get_all_variant_effect_source(self) -> pd.DataFrame:
+        session = sessionmaker(bind=self._engine)
+        with session() as session:
+            sql = text("""
+            select code, name, source_type, description
+            from variant_effect_source
+            """)
+            # Execute the query with a parameter
+            result = session.execute(sql)
+            df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            # Process the results
+            return df
+
+    def get_variant_effect_source_by_task(
+            self, task_code: str) -> pd.DataFrame:
+        session = sessionmaker(bind=self._engine)
+        with session() as session:
+            sql = text("""
+            select code, name, source_type, description
+            from variant_effect_source
+            where code in (
+                select score_source
+                from variant_effect_task_auc
+                where task_code = :task_code)
+            """)
+            # Execute the query with a parameter
+            result = session.execute(
+                sql,
+                {"task_code": task_code})
+            df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            # Process the results
+            return df

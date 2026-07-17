@@ -26,6 +26,7 @@ class VariantEffectTaskAuc(Base):
         String(20), ForeignKey("variant_effect_source.code"), primary_key=True
     )
     auc = Column(Float)
+    neg_log10_mwu_pval = Column(Float)
     num_positive = Column(Integer)
     num_negative = Column(Integer)
 
@@ -41,6 +42,7 @@ class VariantEffectGeneAuc(Base):
     )
     gene_symbol = Column(String(20), primary_key=True)
     auc = Column(Float)
+    neg_log10_mwu_pval = Column(Float)
     num_positive = Column(Integer)
     num_negative = Column(Integer)
 
