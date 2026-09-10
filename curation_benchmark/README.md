@@ -2,7 +2,13 @@
 
 Code and inputs used to build the benchmark datasets distributed with
 [AIGCT](https://github.com/Huang-lab/AiGCT), and the analysis notebooks that
-produce Figures 2–5 and Supplementary Tables S3–S4 of the AIGCT manuscript.
+produce Figures 2–4, Supplementary Figures S2–S5 and Supplementary Tables
+S3–S4 of the AIGCT manuscript.
+
+Figure 5 (hereditary cancer predisposition) is not reproduced here: it is
+computed on individual-level UK Biobank exome and ICD-10 data, which is
+controlled-access and cannot be redistributed. See the manuscript's Data
+Availability statement.
 
 This repository covers **how the benchmark database was made**. To *use* the
 benchmark, install the `aigct` package instead — the curated database is
@@ -92,7 +98,12 @@ so it only needs the `aigct` package and its downloaded database.
 - `generate_supp_tables.py` — Supplementary Tables S3 (AUC-ROC) and S4 (MWU),
   at both the 80% and 90% VEP-coverage thresholds. Set `AIGCT_CONFIG` to your
   `aigct.yaml` and `AIGCT_CLINVAR_CSV` to the ClinVar table from the curation
-  step.
+  step. S3 covers all 14 task–dataset combinations (28 sheets); S4 covers the
+  10 non-ClinVar ones (20 sheets). MWU is not reported for ClinVar: n there is
+  large enough that `-log10(p)` runs into the thousands — past the float64
+  floor on the biggest strata — so it tracks sample size rather than effect
+  size and ranks the VEPs no differently from AUC-ROC. ClinVar is assessed by
+  AUC-ROC.
 - `plot_vep.py` — the horizontal bar charts in Figures 2–4, with VEP labels
   coloured by training-data category (clinical-trained, population-tuned,
   population-free).
