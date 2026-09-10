@@ -1,0 +1,251 @@
+# Datasets curated for the released AIGCT benchmark database.
+#
+# Each entry under `datasets:` names one variant set, the coordinate list it is
+# built from, and the genome assembly that list is reported on. `filter_code`
+# records the filter this dataset becomes in the AIGCT database, so every row
+# here can be traced to a specific benchmark result.
+#
+# Only datasets that made it into the released database are listed. Earlier
+# iterations of these coordinate lists are still present in data/annotation and
+# are catalogued in README.md under "Superseded annotation files".
+
+datasets:
+
+  # ── ClinVar ────────────────────────────────────────────────────────────────
+  # Built by scanning the whole dbNSFP release rather than from a coordinate
+  # list, then balanced per gene; see curation/clinvar.py and curation/balance.py.
+  clinvar:
+    task: CLINVAR
+    source: dbnsfp_scan
+    output: clinvar_withoutX.csv
+  balanced_clinvar:
+    task: CLINVAR
+    source: balance
+    input: clinvar_withoutX.csv
+    output: balanced_clinvar.csv
+    filter_code: BALANCED_CLINVAR
+
+  # ── ADRD ───────────────────────────────────────────────────────────────────
+  ADRD_case:
+    task: ADRD
+    annotation: ADRD_case_annotation.txt
+    assembly: hg38
+    output: ADRD_case.csv
+  ADRD_control:
+    task: ADRD
+    annotation: ADRD_control_annotation.txt
+    assembly: hg38
+    output: ADRD_control.csv
+
+  # ── Cancer ─────────────────────────────────────────────────────────────────
+  MSK_hotspot:
+    task: CANCER
+    annotation: hotspot_annotation_fordb_withouttranscript_gd.txt
+    assembly: hg38
+    output: MSK_hotspot10_28.csv
+    filter_code: MSK_HOTSPOT
+  MSK_passenger:
+    task: CANCER
+    annotation: MSK_passenger_hg19_annotation_6246.txt
+    assembly: hg19
+    output: MSK_passenger_6246.csv
+    filter_code: MSK_PASSENGER
+  TCGA_passenger:
+    task: CANCER
+    annotation: TCGA_passenger_hg19_annotation_rd5000.txt
+    assembly: hg19
+    output: TCGA_passenger_rd5000.csv
+    filter_code: TCGA_PASSENGER
+  Alpha_pos:
+    task: CANCER
+    annotation: alphamissense_cancer_pos.txt
+    assembly: hg38
+    output: alphamissense_cancer_pos.csv
+    filter_code: ALPHA_POS
+  Alpha_neg:
+    task: CANCER
+    annotation: alphamissense_cancer_neg.txt
+    assembly: hg38
+    output: alphamissense_cancer_neg.csv
+    filter_code: ALPHA_NEG
+
+  # ── ASD ────────────────────────────────────────────────────────────────────
+  ASD_case1:
+    task: ASD
+    annotation: ASD_study1_case_hg38_annotation.txt
+    assembly: hg38
+    output: ASD_study1_case.csv
+    filter_code: ASD_CASE1
+  ASD_case2:
+    task: ASD
+    annotation: ASD_study2_case_hg19_annotation.txt
+    assembly: hg19
+    output: ASD_study2_case.csv
+    filter_code: ASD_CASE2
+  ASD_case3:
+    task: ASD
+    annotation: ASD_study3_case_hg19_annotation.txt
+    assembly: hg19
+    output: ASD_study3_case.csv
+    filter_code: ASD_CASE3
+  ASD_case4:
+    task: ASD
+    annotation: ASD_study4_case_hg19_annotation.txt
+    assembly: hg19
+    output: ASD_study4_case.csv
+    filter_code: ASD_CASE4
+  ASD_pri_case1:
+    task: ASD
+    annotation: ASD_primate_study1.txt
+    assembly: hg19
+    output: ASD_primate_study1_case.csv
+    filter_code: ASD_PRI_CASE1
+  ASD_pri_case2:
+    task: ASD
+    annotation: ASD_primate_study2_case.txt
+    assembly: hg19
+    output: ASD_primate_study2_case.csv
+    filter_code: ASD_PRI_CASE2
+  ASD_pri_case3:
+    task: ASD
+    annotation: ASD_primate_study3.txt
+    assembly: hg19
+    output: ASD_primate_study3_case.csv
+    filter_code: ASD_PRI_CASE3
+
+  # ── CHD ────────────────────────────────────────────────────────────────────
+  CHD_case:
+    task: CHD
+    annotation: CHD_case_annotation.txt
+    assembly: hg19
+    output: CHD_case.csv
+    filter_code: CHD_CASE
+
+  # ── DDD ────────────────────────────────────────────────────────────────────
+  DDD_case:
+    task: DDD
+    annotation: DDD_case_annotation.txt
+    assembly: hg19
+    output: DDD_case.csv
+    filter_code: DDD_CASE
+  DDD_pri_case1:
+    task: DDD
+    annotation: DDD_primate_study1.txt
+    assembly: hg19
+    output: DDD_primate_study1.csv
+    filter_code: DDD_PRI_CASE1
+  DDD_pri_case2:
+    task: DDD
+    annotation: DDD_primate_study2.txt
+    assembly: hg19
+    output: DDD_primate_study2.csv
+    filter_code: DDD_PRI_CASE2
+
+  # ── Shared negative set ────────────────────────────────────────────────────
+  # Unaffected-sibling de novo variants pooled from the ASD studies. The same
+  # five files serve as the negative set for ASD, CHD and DDD; per-task overlap
+  # removal (below) is what makes the final control counts differ between the
+  # three tasks.
+  control1:
+    task: shared
+    annotation: ASD_study1_control_hg38_annotation.txt
+    assembly: hg38
+    output: ASD_study1_control_new.csv
+    filter_code: [ASD_CONTROL1, CHD_CONTROL1, DDD_CONTROL1]
+  control2:
+    task: shared
+    annotation: ASD_study2_control_hg19_annotation.txt
+    assembly: hg19
+    output: ASD_study2_control_new.csv
+    filter_code: [ASD_CONTROL2, CHD_CONTROL2, DDD_CONTROL2]
+  control3:
+    task: shared
+    annotation: ASD_study3_control_hg19_annotation.txt
+    assembly: hg19
+    output: ASD_study3_control_new.csv
+    filter_code: [ASD_CONTROL3, CHD_CONTROL3, DDD_CONTROL3]
+  control4:
+    task: shared
+    annotation: ASD_study4_control_hg19_annotation.txt
+    assembly: hg19
+    output: ASD_study4_control_new.csv
+    filter_code: [ASD_CONTROL4, CHD_CONTROL4, DDD_CONTROL4]
+  pri_control2:
+    task: shared
+    annotation: ASD_primate_study2_control.txt
+    assembly: hg19
+    output: ASD_primate_study2_control.csv
+    filter_code: [ASD_PRI_CONTROL2, CHD_PRI_CONTROL2, DDD_PRI_CONTROL2]
+
+
+# Variants appearing in both the positive and the negative set of a task carry
+# no signal and are dropped from both sides. This runs once per task, which is
+# why the shared control files yield slightly different counts for ASD, CHD and
+# DDD in the released database.
+overlap_removal:
+
+  - task: CANCER
+    positives: [MSK_hotspot10_28.csv, alphamissense_cancer_pos.csv]
+    negatives:
+      - alphamissense_cancer_neg.csv
+      - MSK_passenger_6246.csv
+      - TCGA_passenger_rd5000.csv
+
+  - task: ADRD
+    positives: [ADRD_case.csv]
+    negatives: [ADRD_control.csv]
+
+  - task: ASD
+    positives:
+      - ASD_study1_case.csv
+      - ASD_study2_case.csv
+      - ASD_study3_case.csv
+      - ASD_study4_case.csv
+      - ASD_primate_study1_case.csv
+      - ASD_primate_study2_case.csv
+      - ASD_primate_study3_case.csv
+    negatives: &shared_controls
+      - ASD_study1_control_new.csv
+      - ASD_study2_control_new.csv
+      - ASD_study3_control_new.csv
+      - ASD_study4_control_new.csv
+      - ASD_primate_study2_control.csv
+
+  - task: CHD
+    positives: [CHD_case.csv]
+    negatives: *shared_controls
+
+  - task: DDD
+    positives:
+      - DDD_case.csv
+      - DDD_primate_study1.csv
+      - DDD_primate_study2.csv
+    negatives: *shared_controls
+
+
+# ClinVar-excluded developmental disorder benchmarks (Figure 4B, D, F): the
+# same case sets with every variant present in ClinVar removed, used to test how
+# much of a predictor's ranking survives when variants it may have been trained
+# on are taken away.
+clinvar_exclusion:
+  clinvar_set: [clinvar_withoutX.csv]
+  datasets:
+    ASD:
+      inputs:
+        - ASD_study1_case.csv
+        - ASD_study2_case.csv
+        - ASD_study3_case.csv
+        - ASD_study4_case.csv
+        - ASD_primate_study1_case.csv
+        - ASD_primate_study2_case.csv
+        - ASD_primate_study3_case.csv
+      output: ASD_case_without_clinvar.csv
+    CHD:
+      inputs: [CHD_case.csv]
+      output: CHD_case_without_clinvar.csv
+    DDD:
+      inputs:
+        - DDD_case.csv
+        - DDD_primate_study1.csv
+        - DDD_primate_study2.csv
+      output: DDD_case_without_clinvar.csv

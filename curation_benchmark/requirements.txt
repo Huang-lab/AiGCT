@@ -1,0 +1,9 @@
+pandas>=2.0
+numpy
+pyyaml
+tqdm
+openpyxl
+matplotlib
+# Needed only by the notebooks under analysis/, which query the published
+# benchmark database rather than rebuilding it.
+aigct
