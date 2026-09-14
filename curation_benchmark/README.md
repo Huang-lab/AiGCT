@@ -159,9 +159,12 @@ are kept for provenance but were not used to build the released database:
   replaced by the shared control set.
 - `MSK_passenger_annotation.txt` — the full MSK passenger set, narrowed to the
   subset in `MSK_passenger_hg19_annotation_6246.txt`.
-- `TCGA_passenger_annotation.txt`, `TCGA_passenger_hg19_annotation_{1,2}.txt`,
-  `TCGA_passenger_hg19_annotation_rd6000.txt` — replaced by the 5,000-variant
-  random subset `TCGA_passenger_hg19_annotation_rd5000.txt`.
+- `TCGA_passenger_annotation.txt` — the full TCGA passenger set.
+  `TCGA_passenger_hg19_annotation_rd6000.txt` is a random draw of 6,000 from
+  it; 5,909 of those had a dbNSFP record, and a random 5,000 of the 5,909 were
+  retained. `TCGA_passenger_hg19_annotation_rd5000.txt` lists exactly those
+  5,000 (hg19), so the pipeline reproduces the published `TCGA_PASSENGER`
+  filter without re-sampling.
 - `hotspot_annotation_fordb.txt`, `hotspot_annotation_fordb_withouttranscript.txt`
   — replaced by the driver-gene-filtered `..._gd.txt`.
 - `DDD_alpha_case.txt`, `DDD_alpha_control.txt`, `ASD_primate_study2.txt` —
