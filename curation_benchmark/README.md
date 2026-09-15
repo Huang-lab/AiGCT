@@ -1,24 +1,25 @@
 # AIGCT benchmark curation
 
 Code and inputs used to build the benchmark datasets distributed with
-[AIGCT](https://github.com/Huang-lab/AiGCT), and the analysis notebooks that
+[AIGCT](https://github.com/Huang-lab/AiGCT), and the analysis scripts that
 produce Figures 2–4, Supplementary Figures S2–S5 and Supplementary Tables
 S3–S4 of the AIGCT manuscript.
 
-Figure 5 (hereditary cancer predisposition) is not reproduced here: it is
-computed on individual-level UK Biobank exome and ICD-10 data, which is
+This directory contains only what is needed to go from dbNSFP to the published
+results. Figure 5 (hereditary cancer predisposition) is not reproduced here: it
+is computed on individual-level UK Biobank exome and ICD-10 data, which is
 controlled-access and cannot be redistributed. See the manuscript's Data
 Availability statement.
 
-This repository covers **how the benchmark database was made**. To *use* the
-benchmark, install the `aigct` package instead — the curated database is
-downloaded automatically and nothing here needs to be run.
+This covers **how the benchmark database was made**. To *use* the benchmark,
+install the `aigct` package instead — the curated database is downloaded
+automatically and nothing here needs to be run.
 
 ```
 curation/     pipeline that turns cohort variant lists into the benchmark tables
-analysis/     scripts and notebooks that evaluate VEPs and produce the figures
+analysis/     scripts that evaluate VEPs and produce the figures and tables
 data/         variant coordinate lists, transcript reference tables, gene lists
-results/      supplementary tables and metric exports as published
+results/      supplementary tables as published
 config.yaml   paths to inputs and outputs
 datasets.yaml the datasets that were built, and what each becomes in AIGCT
 ```
@@ -35,7 +36,8 @@ pipeline then:
 2. **Resolves duplicate transcripts.** dbNSFP reports one record per
    transcript, so a variant in several transcripts appears several times.
    `curation/transcript_select.py` collapses each set to one representative
-   transcript: the dbNSFP canonical transcript, else the CCDS transcript with
+   transcript: the dbNSFP canonical transcript where there is exactly one;
+   otherwise the Ensembl canonical transcript, else the CCDS transcript with
    the longest CDS (ties broken by overall transcript length), else the longest
    transcript overall. This is the protocol in Supplementary Figure S6.
 3. **Removes overlaps** between the positive and negative set of each task, so
@@ -47,12 +49,39 @@ scans the whole dbNSFP release and keeps every record carrying a ClinVar
 classification, using dbNSFP's own `clinvar_clnsig` and `clinvar_review`
 fields — so **dbNSFP fixes which ClinVar release the benchmark reflects**.
 `curation/balance.py` then samples an equal number of pathogenic and benign
-variants per gene to produce the class-balanced benchmark.
+variants per gene to produce the class-balanced benchmark (21,840 + 21,840
+variants across 3,062 genes).
+
+### VEP versions are fixed by the dbNSFP release
+
+Because every VEP score comes from one dbNSFP release, the model version of
+each predictor is whatever that release ships. dbNSFP v5.0a supplies **CADD
+v1.7** and **MutationTaster2021**, among others. This matters when comparing
+against previously published benchmarks: the AlphaMissense study (Cheng et al.,
+2023) predates dbNSFP v4.7 and therefore used **CADD v1.6**, a model without
+the protein language model and regulatory features added in v1.7. CADD's
+position in the cross-study comparison (Supplementary Figure S5) reflects a
+different predictor, not a difference in the evaluation.
+
+### Two notes on the released database
+
+- **CADD and Eigen in the ClinVar task.** Release 1.0.0 of the benchmark
+  database carries no CADD_raw, Eigen-raw_coding or Eigen-PC-raw_coding scores
+  for the CLINVAR task. The dbNSFP scan did extract them, but wrote the raw
+  score columns under their bare dbNSFP names (`CADD_raw`, …) while the loader
+  expected the renamed form (`CADD_raw_score`, …) and skipped what it could not
+  find. `curation/clinvar.py` applies the rename (`VEP_RENAME` in
+  `curation/columns.py`), so a fresh run is unaffected; release 1.0.1 adds the
+  three predictors to the ClinVar task and changes nothing else.
+- **MAVEN.** The released database also carries MAVEN and MAVEN_(average)
+  scores, which are not produced by this pipeline. They are excluded from every
+  analysis reported in the manuscript, and both `generate_supp_tables.py` and
+  `make_figures.py` exclude them explicitly.
 
 ## External data you must download
 
 Only the small reference tables are redistributed here. The large third-party
-downloads are not, and must be fetched separately, then pointed at from
+download is not, and must be fetched separately, then pointed at from
 `config.yaml`:
 
 | What | Where | Used by |
@@ -66,7 +95,7 @@ Bundled under `data/reference/` for convenience:
 | `mart_export.txt` | Ensembl BioMart — transcript stable ID, version, length including UTRs and CDS, Ensembl canonical flag, CCDS ID |
 | `CCDSID_length_table.current.csv` | CDS lengths derived from the NCBI CCDS release (`CCDS_nucleotide.current.fna.gz`) |
 
-## Running it
+## Running the curation
 
 ```bash
 pip install -r requirements.txt
@@ -90,47 +119,38 @@ comes from, the assembly that list is reported on, the CSV it produces, and the
 `filter_code` it becomes in the AIGCT database. Every benchmark number in the
 manuscript can be traced back through it.
 
-## Analysis
+## Running the analysis
 
 `analysis/` queries the *published* AIGCT database rather than rebuilding it,
-so it only needs the `aigct` package and its downloaded database.
-
-- `generate_supp_tables.py` — Supplementary Tables S3 (AUC-ROC) and S4 (MWU),
-  at both the 80% and 90% VEP-coverage thresholds. Set `AIGCT_CONFIG` to your
-  `aigct.yaml` and `AIGCT_CLINVAR_CSV` to the ClinVar table from the curation
-  step. S3 covers all 14 task–dataset combinations (28 sheets); S4 covers the
-  10 non-ClinVar ones (20 sheets). MWU is not reported for ClinVar: n there is
-  large enough that `-log10(p)` runs into the thousands — past the float64
-  floor on the biggest strata — so it tracks sample size rather than effect
-  size and ranks the VEPs no differently from AUC-ROC. ClinVar is assessed by
-  AUC-ROC.
-- `plot_vep.py` — the horizontal bar charts in Figures 2–4, with VEP labels
-  coloured by training-data category (clinical-trained, population-tuned,
-  population-free).
-- `notebooks/` — per-task evaluation notebooks. Outputs are stripped before
-  commit, so run a notebook top to bottom to reproduce its figures.
-
-Nothing under `analysis/` hard-codes a filesystem location. The notebooks read
-theirs from `notebooks/paths.py`, which takes every location from an
-environment variable:
-
-| Variable | Meaning | Default |
-| --- | --- | --- |
-| `AIGCT_HOME` | AIGCT installation holding `config/` and `db/` | this repository |
-| `AIGCT_CONFIG` | `aigct.yaml` of that installation | `$AIGCT_HOME/config/aigct.yaml` |
-| `AIGCT_DB_DIR` | benchmark database tables | `$AIGCT_HOME/db/data` |
-| `AIGCT_CLINVAR_CSV` | ClinVar table from the curation step | `$AIGCT_HOME/output/processed/clinvar_withoutX.csv` |
-| `AIGCT_SCORES_DIR` | MAVEN / EVE score tables | `$AIGCT_HOME/processed_data` |
-| `AIGCT_OUTPUT_DIR` | where the notebooks write output | `$AIGCT_HOME/output` |
-
-Setting `AIGCT_HOME` alone is usually enough:
+so it needs only the `aigct` package and its downloaded database. Point
+`AIGCT_CONFIG` at the `aigct.yaml` of that installation; nothing else is
+required.
 
 ```bash
-export AIGCT_HOME=/path/to/your/aigct-install
+export AIGCT_CONFIG=/path/to/your/aigct-install/config/aigct.yaml
+
+python analysis/generate_supp_tables.py   # Supplementary Tables S3, S4 and counts
+python analysis/make_figures.py           # all panels of Figures 2–4, S2–S5
 ```
 
-`results/` holds the supplementary tables and metric exports exactly as
-published.
+- `generate_supp_tables.py` — Supplementary Tables S3 (AUC-ROC) and S4 (MWU) at
+  both the 80% and 90% VEP-coverage thresholds, plus the auPRC companion table
+  and a dataset-counts table. S3 covers all 14 task–dataset combinations (28
+  sheets); S4 covers the 10 non-ClinVar ones (20 sheets). MWU is not reported
+  for ClinVar: n there is large enough that `-log10(p)` runs into the thousands
+  — past the float64 floor on the biggest strata — so it tracks sample size
+  rather than effect size and ranks the VEPs no differently from AUC-ROC.
+  ClinVar is assessed by AUC-ROC.
+- `make_figures.py` — every panel of Figures 2–4 (80% threshold) and
+  Supplementary Figures S2–S4 (90%), plus the two cross-study panels of
+  Supplementary Figure S5, written as individual PNGs with the evaluated counts
+  in each panel title. `--only` restricts to named panels, `--thresholds` to one
+  threshold.
+- `plot_vep.py` — the bar-chart styling shared by those panels, with VEP labels
+  coloured by training-data category (clinical-trained, population-tuned,
+  population-free).
+
+`results/supp_tables/` holds the supplementary tables exactly as published.
 
 ## Notes on the data files
 
@@ -138,37 +158,24 @@ published.
 each coordinate list is recorded in `datasets.yaml` and used to pick which
 dbNSFP coordinate columns to join against.
 
-**DDD gene lists.** The PrimateAI and AlphaMissense gene lists used to filter
-the DDD task are not stored in this repository. They ship with the benchmark
-database as `db/data/DDD/variant_filter_gene.csv`, under the filter codes
+**DDD gene lists.** The PrimateAI and AlphaMissense gene lists associated with
+the DDD task ship with the benchmark database as
+`db/data/DDD/variant_filter_gene.csv`, under the filter codes
 `DDD_RELATED_GENES_PRIMATEAI` (605 genes, from Sundaram et al.) and
-`DDD_RELATED_GENES_ALPHA` (215 genes).
+`DDD_RELATED_GENES_ALPHA` (215 genes). They are available as named gene filters
+but were **not applied** in any analysis reported in the manuscript, which uses
+all DDD de novo missense variants.
 
 **Shared negative set.** ASD, CHD and DDD share one negative set, pooled from
 the unaffected-sibling de novo variants of the ASD studies. Overlap removal
 runs once per task, which is why the same five control files yield slightly
 different counts for the three tasks in the released database.
 
-**Superseded annotation files.** `data/annotation` retains earlier iterations
-of several coordinate lists that are not referenced by `datasets.yaml`. They
-are kept for provenance but were not used to build the released database:
-
-- `ASD_case_annotation.txt`, `ASD_control_annotation.txt` — pooled ASD lists,
-  replaced by the per-study `ASD_study{1..4}_*` files.
-- `CHD_control_annotation.txt`, `DDD_control_annotation.txt`, `CHD_AIGCT.txt` —
-  replaced by the shared control set.
-- `MSK_passenger_annotation.txt` — the full MSK passenger set, narrowed to the
-  subset in `MSK_passenger_hg19_annotation_6246.txt`.
-- `TCGA_passenger_annotation.txt` — the full TCGA passenger set.
-  `TCGA_passenger_hg19_annotation_rd6000.txt` is a random draw of 6,000 from
-  it; 5,909 of those had a dbNSFP record, and a random 5,000 of the 5,909 were
-  retained. `TCGA_passenger_hg19_annotation_rd5000.txt` lists exactly those
-  5,000 (hg19), so the pipeline reproduces the published `TCGA_PASSENGER`
-  filter without re-sampling.
-- `hotspot_annotation_fordb.txt`, `hotspot_annotation_fordb_withouttranscript.txt`
-  — replaced by the driver-gene-filtered `..._gd.txt`.
-- `DDD_alpha_case.txt`, `DDD_alpha_control.txt`, `ASD_primate_study2.txt` —
-  intermediate gene-list-filtered subsets.
+**TCGA passengers.** The full TCGA passenger set was randomly reduced: a draw
+of 6,000 variants, of which 5,909 had a dbNSFP record, from which a random
+5,000 were retained. `data/annotation/TCGA_passenger_hg19_annotation_rd5000.txt`
+lists exactly those 5,000 (hg19), so the pipeline reproduces the published
+`TCGA_PASSENGER` filter without re-sampling.
 
 **One reconstructed file.** `MSK_passenger_hg19_annotation_6246.txt` was
 regenerated from the `hg19_chr`, `hg19_pos(1-based)`, `ref` and `alt` columns

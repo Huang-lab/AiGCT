@@ -15,8 +15,6 @@ VEP_TYPE = {
     "gmvp":                 "clinical-trained",
     "list-s2":              "population-tuned",
     "m-cap":                "clinical-trained",
-    "maven":                "population-free",
-    "maven_(average)":      "population-free",
     "metalr":               "clinical-trained",
     "metarnn":              "clinical-trained",
     "metasvm":              "clinical-trained",

@@ -4,6 +4,5 @@ pyyaml
 tqdm
 openpyxl
 matplotlib
-# Needed only by the notebooks under analysis/, which query the published
-# benchmark database rather than rebuilding it.
+# analysis/ queries the published benchmark database rather than rebuilding it
 aigct

@@ -116,18 +116,20 @@ def _select_by_reference(value):
 
 
 def _resolve_group(group):
-    """Resolve one variant's rows, preferring dbNSFP's own canonical flag."""
+    """Resolve one variant's rows, preferring dbNSFP's own canonical flag.
+
+    A variant with exactly one dbNSFP canonical transcript is settled there.
+    With none, or with more than one, the choice is delegated to the
+    Ensembl/CCDS/length hierarchy in `_select_by_reference`.
+    """
     if group.shape[0] == 1:
         if group["VEP_canonical"].isin(["YES", "."]).any():
             return group
         return _select_by_reference(group)
-    try:
-        canonical = group[group["VEP_canonical"] == "YES"]
-        if canonical.shape[0] > 1:
-            print("multiple canonical transcripts:\n", canonical)
+    canonical = group[group["VEP_canonical"] == "YES"]
+    if canonical.shape[0] == 1:
         return canonical
-    except Exception:
-        return _select_by_reference(group)
+    return _select_by_reference(group)
 
 
 def choose_canonical(file, dataset_name):

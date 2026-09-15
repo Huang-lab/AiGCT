@@ -7,9 +7,11 @@ label are excluded outright.
 
 Because the number of variants carrying a score from any given predictor
 varies, variants that already have a score from a chosen priority VEP are
-sampled first. Balancing happens before dbNSFP annotation is complete for
-every sampled variant, so the resulting set is only approximately balanced —
-see the Results section.
+sampled first. The sampled set itself is exactly balanced (21,840 pathogenic
+and 21,840 benign variants across 3,062 genes in the released database). The
+subset actually evaluated is smaller and imbalanced, because the analyzer
+retains a variant only if every VEP passing the coverage threshold scored it,
+and benign variants are less completely covered by several VEPs.
 """
 import pandas as pd
 
