@@ -38,10 +38,6 @@ CONFIG = os.environ.get("AIGCT_CONFIG", os.path.join(REPO_ROOT, "config", "aigct
 VARIANT_PK = ["GENOME_ASSEMBLY", "CHROMOSOME", "POSITION",
               "REFERENCE_NUCLEOTIDE", "ALTERNATE_NUCLEOTIDE"]
 
-# MAVEN and MAVEN_(average) are present in the database but excluded from every
-# analysis reported in the manuscript.
-EXCLUDED_SOURCES = ["MAVEN", "MAVENAVG"]
-
 # The VEP panels benchmarked in the AlphaMissense study, used for the
 # cross-study validation in Supplementary Figure S5.
 ALPHAMISSENSE_CLINVAR_PANEL = ["ALPHAM", "VAR_RL", "REVEL", "GMVP", "EIGEN", "CADD",
@@ -132,9 +128,7 @@ def main():
             continue
         qry = clinvar_excl if q == "clinvar_excl" else (VEQueryCriteria(**q) if q else None)
         for pct in args.thresholds:
-            kw = dict(vep_min_overlap_percent=pct, variant_vep_retention_percent=100,
-                      variant_effect_sources=EXCLUDED_SOURCES,
-                      include_variant_effect_sources=False)
+            kw = dict(vep_min_overlap_percent=pct, variant_vep_retention_percent=100)
             if qry is not None:
                 kw["variant_query_criteria"] = qry
             m = container.analyzer.compute_metrics(task, **kw)

@@ -24,6 +24,9 @@ config.yaml   paths to inputs and outputs
 datasets.yaml the datasets that were built, and what each becomes in AIGCT
 ```
 
+How the curated CSVs become the distributed database is documented under
+"From curated CSVs to the benchmark database" below.
+
 ## What the pipeline does
 
 Every benchmark task starts from a list of variant coordinates extracted from
@@ -31,8 +34,8 @@ the supplementary tables of published cohort studies (`data/annotation`). The
 pipeline then:
 
 1. **Annotates** each variant against dbNSFP v5.0a, pulling the rank scores of
-   all 37 evaluated VEPs plus transcript, protein and gnomAD frequency fields
-   (`curation/dbnsfp.py`).
+   all 37 evaluated VEPs (Supplementary Table S2) plus transcript, protein and
+   gnomAD frequency fields (`curation/dbnsfp.py`).
 2. **Resolves duplicate transcripts.** dbNSFP reports one record per
    transcript, so a variant in several transcripts appears several times.
    `curation/transcript_select.py` collapses each set to one representative
@@ -63,20 +66,109 @@ the protein language model and regulatory features added in v1.7. CADD's
 position in the cross-study comparison (Supplementary Figure S5) reflects a
 different predictor, not a difference in the evaluation.
 
-### Two notes on the released database
+### What changed between database release 1.0.0 and 1.0.1
 
-- **CADD and Eigen in the ClinVar task.** Release 1.0.0 of the benchmark
-  database carries no CADD_raw, Eigen-raw_coding or Eigen-PC-raw_coding scores
-  for the CLINVAR task. The dbNSFP scan did extract them, but wrote the raw
-  score columns under their bare dbNSFP names (`CADD_raw`, …) while the loader
-  expected the renamed form (`CADD_raw_score`, …) and skipped what it could not
-  find. `curation/clinvar.py` applies the rename (`VEP_RENAME` in
-  `curation/columns.py`), so a fresh run is unaffected; release 1.0.1 adds the
-  three predictors to the ClinVar task and changes nothing else.
-- **MAVEN.** The released database also carries MAVEN and MAVEN_(average)
-  scores, which are not produced by this pipeline. They are excluded from every
-  analysis reported in the manuscript, and both `generate_supp_tables.py` and
-  `make_figures.py` exclude them explicitly.
+Release 1.0.0 carried no CADD_raw, Eigen-raw_coding or Eigen-PC-raw_coding
+scores for the CLINVAR task. The dbNSFP scan did extract them, but wrote the
+raw score columns under their bare dbNSFP names (`CADD_raw`, …) while the
+loader expected the renamed form (`CADD_raw_score`, …) and skipped what it
+could not find. `curation/clinvar.py` applies the rename (`VEP_RENAME` in
+`curation/columns.py`), so a fresh run is unaffected.
+
+1.0.0 also carried MAVEN and MAVEN_(average) scores, which are not produced by
+this pipeline and are not among the predictors evaluated in the manuscript.
+
+Release 1.0.1 therefore adds the three missing predictors to the ClinVar task
+and drops the two MAVEN sources, leaving exactly the **37 VEPs of
+Supplementary Table S2** in every task. Dropping MAVEN changes no reported
+number: it was excluded from every analysis in 1.0.0 as well, and the
+supplementary tables regenerate bit for bit from either release.
+
+## From curated CSVs to the benchmark database
+
+The curation stages above end at one annotated, transcript-resolved CSV per
+dataset under `output/processed/`. Those CSVs are then loaded into the
+flat-file relational database that the `aigct` package reads. This repository
+documents that step rather than shipping a driver for it, because the released
+database is downloaded from Zenodo and nothing here needs to rebuild it.
+
+The database is a directory of CSV files: four global tables plus one
+subdirectory per task.
+
+| Table | Scope | Contents |
+|---|---|---|
+| `variant.csv` | global | master list of variants, keyed by (assembly, chromosome, position, ref, alt), with hg19/hg18 coordinates, amino acid change, gene/transcript/protein IDs and gnomAD allele frequency |
+| `variant_task.csv` | global | the six task codes |
+| `variant_effect_source.csv` | global | the 37 VEP codes and display names |
+| `variant_data_source.csv` | global | allele-frequency sources |
+| `<TASK>/variant_effect_label.csv` | per task | one row per variant: `LABEL_SOURCE`, `BINARY_LABEL` |
+| `<TASK>/variant_effect_score.csv` | per task | one row per variant **per VEP**: `SCORE_SOURCE`, `RAW_SCORE`, `RANK_SCORE` |
+| `<TASK>/variant_filter.csv` | per task | the named filters available for that task |
+| `<TASK>/variant_filter_variant.csv` | per task | which variants belong to each variant-based filter |
+| `<TASK>/variant_filter_gene.csv` | per task | which genes belong to each gene-based filter |
+
+All variants are stored on **hg38**; coordinate lists reported on hg19 or hg18
+are carried in the `PRIOR_*` columns rather than as separate rows.
+
+**Loading a curated CSV.** `aigct.etl.repo_loader.RepositoryLoader.load_variant_file`
+takes one processed CSV together with the task, a `LABEL_SOURCE` and a binary
+label, and expands it into three tables at once: one row in `variant.csv`, one
+row in `variant_effect_label.csv`, and one row in `variant_effect_score.csv`
+for every VEP score column present. Its `VEP_COLUMN_LIST` is what maps a
+dbNSFP column pair such as `AlphaMissense_score` / `AlphaMissense_rankscore`
+onto the database VEP code `ALPHAM`. Each call carries a fixed label, so
+positive and negative sets are loaded separately — which is why
+`datasets.yaml` lists case and control files as separate datasets.
+
+`LABEL_SOURCE` records which curated set a variant came from. Five of the six
+tasks use a single source named after the task; the cancer task distinguishes
+its five contributing sets:
+
+```
+ADRD / ASD / CHD / DDD / CLINVAR : one source per task
+CANCER : HOTSPOT, ALPHAMISSENSE_POS (positives)
+         MSK_PASSENGER, TCGA_PASSENGER, ALPHAMISSENSE_NEG (negatives)
+```
+
+**Named filters.** The filters that Figures 2–4 select on are loaded
+separately from the labels, so a variant can carry one label and belong to
+several filters. Every `filter_code` in `datasets.yaml` becomes a row in the
+task's `variant_filter.csv` and a set of rows in
+`variant_filter_variant.csv`. Gene-based filters (the cancer driver-gene
+categories and the DDD gene lists) live in `variant_filter_gene.csv` instead.
+As released:
+
+| Task | Filters |
+|---|---|
+| CANCER | `MSK_HOTSPOT` (826), `ALPHA_POS` (862), `MSK_PASSENGER` (6,234), `TCGA_PASSENGER` (5,000), `ALPHA_NEG` (1,733); gene filters `TSG` (99 genes), `ONCOG` (84 genes) |
+| CLINVAR | `ONESTAR` (122,853), `TWOSTAR` (46,661), `THREESTAR` (3,161), `FOURSTAR` (8), `BALANCED_CLINVAR` (43,680) |
+| ASD | `ASD_CASE1`–`4`, `ASD_PRI_CASE1`–`3`, `ASD_CONTROL1`–`4`, `ASD_PRI_CONTROL2` |
+| CHD | `CHD_CASE`, `CHD_CONTROL1`–`4`, `CHD_PRI_CONTROL2` |
+| DDD | `DDD_CASE`, `DDD_PRI_CASE1`–`2`, `DDD_CONTROL1`–`4`, `DDD_PRI_CONTROL2`; gene filters `DDD_RELATED_GENES_PRIMATEAI` (605 genes), `DDD_RELATED_GENES_ALPHA` (215 genes) |
+| ADRD | none — the task is a single case/control set |
+
+Two consequences of this layout are worth spelling out, because the
+manuscript's numbers depend on them:
+
+- **The ClinVar star filters hold one star rating each, not a cumulative
+  range.** `ONESTAR` is the one-star variants only, and the four filters
+  partition the task exactly (122,853 + 46,661 + 3,161 + 8 = 172,683). The
+  "one star or higher" stratum in Figure 2B is therefore the *union* of all
+  four filters, which is how `generate_supp_tables.py` and `make_figures.py`
+  request it.
+- **A variant can sit in more than one filter but carries only one label.**
+  In the cancer task the 862 `ALPHA_POS` variants overlap the 826
+  `MSK_HOTSPOT` variants by 675, so only 187 of them are labelled
+  `ALPHAMISSENSE_POS`; the union is the 1,013 positives quoted in the
+  Methods (826 + 862 − 675).
+
+**Note on the loader.** `aigct.etl.repo_loader` in the published package
+provides `init_variant_task`, `init_variant_effect_source` and
+`load_variant_file`. The filter tables and the ClinVar task of the released
+database were built with additional loader routines that are not part of the
+published package, so the database cannot currently be rebuilt end to end from
+PyPI alone. This does not affect use of the benchmark: the database itself is
+distributed through Zenodo and installed by `install_db`.
 
 ## External data you must download
 

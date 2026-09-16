@@ -90,9 +90,6 @@ for overlap in THRESHOLDS:
         if qry is not None:
             kwargs["variant_query_criteria"] = qry
 
-        kwargs["variant_effect_sources"] = ["MAVEN", "MAVENAVG"]
-        kwargs["include_variant_effect_sources"] = False
-
         metrics = container.analyzer.compute_metrics(task_code, **kwargs)
 
         n      = int(metrics.general_metrics["NUM_VARIANTS"].iloc[0])
