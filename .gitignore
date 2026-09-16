@@ -1,5 +1,30 @@
-demo/output/*
-temp
-data1
+# Python
 **/__pycache__/
-db
+*.pyc
+.ipynb_checkpoints/
+
+# Build artifacts (published to PyPI instead)
+dist/
+build/
+*.egg-info/
+
+# Local working data and configs, not part of the distributed package.
+# The benchmark database is downloaded from Zenodo by install_db.
+data/
+data1/
+db/
+temp/
+conf1/
+TGCA.V1/
+demo/output/*
+/repo_v*.tar.gz
+
+# Editor / OS
+*.swp
+.DS_Store
+
+# Scratch files
+/junk*
+/ve
+/test_CHD.ipynb
+tests/test.py
