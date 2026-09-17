@@ -72,13 +72,14 @@ def balance_by_gene(
         gene_stats.append({"geneid": gene, "num_variants": len(balanced_group)})
 
     balanced_df = pd.concat(balanced_data).reset_index(drop=True)
-    balanced_df[priority_col] = balanced_df[priority_col].replace(pd.NA, ".")
+
+    # Counted with isna(). The priority column arrives from pd.read_csv as
+    # float64 holding np.nan, which `.replace(pd.NA, ".")` does not match, so
+    # the previous form of this count reported 0 missing unconditionally.
+    missing_priority = int(balanced_df[priority_col].isna().sum())
 
     print("balanced variants:", len(balanced_df))
-    print(
-        f"without a {priority_col} score:",
-        len(balanced_df[balanced_df[priority_col] == "."]),
-    )
+    print(f"without a {priority_col} score:", missing_priority)
 
     if gene_stats_path:
         pd.DataFrame(gene_stats).to_csv(gene_stats_path, index=False)
