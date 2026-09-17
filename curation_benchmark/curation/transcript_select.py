@@ -35,7 +35,7 @@ def transcript_reference():
 
     Rows present only in the CCDS table (no matching Ensembl transcript) are
     dropped; Ensembl transcripts with no CCDS entry are kept with a null
-    'count' so that step 3 of the hierarchy can still use them.
+    'count' so that the transcript-length tiebreak can still use them.
     """
     cfg = load_config()["repo"]
     biomart = pd.read_csv(repo_path(cfg["biomart_export"]), sep="\t")
