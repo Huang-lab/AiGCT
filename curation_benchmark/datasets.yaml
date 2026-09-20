@@ -56,6 +56,8 @@ datasets:
     assembly: hg19
     output: TCGA_passenger_rd5000.csv
     filter_code: TCGA_PASSENGER
+  # The cancer hotspot benchmark of the AlphaMissense study (Cheng et al. 2023,
+  # Supplementary Table S6), taken as published; used for Figures 3A and S5B.
   Alpha_pos:
     task: CANCER
     annotation: alphamissense_cancer_pos.txt
