@@ -211,6 +211,23 @@ comes from, the assembly that list is reported on, the CSV it produces, and the
 `filter_code` it becomes in the AIGCT database. Every benchmark number in the
 manuscript can be traced back through it.
 
+### Tests
+
+```bash
+pytest curation_benchmark/tests
+```
+
+Unit tests for the two stages where a defect is silent rather than loud: the
+transcript hierarchy, which must never return an empty group (a variant deleted
+there leaves no message and no duplicates entry), and the gene balancing, whose
+printed coverage count is the only readout of how well priority-first sampling
+worked. They need neither dbNSFP nor the reference tables, so they run in
+seconds on a bare checkout.
+
+The repository root's `pytest.ini` sets `testpaths=tests`, which is the `aigct`
+package's own suite and needs a downloaded benchmark database; these are kept
+separate and named explicitly.
+
 ## Running the analysis
 
 `analysis/` queries the *published* AIGCT database rather than rebuilding it,

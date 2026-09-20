@@ -5,10 +5,15 @@ transcripts appears several times with identical coordinates. This module
 collapses each such set to a single representative transcript, following the
 hierarchy described in the Methods and Supplementary Figure S6:
 
-  1. the canonical transcript as annotated by dbNSFP (VEP_canonical == 'YES');
-  2. failing that, the CCDS-annotated transcript with the longest CDS, ties
+  1. the canonical transcript as annotated by dbNSFP (VEP_canonical == 'YES'),
+     where there is exactly one;
+  2. failing that, the Ensembl canonical transcript;
+  3. failing that, the CCDS-annotated transcript with the longest CDS, ties
      broken by overall transcript length;
-  3. failing that, the transcript with the longest overall length (UTRs + CDS).
+  4. failing that, the transcript with the longest overall length (UTRs + CDS).
+
+A tiebreak whose column is missing for every candidate is skipped rather than
+applied, so it cannot empty the group; see `_keep_max`.
 
 Reference tables (Ensembl BioMart export and CCDS CDS lengths) are loaded
 lazily on first use so that importing this module is cheap and does not fail
@@ -30,7 +35,7 @@ def transcript_reference():
 
     Rows present only in the CCDS table (no matching Ensembl transcript) are
     dropped; Ensembl transcripts with no CCDS entry are kept with a null
-    'count' so that step 3 of the hierarchy can still use them.
+    'count' so that the transcript-length tiebreak can still use them.
     """
     cfg = load_config()["repo"]
     biomart = pd.read_csv(repo_path(cfg["biomart_export"]), sep="\t")
@@ -63,6 +68,20 @@ def _element_at(value, index):
     return value.split(";")[index]
 
 
+def _keep_max(frame, column):
+    """Rows where `column` is at its maximum, or `frame` unchanged if all NaN.
+
+    `frame[column].max()` is NaN when every value in the column is missing, and
+    `NaN == NaN` is False, so comparing against it drops every row and deletes
+    the variant from the benchmark with no message and no duplicates entry. An
+    absent CDS length is not evidence about which transcript to keep, so the
+    tiebreak falls through to the next one instead of emptying the group.
+    """
+    if frame[column].isna().all():
+        return frame
+    return frame[frame[column] == frame[column].max()]
+
+
 def _apply_hierarchy(group):
     """Pick one row from `group` using the CCDS/length hierarchy."""
     if group[group["_merge"] != "left_only"].empty:
@@ -74,8 +93,8 @@ def _apply_hierarchy(group):
     if canonical.shape[0] == 1:
         return canonical
     if not canonical.empty:
-        canonical = canonical.loc[canonical["count"] == canonical["count"].max()]
-        canonical = canonical[canonical[_LENGTH_COLUMN] == canonical[_LENGTH_COLUMN].max()]
+        canonical = _keep_max(canonical, "count")
+        canonical = _keep_max(canonical, _LENGTH_COLUMN)
         if canonical.shape[0] > 1:
             print("tie among canonical transcripts:\n", canonical, "\n")
         return canonical
@@ -85,14 +104,14 @@ def _apply_hierarchy(group):
     if ccds.shape[0] == 1:
         return ccds
     if not ccds.empty:
-        ccds = ccds[ccds["count"] == ccds["count"].max()]
-        ccds = ccds[ccds[_LENGTH_COLUMN] == ccds[_LENGTH_COLUMN].max()]
+        ccds = _keep_max(ccds, "count")
+        ccds = _keep_max(ccds, _LENGTH_COLUMN)
         if ccds.shape[0] > 1:
             print("tie among CCDS transcripts:\n", ccds, "\n")
         return ccds
 
     # Step 3: longest overall transcript.
-    longest = group.loc[group[_LENGTH_COLUMN] == group[_LENGTH_COLUMN].max()]
+    longest = _keep_max(group, _LENGTH_COLUMN)
     if longest.shape[0] > 1:
         print("tie on transcript length:\n", longest, "\n")
     return longest
