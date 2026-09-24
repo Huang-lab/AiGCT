@@ -28,12 +28,12 @@ def test_plot_results_vep_file(
         ve_analyzer: VEAnalyzer,
         ve_plotter: VEAnalysisPlotter):
     ve_src = "ALPHAM"
-    ve_src = "MAVEN"
+    # ve_src = "MAVEN"
     task = "CANCER"
     task = "DDD"
     task="CLINVAR"
     # task="ADRD"
-    criteria = VEQueryCriteria(filter_names="ONEPLUS")
+    criteria = VEQueryCriteria(filter_names="balanced_clinvar")
     metrics = ve_analyzer.compute_calibration_metrics(
         task, column_name_map=None,
         variant_effect_source=ve_src,

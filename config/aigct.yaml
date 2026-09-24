@@ -64,4 +64,7 @@ plot:
     title_font_size: 30
     legend_font_size: 10
     legend_line_width: 3.0
+    recall_annotation_offset: 0.05
+    f1_annotation_offset: 0.05
+    precision_annotation_offset: 0.05
 
