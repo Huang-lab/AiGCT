@@ -1,5 +1,32 @@
-demo/output/*
-temp
-data1
+# Python
 **/__pycache__/
-db
+*.pyc
+.ipynb_checkpoints/
+
+# Build artifacts (published to PyPI instead)
+
+build/
+*.egg-info/
+
+# Local working data and configs, not part of the distributed package.
+# The benchmark database is downloaded from Zenodo by install_db.
+# Anchored with a leading slash: an unanchored `data/` matches at any depth,
+# and would swallow new files under curation_benchmark/data/.
+/data/
+/data1/
+/db/
+/temp/
+/conf1/
+/TGCA.V1/
+demo/output/*
+/repo_v*.tar.gz
+
+# Editor / OS
+*.swp
+.DS_Store
+
+# Scratch files
+/junk*
+
+/test_CHD.ipynb
+tests/test.py

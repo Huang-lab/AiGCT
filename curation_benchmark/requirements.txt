@@ -1,0 +1,8 @@
+pandas>=2.0
+numpy
+pyyaml
+tqdm
+openpyxl
+matplotlib
+# analysis/ queries the published benchmark database rather than rebuilding it
+aigct

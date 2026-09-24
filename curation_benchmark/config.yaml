@@ -1,0 +1,62 @@
+# Paths to inputs and outputs for the AIGCT benchmark curation pipeline.
+#
+# Everything under `repo:` resolves relative to the repository root and should
+# work as-is after cloning. Everything under `external:` points at large
+# third-party downloads that are NOT redistributed here — see README.md
+# ("External data you must download") for where to get each one.
+
+external:
+  # dbNSFP v5.0a academic release, unpacked. Set this to wherever you unpacked
+  # it; the directory must contain the per-chromosome files
+  # dbNSFP5.0a_variant.chr{1..22,X,Y,M}.gz
+  dbnsfp_dir: "/path/to/dbNSFP5.0a"
+  dbnsfp_file_template: "dbNSFP5.0a_variant.chr{chrom}.gz"
+
+repo:
+  # Per-cohort variant coordinate lists fed to the dbNSFP extraction step.
+  # Whitespace-separated, no header: chrom pos ref alt
+  annotation_dir: "data/annotation"
+
+  # Reference tables used to resolve variants mapping to multiple transcripts.
+  biomart_export: "data/reference/mart_export.txt"
+  ccds_length_table: "data/reference/CCDSID_length_table.current.csv"
+
+  # Gene lists used by the cancer and DDD tasks.
+  gene_lists_dir: "data/gene_lists"
+
+output:
+  # Annotated, transcript-resolved variant tables (one CSV per dataset).
+  processed_dir: "output/processed"
+
+  # Variants that still mapped to >1 transcript after the hierarchy was applied,
+  # written per dataset for manual inspection.
+  duplicates_dir: "output/duplicates"
+
+  # Append-only run logs from the overlap-removal step.
+  logs_dir: "output/logs"
+
+clinvar:
+  # Review-status values retained when building the ClinVar benchmark, mapped to
+  # the integer star rating stored in the output.
+  review_stars:
+    "criteria_provided,_single_submitter": 1
+    "criteria_provided,_multiple_submitters,_no_conflicts": 2
+    "reviewed_by_expert_panel": 3
+    "practice_guideline": 4
+
+  # Clinical significance values retained, mapped to the binary label.
+  clnsig_labels:
+    "Pathogenic": 1
+    "Pathogenic/Likely_pathogenic": 1
+    "Likely_pathogenic": 1
+    "Benign": 0
+    "Benign/Likely_benign": 0
+    "Likely_benign": 0
+
+  # Gene-level class balancing (Figure 2A, Supplementary Figure S5A).
+  balance:
+    # Within each gene, variants carrying a score from this VEP are sampled
+    # first so that the balanced set is as densely annotated as possible.
+    priority_column: "AlphaMissense_rankscore"
+    gene_column: "Ensembl_geneid"
+    random_state: 18
