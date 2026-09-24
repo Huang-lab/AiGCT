@@ -35,11 +35,13 @@ pipeline then:
 
 1. **Annotates** each variant against dbNSFP v5.0a, pulling the rank scores of
    all 37 evaluated VEPs (Supplementary Table S2) plus transcript, protein and
-   gnomAD frequency fields (`curation/dbnsfp.py`). Variants that find no
-   dbNSFP record are written to `output/unmatched/<dataset>.txt` in the input
-   format, and the per-dataset match count to `output/unmatched/match_rates.csv`,
-   so the loss at this stage is on record. See "dbNSFP match rates" below for
-   the numbers behind the released database.
+   gnomAD frequency fields (`curation/dbnsfp.py`). Alternate alleles written
+   as IUPAC ambiguity codes are resolved against the reference base first
+   (`curation/iupac.py`). Variants that find no dbNSFP record are written to
+   `output/unmatched/<dataset>.txt` in the input format, and the per-dataset
+   match count to `output/unmatched/match_rates.csv`, so the loss at this stage
+   is on record. See "dbNSFP match rates" below for the numbers behind the
+   released database.
 2. **Resolves duplicate transcripts.** dbNSFP reports one record per
    transcript, so a variant in several transcripts appears several times.
    `curation/transcript_select.py` collapses each set to one representative
@@ -249,8 +251,9 @@ pytest curation_benchmark/tests
 Unit tests for the stages where a defect is silent rather than loud: reading
 the coordinate lists (two committed lists carry a trailing space that a naive
 split turns into a missing allele), the dbNSFP join and its record of what did
-not match, the transcript hierarchy (which must never return an empty group),
-and the gene balancing (which must not depend on any score column). They need
+not match, the IUPAC decode (which must never invent an allele), the transcript
+hierarchy (which must never return an empty group), and the gene balancing
+(which must not depend on any score column). They need
 neither dbNSFP nor the reference tables, so they run in seconds on a bare
 checkout.
 
@@ -308,19 +311,37 @@ produced by `generate_supp_tables.py`):
 
 | Assembly | Lists | Variants matched | Range per list |
 |---|---|---|---|
-| hg19 | 16 | 96.4% | 79.3% – 100% |
+| hg19 | 16 | 96.5% | 94.4% – 100% |
 | hg38 | 5 | 96.1% | 81.0% – 100% |
 
-The three lists below 85% are small and are low for reasons unrelated to
-assembly. `ASD_case4` (84.0%) and `control4` (79.3%) come from one source study
-whose supplementary table records 19 and 17 of their variants, respectively,
-with an IUPAC ambiguity code as the alternate allele (`R`, `Y`, `S`, `M`, `K`,
-`W` — heterozygous genotype notation). The pipeline matches alleles exactly,
-so these 36 variants never reach the database; they are recoverable from the
-reference base (ref `G`, alt `R` = A/G, so alt = A) and are listed in
-`output/unmatched/` on a re-run. `MSK_hotspot` (81.0%) is the driver-gene-filtered
-hotspot list, whose TransVar-derived genomic coordinates include some that
-are not missense records in dbNSFP.
+`MSK_hotspot` (81.0%) is the one list well below the rest: it is the
+driver-gene-filtered hotspot list, whose TransVar-derived genomic coordinates
+include some that are not missense records in dbNSFP. Every other list is
+above 94%.
+
+**IUPAC ambiguity codes in the study-4 lists.** `ASD_case4` and `control4`
+record 19 and 17 of their alternate alleles as IUPAC ambiguity codes (`R`, `Y`,
+`S`, `M`, `K`, `W`) — the pair of bases at a heterozygous site rather than the
+alternate alone. An exact-allele join cannot match those, which is why both
+lists once sat at 84.0% and 79.3% while every other list was above 94%.
+
+The variants themselves were never missing from the benchmark. Study 4 draws
+from the same sample collection as studies 2 and 3, whose lists record all 36
+of those sites with ordinary single bases, so they entered the database through
+those lists; 34 of the 36 have a dbNSFP record and all 34 are in the released
+tables. What was incomplete was the per-study named filters, which tag variants
+by the list they came from: `ASD_CASE4` held 105 of 125 and the `*_CONTROL4`
+filters 65 of 82.
+
+`curation/iupac.py` now resolves each code against the reference base (ref `G`,
+alt `R` = A/G, so the alternate is A) before the join, and the released filters
+have been completed to match: `ASD_CASE4` 124/125, `ASD_CONTROL4` and
+`CHD_CONTROL4` 80/82, `DDD_CONTROL4` 79/82 (one further variant removed by
+overlap with the DDD case set). The remaining three have no dbNSFP record. A
+code the reference base does not belong to is left alone rather than guessed,
+and reported as unresolved. No label, score or variant was added, so no figure
+or table in the manuscript changes — the affected filters are not used by any
+reported analysis, which evaluates each task as a whole.
 
 **Source of `alphamissense_cancer_{pos,neg}.txt`.** These are the cancer
 hotspot benchmark of the AlphaMissense study (Cheng et al. 2023,

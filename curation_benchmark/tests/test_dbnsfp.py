@@ -43,6 +43,13 @@ def test_tolerates_trailing_space_and_crlf(tmp_path):
     assert a["Alt"].notna().all()
 
 
+def test_decodes_iupac_ambiguity_codes(tmp_path):
+    """Two committed lists write heterozygous alternates as ambiguity codes."""
+    p = _write(tmp_path / "a.txt", "1 100 G R\n1 200 C T\n")
+    a = dbnsfp.read_annotation(p)
+    assert a["Alt"].tolist() == ["A", "T"]
+
+
 def test_rejects_a_malformed_line(tmp_path):
     p = _write(tmp_path / "a.txt", "1 100 A G\n2 200 C\n")
     with pytest.raises(ValueError, match="malformed"):

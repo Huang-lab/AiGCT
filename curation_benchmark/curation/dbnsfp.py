@@ -11,6 +11,9 @@ hg19 positions but only hg38 alleles, so an hg19 list is joined on hg19
 chromosome and position and on the hg38 ref/alt; a locus whose reference base
 changed between builds therefore fails to match. hg18 lists are not supported.
 
+Alternate alleles recorded as IUPAC ambiguity codes are resolved against the
+reference base before the join (see `curation/iupac.py`).
+
 Every variant that finds no dbNSFP record is written, in the input format, to
 the configured `unmatched` directory as `<dataset>.txt`, and the per-dataset
 match count is appended to `match_rates.csv` there, so that the loss at this
@@ -23,6 +26,7 @@ import tqdm
 
 from .columns import EXTRACT_COLUMNS, VEP_RENAME
 from .config import dbnsfp_chromosome_file, output_path
+from .iupac import decode_annotation
 from .transcript_select import choose_canonical
 
 ANNOTATION_COLUMNS = ["Chr", "Pos", "Ref", "Alt"]
@@ -44,6 +48,9 @@ def read_annotation(path):
     committed coordinate lists carry a trailing space on every line, which a
     single-space split turns into a fifth, empty field. pandas then shifts the
     columns left, the alternate allele reads as missing, and nothing matches.
+
+    Alternate alleles written as IUPAC ambiguity codes are resolved against the
+    reference base; see `curation/iupac.py`.
     """
     frame = pd.read_csv(
         path, sep=r"\s+", header=None, names=ANNOTATION_COLUMNS, dtype=str,
@@ -51,6 +58,13 @@ def read_annotation(path):
     )
     if frame[ANNOTATION_COLUMNS].isna().any().any():
         raise ValueError(f"{path}: malformed line(s); expected 'chr pos ref alt'")
+
+    frame, decoded, unresolved = decode_annotation(frame)
+    if decoded:
+        print(f"decoded {decoded} IUPAC ambiguity code(s) in {path}")
+    if unresolved:
+        print(f"WARNING: {unresolved} allele(s) in {path} are neither a single "
+              f"base nor a resolvable ambiguity code; they will not match")
     return frame
 
 
