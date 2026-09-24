@@ -161,6 +161,8 @@
 </li>
       <li><a href="autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer._data_validator">_data_validator (aigct.container.VEBenchmarkContainer attribute)</a>
 </li>
+      <li><a href="autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext._db_url">_db_url (aigct.repository.RepoSessionContext attribute)</a>
+</li>
       <li><a href="autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._derive_variant_effect_source_columns">_derive_variant_effect_source_columns() (aigct.etl.repo_loader.RepositoryLoader method)</a>
 </li>
       <li><a href="autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter._display_gene_metric_table">_display_gene_metric_table() (aigct.plotter.VEAnalysisPlotter method)</a>
@@ -170,6 +172,8 @@
       <li><a href="autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter._display_pr_table">_display_pr_table() (aigct.plotter.VEAnalysisPlotter method)</a>
 </li>
       <li><a href="autoapi/aigct/plotter/index.html#aigct.plotter.VEAnalysisPlotter._display_roc_table">_display_roc_table() (aigct.plotter.VEAnalysisPlotter method)</a>
+</li>
+      <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository._engine">_engine (aigct.repository.VariantEffectAnalysisRepository attribute)</a>
 </li>
       <li><a href="autoapi/aigct/etl/repo_loader/index.html#aigct.etl.repo_loader.RepositoryLoader._excep_file_full_path_name">_excep_file_full_path_name() (aigct.etl.repo_loader.RepositoryLoader method)</a>
 </li>
@@ -273,6 +277,12 @@
 </li>
       <li><a href="autoapi/aigct/repo_qc/index.html#aigct.repo_qc.VEDataValidator._validate_pk">_validate_pk() (aigct.repo_qc.VEDataValidator method)</a>
 </li>
+      <li><a href="autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer._variant_analysis_repo">_variant_analysis_repo (aigct.container.VEBenchmarkContainer attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr._variant_analysis_repo">(aigct.query.VEBenchmarkQueryMgr attribute)</a>
+</li>
+      </ul></li>
       <li><a href="autoapi/aigct/analyzer/index.html#aigct.analyzer.VEAnalyzer._variant_effect_label_repo">_variant_effect_label_repo (aigct.analyzer.VEAnalyzer attribute)</a>
 
       <ul>
@@ -610,9 +620,11 @@
 </li>
       <li><a href="autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer.data_validator">data_validator (aigct.container.VEBenchmarkContainer property)</a>
 </li>
+      <li><a href="autoapi/aigct/repository/index.html#aigct.repository.DataCache">DataCache (class in aigct.repository)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="autoapi/aigct/repository/index.html#aigct.repository.DataCache">DataCache (class in aigct.repository)</a>
+      <li><a href="autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.db_url">db_url (aigct.repository.RepoSessionContext property)</a>
 </li>
       <li><a href="autoapi/aigct/db_model/index.html#aigct.db_model.VariantEffectSource.description">description (aigct.db_model.VariantEffectSource attribute)</a>
 
@@ -632,6 +644,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.engine">engine (aigct.repository.RepoSessionContext property)</a>
+</li>
       <li><a href="autoapi/aigct/exporter/index.html#aigct.exporter.VEAnalysisExporter.export_calibration_results">export_calibration_results() (aigct.exporter.VEAnalysisExporter method)</a>
 </li>
   </ul></td>
@@ -728,10 +742,16 @@
         <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectScoreRepository.get_all_for_all_tasks">(aigct.repository.VariantEffectScoreRepository method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_all_task_variant_effect_label_stats">get_all_task_variant_effect_label_stats() (aigct.query.VEBenchmarkQueryMgr method)</a>
 </li>
+      <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_all_variant_effect_source">get_all_variant_effect_source() (aigct.query.VEBenchmarkQueryMgr method)</a>
+
+      <ul>
+        <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_all_variant_effect_source">(aigct.repository.VariantEffectAnalysisRepository method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_all_variant_effect_source_stats">get_all_variant_effect_source_stats() (aigct.query.VEBenchmarkQueryMgr method)</a>
 </li>
       <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_all_variant_filters">get_all_variant_filters() (aigct.query.VEBenchmarkQueryMgr method)</a>
@@ -768,8 +788,26 @@
 </li>
       <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_distribution">get_variant_distribution() (aigct.query.VEBenchmarkQueryMgr method)</a>
 </li>
+      <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_gene_metrics_by_task_gene">get_variant_effect_gene_metrics_by_task_gene() (aigct.query.VEBenchmarkQueryMgr method)</a>
+
+      <ul>
+        <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_gene_metrics_by_task_gene">(aigct.repository.VariantEffectAnalysisRepository method)</a>
+</li>
+      </ul></li>
+      <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_metrics_by_task">get_variant_effect_metrics_by_task() (aigct.query.VEBenchmarkQueryMgr method)</a>
+
+      <ul>
+        <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_metrics_by_task">(aigct.repository.VariantEffectAnalysisRepository method)</a>
+</li>
+      </ul></li>
       <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_scores">get_variant_effect_scores() (aigct.query.VEBenchmarkQueryMgr method)</a>
 </li>
+      <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_source_by_task">get_variant_effect_source_by_task() (aigct.query.VEBenchmarkQueryMgr method)</a>
+
+      <ul>
+        <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_source_by_task">(aigct.repository.VariantEffectAnalysisRepository method)</a>
+</li>
+      </ul></li>
       <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_source_stats">get_variant_effect_source_stats() (aigct.query.VEBenchmarkQueryMgr method)</a>
 </li>
       <li><a href="autoapi/aigct/query/index.html#aigct.query.VEBenchmarkQueryMgr.get_variant_effect_sources">get_variant_effect_sources() (aigct.query.VEBenchmarkQueryMgr method)</a>
@@ -913,16 +951,22 @@
         <li><a href="autoapi/aigct/model/index.html#aigct.model.VariantEffectSource.name">(aigct.model.VariantEffectSource attribute)</a>
 </li>
       </ul></li>
+      <li><a href="autoapi/aigct/db_model/index.html#aigct.db_model.VariantEffectGeneAuc.neg_log10_mwu_pval">neg_log10_mwu_pval (aigct.db_model.VariantEffectGeneAuc attribute)</a>
+
+      <ul>
+        <li><a href="autoapi/aigct/db_model/index.html#aigct.db_model.VariantEffectTaskAuc.neg_log10_mwu_pval">(aigct.db_model.VariantEffectTaskAuc attribute)</a>
+</li>
+      </ul></li>
       <li><a href="autoapi/aigct/file_util/index.html#aigct.file_util.new_line">new_line() (in module aigct.file_util)</a>
 </li>
       <li><a href="autoapi/aigct/repository/index.html#aigct.repository.TableDef.non_pk_columns">non_pk_columns (aigct.repository.TableDef attribute)</a>
 </li>
       <li><a href="autoapi/aigct/date_util/index.html#aigct.date_util.now_str_basic_format">now_str_basic_format() (in module aigct.date_util)</a>
 </li>
-      <li><a href="autoapi/aigct/date_util/index.html#aigct.date_util.now_str_compact">now_str_compact() (in module aigct.date_util)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/aigct/date_util/index.html#aigct.date_util.now_str_compact">now_str_compact() (in module aigct.date_util)</a>
+</li>
       <li><a href="autoapi/aigct/db_model/index.html#aigct.db_model.VariantEffectGeneAuc.num_negative">num_negative (aigct.db_model.VariantEffectGeneAuc attribute)</a>
 
       <ul>
@@ -1178,10 +1222,12 @@
 </li>
       <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantCache">VariantCache (class in aigct.repository)</a>
 </li>
-      <li><a href="autoapi/aigct/db_model/index.html#aigct.db_model.VariantEffectGeneAuc">VariantEffectGeneAuc (class in aigct.db_model)</a>
+      <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository">VariantEffectAnalysisRepository (class in aigct.repository)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="autoapi/aigct/db_model/index.html#aigct.db_model.VariantEffectGeneAuc">VariantEffectGeneAuc (class in aigct.db_model)</a>
+</li>
       <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelCache">VariantEffectLabelCache (class in aigct.repository)</a>
 </li>
       <li><a href="autoapi/aigct/repository/index.html#aigct.repository.VariantEffectLabelRepository">VariantEffectLabelRepository (class in aigct.repository)</a>

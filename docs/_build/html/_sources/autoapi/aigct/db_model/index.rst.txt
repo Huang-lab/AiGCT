@@ -406,6 +406,9 @@ Module Contents
    .. py:attribute:: auc
 
 
+   .. py:attribute:: neg_log10_mwu_pval
+
+
    .. py:attribute:: num_positive
 
 
@@ -547,6 +550,9 @@ Module Contents
 
 
    .. py:attribute:: auc
+
+
+   .. py:attribute:: neg_log10_mwu_pval
 
 
    .. py:attribute:: num_positive

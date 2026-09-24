@@ -242,10 +242,10 @@ method for a detailed explanation of the parameters passed to that method.</p>
 </section>
 <section id="plot-results">
 <h2>Plot Results<a class="headerlink" href="#plot-results" title="Link to this heading"></a></h2>
-<p>Issue the following to plot the results.</p>
-<blockquote>
-<div><p>container.plotter.plot_results(metric)</p>
-</div></blockquote>
+<p>Issue the following to plot the results.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">container</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">plot_results</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>This will generate a series of presentation ready plots and tables:</p>
 <ul class="simple">
 <li><p>Plot showing ROC curves for the user and system veps allowing for easy
@@ -294,10 +294,10 @@ method for more details.</p>
 <h2>Export Results<a class="headerlink" href="#export-results" title="Link to this heading"></a></h2>
 <p>Issue the following to export the raw analysis result data underlying the
 plots and tables to csv files that can be used to produce your own plots or to do
-further analysis.</p>
-<blockquote>
-<div><p>container.exporter.export_results(metrics, “&lt;export_dir&gt;”)</p>
-</div></blockquote>
+further analysis.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">container</span><span class="o">.</span><span class="n">exporter</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="s2">&quot;&lt;export_dir&gt;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>The second parameter is the name of a directory where you want the results to be exported.
 It will generate a series of files in a uniquely named subdirectory of this directory.</p>
 <p>See the the API documentation for the aigct.exporter.VEAnalysisExporter.export_results

@@ -19,6 +19,7 @@ The tasks available are:
 * ASD - Autism Spectrum Disorder
 * DDD - Deciphering Developmental Disorders
 * CHD - Congential Heart Disease
+* ADRD - Alzheimer's disease and related dementias
 
 The platform provides a python package that supports the following functions:
 

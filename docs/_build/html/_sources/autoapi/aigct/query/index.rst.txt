@@ -35,7 +35,7 @@ Module Contents
 
 .. py:function:: cleanup_variant_query_params(params: aigct.model.VEQueryCriteria)
 
-.. py:class:: VEBenchmarkQueryMgr(variant_effect_label_repo: aigct.repository.VariantEffectLabelRepository, variant_repo: aigct.repository.VariantRepository, variant_task_repo: aigct.repository.VariantTaskRepository, variant_effect_source_repo: aigct.repository.VariantEffectSourceRepository, variant_effect_score_repo: aigct.repository.VariantEffectScoreRepository, variant_filter_repo: aigct.repository.VariantFilterRepository)
+.. py:class:: VEBenchmarkQueryMgr(variant_effect_label_repo: aigct.repository.VariantEffectLabelRepository, variant_repo: aigct.repository.VariantRepository, variant_task_repo: aigct.repository.VariantTaskRepository, variant_effect_source_repo: aigct.repository.VariantEffectSourceRepository, variant_effect_score_repo: aigct.repository.VariantEffectScoreRepository, variant_filter_repo: aigct.repository.VariantFilterRepository, variant_analysis_repo: aigct.repository.VariantEffectAnalysisRepository)
 
    Methods to query the variant repository
 
@@ -56,6 +56,9 @@ Module Contents
 
 
    .. py:attribute:: _variant_filter_repo
+
+
+   .. py:attribute:: _variant_analysis_repo
 
 
    .. py:method:: get_tasks() -> pandas.DataFrame
@@ -233,5 +236,17 @@ Module Contents
           filter_variant_df - Data frame of variants associated with
           each filter
 
+
+
+   .. py:method:: get_variant_effect_metrics_by_task(task_code: str) -> pandas.DataFrame
+
+
+   .. py:method:: get_variant_effect_gene_metrics_by_task_gene(task_code: str, gene_symbol: str) -> pandas.DataFrame
+
+
+   .. py:method:: get_all_variant_effect_source() -> pandas.DataFrame
+
+
+   .. py:method:: get_variant_effect_source_by_task(task_code: str) -> pandas.DataFrame
 
 

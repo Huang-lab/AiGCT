@@ -455,9 +455,9 @@
                         <span class="s2">&quot;Cannot compute mann-whitney u values &quot;</span>
                         <span class="o">+</span> <span class="s2">&quot;because all labels have same value&quot;</span>
                     <span class="p">)</span>
-                <span class="n">neg_log10_mwu_pval</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
-                    <span class="n">stats</span><span class="o">.</span><span class="n">mannwhitneyu</span><span class="p">(</span><span class="n">negative_scores</span><span class="p">,</span> <span class="n">positive_scores</span><span class="p">)</span><span class="o">.</span><span class="n">pvalue</span>
-                <span class="p">)</span>
+                <span class="n">mwu_pval</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">mannwhitneyu</span><span class="p">(</span><span class="n">negative_scores</span><span class="p">,</span> <span class="n">positive_scores</span><span class="p">)</span><span class="o">.</span><span class="n">pvalue</span>
+                <span class="n">mwu_pval</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">mwu_pval</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">tiny</span><span class="p">)</span>
+                <span class="n">neg_log10_mwu_pval</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mwu_pval</span><span class="p">)</span>
                 <span class="n">neg_log10_mwu_pvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">neg_log10_mwu_pval</span><span class="p">)</span>
                 <span class="n">exceps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>

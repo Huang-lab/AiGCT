@@ -59,6 +59,7 @@ Classes
    aigct.repository.VariantRepository
    aigct.repository.VariantEffectLabelRepository
    aigct.repository.VariantEffectScoreRepository
+   aigct.repository.VariantEffectAnalysisRepository
 
 
 Functions
@@ -157,7 +158,7 @@ Module Contents
 
 .. py:function:: read_repo_csv(file: str) -> pandas.DataFrame
 
-.. py:class:: RepoSessionContext(data_folder_root: str, table_defs: dict[str, TableDef])
+.. py:class:: RepoSessionContext(data_folder_root: str, table_defs: dict[str, TableDef], db_url: str = None)
 
    .. py:attribute:: _data_folder_root
 
@@ -165,7 +166,18 @@ Module Contents
    .. py:attribute:: _table_defs
 
 
+   .. py:attribute:: _db_url
+      :value: None
+
+
+
    .. py:property:: data_folder_root
+
+
+   .. py:property:: db_url
+
+
+   .. py:property:: engine
 
 
    .. py:method:: table_def(table_name: str)
@@ -423,5 +435,22 @@ Module Contents
 
 
    .. py:method:: get_all_for_all_tasks() -> pandas.DataFrame
+
+
+.. py:class:: VariantEffectAnalysisRepository(session_context: RepoSessionContext)
+
+   .. py:attribute:: _engine
+
+
+   .. py:method:: get_variant_effect_metrics_by_task(task_code: str) -> pandas.DataFrame
+
+
+   .. py:method:: get_variant_effect_gene_metrics_by_task_gene(task_code: str, gene_symbol: str) -> pandas.DataFrame
+
+
+   .. py:method:: get_all_variant_effect_source() -> pandas.DataFrame
+
+
+   .. py:method:: get_variant_effect_source_by_task(task_code: str) -> pandas.DataFrame
 
 

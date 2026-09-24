@@ -1,4 +1,4 @@
-version---
+---
 
 log:
   # Log file directory
@@ -14,7 +14,7 @@ repository:
   # repository "data" directory is a subdirectory off of this directory.
   # root_dir: ~/gitrepo/agct_dev
   root_dir: ~/gitrepo/aigct_data1/repo1
-  source_url: https://zenodo.org/records/19928885/files/aigct_repo.tar.gz?download=1
+  source_url: https://zenodo.org/records/22940812/files/aigct_repo.tar.gz?download=1
   version: 0.1.0.dev1
 db:
   url: "sqlite:///./db/aigct.db"

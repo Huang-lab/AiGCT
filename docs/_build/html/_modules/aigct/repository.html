@@ -84,6 +84,12 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dask.dataframe</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">sessionmaker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">text</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aigct.db_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Base</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParameterizedSingleton</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
@@ -153,7 +159,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">full_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span></div>
 </div>
 
-    
 
 
 <div class="viewcode-block" id="VARIANT_PK_COLUMNS">
@@ -306,7 +311,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">RepoSessionContext</span><span class="p">:</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_folder_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">table_defs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TableDef</span><span class="p">]):</span>
+                 <span class="n">table_defs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TableDef</span><span class="p">],</span>
+                 <span class="n">db_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <div class="viewcode-block" id="RepoSessionContext._data_folder_root">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext._data_folder_root">[docs]</a>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span> <span class="o">=</span> <span class="n">data_folder_root</span></div>
@@ -315,12 +321,32 @@
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext._table_defs">[docs]</a>
         <span class="bp">self</span><span class="o">.</span><span class="n">_table_defs</span> <span class="o">=</span> <span class="n">table_defs</span></div>
 
+<div class="viewcode-block" id="RepoSessionContext._db_url">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext._db_url">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db_url</span> <span class="o">=</span> <span class="n">db_url</span></div>
+
+        <span class="k">if</span> <span class="n">db_url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">db_url</span><span class="p">)</span>
 
     <span class="nd">@property</span>
 <div class="viewcode-block" id="RepoSessionContext.data_folder_root">
 <a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.data_folder_root">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">data_folder_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_folder_root</span></div>
+
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="RepoSessionContext.db_url">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.db_url">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">db_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_db_url</span></div>
+
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="RepoSessionContext.engine">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.RepoSessionContext.engine">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">engine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span></div>
 
 
 <div class="viewcode-block" id="RepoSessionContext.table_def">
@@ -940,6 +966,98 @@
 </div>
 
 
+
+<div class="viewcode-block" id="VariantEffectAnalysisRepository">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VariantEffectAnalysisRepository</span><span class="p">:</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session_context</span><span class="p">:</span> <span class="n">RepoSessionContext</span><span class="p">):</span>
+<div class="viewcode-block" id="VariantEffectAnalysisRepository._engine">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository._engine">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="o">=</span> <span class="n">session_context</span><span class="o">.</span><span class="n">engine</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectAnalysisRepository.get_variant_effect_metrics_by_task">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_metrics_by_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_effect_metrics_by_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            select score_source, auc, neg_log10_mwu_pval,</span>
+<span class="s2">                        num_positive, num_negative</span>
+<span class="s2">            from variant_effect_task_auc</span>
+<span class="s2">            where task_code = :task_code</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="c1"># Execute the query with a parameter</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">sql</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;task_code&quot;</span><span class="p">:</span> <span class="n">task_code</span><span class="p">})</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">fetchall</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="c1"># Process the results</span>
+            <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectAnalysisRepository.get_variant_effect_gene_metrics_by_task_gene">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_gene_metrics_by_task_gene">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_effect_gene_metrics_by_task_gene</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gene_symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            select score_source, gene_symbol, auc,</span>
+<span class="s2">                       neg_log10_mwu_pval, num_positive, num_negative</span>
+<span class="s2">            from variant_effect_gene_auc</span>
+<span class="s2">            where task_code = :task_code</span>
+<span class="s2">                and gene_symbol = :gene_symbol</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="c1"># Execute the query with a parameter</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">sql</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;task_code&quot;</span><span class="p">:</span> <span class="n">task_code</span><span class="p">,</span> <span class="s2">&quot;gene_symbol&quot;</span><span class="p">:</span> <span class="n">gene_symbol</span><span class="p">})</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">fetchall</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="c1"># Process the results</span>
+            <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectAnalysisRepository.get_all_variant_effect_source">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_all_variant_effect_source">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_all_variant_effect_source</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            select code, name, source_type, description</span>
+<span class="s2">            from variant_effect_source</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="c1"># Execute the query with a parameter</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">fetchall</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="c1"># Process the results</span>
+            <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="VariantEffectAnalysisRepository.get_variant_effect_source_by_task">
+<a class="viewcode-back" href="../../autoapi/aigct/repository/index.html#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_source_by_task">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variant_effect_source_by_task</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">task_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            select code, name, source_type, description</span>
+<span class="s2">            from variant_effect_source</span>
+<span class="s2">            where code in (</span>
+<span class="s2">                select score_source</span>
+<span class="s2">                from variant_effect_task_auc</span>
+<span class="s2">                where task_code = :task_code)</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="c1"># Execute the query with a parameter</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">sql</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;task_code&quot;</span><span class="p">:</span> <span class="n">task_code</span><span class="p">})</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">fetchall</span><span class="p">(),</span> <span class="n">columns</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="c1"># Process the results</span>
+            <span class="k">return</span> <span class="n">df</span></div>
+</div>
 
 </pre></div>
 

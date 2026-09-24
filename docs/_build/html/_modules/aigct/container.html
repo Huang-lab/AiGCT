@@ -76,6 +76,7 @@
              
   <h1>Source code for aigct.container</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.repository</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">VariantEffectAnalysisRepository</span><span class="p">,</span>
     <span class="n">VariantEffectScoreRepository</span><span class="p">,</span>
     <span class="n">VariantEffectLabelRepository</span><span class="p">,</span>
     <span class="n">RepoSessionContext</span><span class="p">,</span>
@@ -121,7 +122,8 @@
 <div class="viewcode-block" id="VEBenchmarkContainer._repo_session_context">
 <a class="viewcode-back" href="../../autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer._repo_session_context">[docs]</a>
         <span class="bp">self</span><span class="o">.</span><span class="n">_repo_session_context</span> <span class="o">=</span> <span class="n">RepoSessionContext</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">root_dir</span><span class="p">,</span> <span class="n">TABLE_DEFS</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">repository</span><span class="o">.</span><span class="n">root_dir</span><span class="p">,</span> <span class="n">TABLE_DEFS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">url</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VEBenchmarkContainer._variant_task_repo">
 <a class="viewcode-back" href="../../autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer._variant_task_repo">[docs]</a>
@@ -162,6 +164,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_variant_filter_repo</span> <span class="o">=</span> <span class="n">VariantFilterRepository</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_repo_session_context</span>
         <span class="p">)</span>
+<div class="viewcode-block" id="VEBenchmarkContainer._variant_analysis_repo">
+<a class="viewcode-back" href="../../autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer._variant_analysis_repo">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variant_analysis_repo</span> <span class="o">=</span> <span class="n">VariantEffectAnalysisRepository</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_repo_session_context</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="VEBenchmarkContainer._analyzer">
 <a class="viewcode-back" href="../../autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer._analyzer">[docs]</a>
         <span class="bp">self</span><span class="o">.</span><span class="n">_analyzer</span> <span class="o">=</span> <span class="n">VEAnalyzer</span><span class="p">(</span>
@@ -176,7 +184,8 @@
                                               <span class="bp">self</span><span class="o">.</span><span class="n">_variant_task_repo</span><span class="p">,</span>
                                               <span class="bp">self</span><span class="o">.</span><span class="n">_variant_effect_source_repo</span><span class="p">,</span>
                                               <span class="bp">self</span><span class="o">.</span><span class="n">_score_repo</span><span class="p">,</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">_variant_filter_repo</span><span class="p">)</span></div>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">_variant_filter_repo</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">_variant_analysis_repo</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VEBenchmarkContainer._reporter">
 <a class="viewcode-back" href="../../autoapi/aigct/container/index.html#aigct.container.VEBenchmarkContainer._reporter">[docs]</a>

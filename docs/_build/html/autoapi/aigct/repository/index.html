@@ -235,6 +235,9 @@ details of the repository structure.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#aigct.repository.VariantEffectScoreRepository" title="aigct.repository.VariantEffectScoreRepository"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantEffectScoreRepository</span></code></a></p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aigct.repository.VariantEffectAnalysisRepository" title="aigct.repository.VariantEffectAnalysisRepository"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VariantEffectAnalysisRepository</span></code></a></p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -398,7 +401,7 @@ details of the repository structure.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="aigct.repository.RepoSessionContext">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.repository.</span></span><span class="sig-name descname"><span class="pre">RepoSessionContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_folder_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_defs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#aigct.repository.TableDef" title="aigct.repository.TableDef"><span class="pre">TableDef</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.repository.</span></span><span class="sig-name descname"><span class="pre">RepoSessionContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_folder_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table_defs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#aigct.repository.TableDef" title="aigct.repository.TableDef"><span class="pre">TableDef</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext" title="Link to this definition"></a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="aigct.repository.RepoSessionContext._data_folder_root">
 <span class="sig-name descname"><span class="pre">_data_folder_root</span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext._data_folder_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext._data_folder_root" title="Link to this definition"></a></dt>
@@ -409,9 +412,24 @@ details of the repository structure.</p>
 <span class="sig-name descname"><span class="pre">_table_defs</span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext._table_defs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext._table_defs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.repository.RepoSessionContext._db_url">
+<span class="sig-name descname"><span class="pre">_db_url</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext._db_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext._db_url" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="aigct.repository.RepoSessionContext.data_folder_root">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data_folder_root</span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext.data_folder_root"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext.data_folder_root" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aigct.repository.RepoSessionContext.db_url">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">db_url</span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext.db_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext.db_url" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aigct.repository.RepoSessionContext.engine">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">engine</span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#RepoSessionContext.engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.RepoSessionContext.engine" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -768,6 +786,36 @@ limit the set of variants returned.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="aigct.repository.VariantEffectScoreRepository.get_all_for_all_tasks">
 <span class="sig-name descname"><span class="pre">get_all_for_all_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#VariantEffectScoreRepository.get_all_for_all_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.VariantEffectScoreRepository.get_all_for_all_tasks" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aigct.repository.VariantEffectAnalysisRepository">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">aigct.repository.</span></span><span class="sig-name descname"><span class="pre">VariantEffectAnalysisRepository</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#aigct.repository.RepoSessionContext" title="aigct.repository.RepoSessionContext"><span class="pre">RepoSessionContext</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/aigct/repository.html#VariantEffectAnalysisRepository"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.VariantEffectAnalysisRepository" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="aigct.repository.VariantEffectAnalysisRepository._engine">
+<span class="sig-name descname"><span class="pre">_engine</span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#VariantEffectAnalysisRepository._engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.VariantEffectAnalysisRepository._engine" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_metrics_by_task">
+<span class="sig-name descname"><span class="pre">get_variant_effect_metrics_by_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#VariantEffectAnalysisRepository.get_variant_effect_metrics_by_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_metrics_by_task" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_gene_metrics_by_task_gene">
+<span class="sig-name descname"><span class="pre">get_variant_effect_gene_metrics_by_task_gene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene_symbol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#VariantEffectAnalysisRepository.get_variant_effect_gene_metrics_by_task_gene"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_gene_metrics_by_task_gene" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.repository.VariantEffectAnalysisRepository.get_all_variant_effect_source">
+<span class="sig-name descname"><span class="pre">get_all_variant_effect_source</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#VariantEffectAnalysisRepository.get_all_variant_effect_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.VariantEffectAnalysisRepository.get_all_variant_effect_source" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_source_by_task">
+<span class="sig-name descname"><span class="pre">get_variant_effect_source_by_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/aigct/repository.html#VariantEffectAnalysisRepository.get_variant_effect_source_by_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aigct.repository.VariantEffectAnalysisRepository.get_variant_effect_source_by_task" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

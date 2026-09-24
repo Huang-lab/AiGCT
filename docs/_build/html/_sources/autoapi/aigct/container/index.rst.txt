@@ -43,6 +43,9 @@ Module Contents
    .. py:attribute:: _variant_effect_source_repo
 
 
+   .. py:attribute:: _variant_analysis_repo
+
+
    .. py:attribute:: _analyzer
 
 
