@@ -32,6 +32,10 @@ output:
   # written per dataset for manual inspection.
   duplicates_dir: "output/duplicates"
 
+  # Variants that found no dbNSFP record, one file per dataset in the input
+  # format, plus match_rates.csv with the per-dataset match count.
+  unmatched_dir: "output/unmatched"
+
   # Append-only run logs from the overlap-removal step.
   logs_dir: "output/logs"
 
@@ -53,10 +57,9 @@ clinvar:
     "Benign/Likely_benign": 0
     "Likely_benign": 0
 
-  # Gene-level class balancing (Figure 2A, Supplementary Figure S5A).
+  # Gene-level class balancing (Figure 2A, Supplementary Figure S5A): within
+  # each gene, an equal number of pathogenic and benign variants is drawn
+  # uniformly at random under this seed.
   balance:
-    # Within each gene, variants carrying a score from this VEP are sampled
-    # first so that the balanced set is as densely annotated as possible.
-    priority_column: "AlphaMissense_rankscore"
     gene_column: "Ensembl_geneid"
     random_state: 18
