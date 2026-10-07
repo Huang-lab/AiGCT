@@ -19,7 +19,6 @@ bases, so the variants themselves reach the benchmark either way. Decoding
 matters for the per-study named filters, which would otherwise be missing the
 ambiguity-coded rows.
 """
-import pandas as pd
 
 # The two bases each ambiguity code stands for.
 IUPAC_PAIRS = {

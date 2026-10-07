@@ -49,15 +49,28 @@ def read_annotation(path):
     single-space split turns into a fifth, empty field. pandas then shifts the
     columns left, the alternate allele reads as missing, and nothing matches.
 
+    The lines are split here rather than by pandas, and a line that does not
+    have exactly four fields is refused with its line number. pandas reads a
+    list whose every line has a fifth column (a gene, a sample id) by using
+    the first field as the index and shifting the rest left, without an error:
+    the chromosome becomes the position.
+
     Alternate alleles written as IUPAC ambiguity codes are resolved against the
     reference base; see `curation/iupac.py`.
     """
-    frame = pd.read_csv(
-        path, sep=r"\s+", header=None, names=ANNOTATION_COLUMNS, dtype=str,
-        engine="python",
-    )
-    if frame[ANNOTATION_COLUMNS].isna().any().any():
-        raise ValueError(f"{path}: malformed line(s); expected 'chr pos ref alt'")
+    rows = []
+    with open(path, encoding="utf-8-sig") as handle:
+        for number, line in enumerate(handle, start=1):
+            fields = line.split()
+            if not fields:
+                continue
+            if len(fields) != len(ANNOTATION_COLUMNS):
+                raise ValueError(
+                    f"{path}:{number}: malformed line, expected 'chr pos ref alt' "
+                    f"(4 fields), got {len(fields)}"
+                )
+            rows.append(fields)
+    frame = pd.DataFrame(rows, columns=ANNOTATION_COLUMNS, dtype=str)
 
     frame, decoded, unresolved = decode_annotation(frame)
     if decoded:

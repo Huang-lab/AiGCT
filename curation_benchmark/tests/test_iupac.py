@@ -10,7 +10,12 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from curation.iupac import decode_allele, decode_annotation  # noqa: E402
+from curation.iupac import (  # noqa: E402
+    BASES,
+    IUPAC_PAIRS,
+    decode_allele,
+    decode_annotation,
+)
 
 
 @pytest.mark.parametrize("ref,alt,expected", [
@@ -53,3 +58,20 @@ def test_decode_annotation_reports_what_it_changed():
     assert changed == 1        # only the first row
     assert unresolved == 1     # the C/R row stays ambiguous
     assert frame["Alt"].tolist() == ["R", "T", "R"]   # input untouched
+
+
+@pytest.mark.parametrize("ref", list("ACGT"))
+@pytest.mark.parametrize("code", ["B", "D", "H", "V", "N"])
+def test_codes_that_cover_more_than_two_bases_are_never_decoded(ref, code):
+    """No unique alternate exists, so guessing one would invent an allele."""
+    assert decode_allele(ref, code) == code
+
+
+def test_every_code_in_the_table_stands_for_exactly_two_bases():
+    """decode_allele takes `(pair - {ref}).pop()`. That is only deterministic, and
+    only correct, for a two-element set: for a larger one it would return an
+    arbitrary member, and a different one from run to run under hash
+    randomisation. Adding B, D, H, V or N to the table has to fail here first."""
+    assert IUPAC_PAIRS
+    for code, pair in IUPAC_PAIRS.items():
+        assert len(pair) == 2 and pair <= BASES, code

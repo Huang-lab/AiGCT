@@ -56,6 +56,25 @@ def test_rejects_a_malformed_line(tmp_path):
         dbnsfp.read_annotation(p)
 
 
+def test_rejects_a_list_with_an_extra_column(tmp_path):
+    """pandas read a fifth column as the index and shifted the others left
+    without an error, so the chromosome became the position."""
+    p = _write(tmp_path / "a.txt", "1 100 A G GENE1\n2 200 C T GENE2\n")
+    with pytest.raises(ValueError, match=r"a\.txt:1: malformed"):
+        dbnsfp.read_annotation(p)
+
+
+def test_a_bad_line_is_reported_with_its_number(tmp_path):
+    p = _write(tmp_path / "a.txt", "1 100 A G\n\n2 200 C\n")
+    with pytest.raises(ValueError, match=r":3: malformed"):
+        dbnsfp.read_annotation(p)
+
+
+def test_a_byte_order_mark_does_not_become_part_of_the_chromosome(tmp_path):
+    p = _write(tmp_path / "a.txt", "\ufeff1 100 A G\n")
+    assert dbnsfp.read_annotation(p)["Chr"].tolist() == ["1"]
+
+
 # ── extract: unmatched variants are returned, not dropped ────────────────────
 
 def _fake_dbnsfp(tmp_path, monkeypatch):
@@ -140,3 +159,73 @@ def test_output_paths_may_not_be_the_input(tmp_path, monkeypatch):
     ann = dbnsfp.read_annotation(p)
     with pytest.raises(ValueError, match="overwrite"):
         dbnsfp._record_unmatched("ds", "hg38", p, ann, ann)
+
+
+# ── chunking, and the whole annotate_dataset path ────────────────────────────
+
+def test_extract_reads_every_chunk(tmp_path, monkeypatch):
+    """Matches are collected across chunks and concatenated once. A chunk lost on
+    the way would be indistinguishable from a variant dbNSFP does not have."""
+    _fake_dbnsfp(tmp_path, monkeypatch)
+    monkeypatch.setattr(dbnsfp, "_CHUNK_SIZE", 1)        # the two rows land in two chunks
+    ann = pd.DataFrame([["1", "100", "A", "G"], ["1", "200", "C", "T"]],
+                       columns=dbnsfp.ANNOTATION_COLUMNS)
+    with redirect_stdout(io.StringIO()):
+        matched, unmatched = dbnsfp.extract(ann, "hg38")
+    assert len(matched) == 2
+    assert unmatched.empty
+
+
+def _hg19_dbnsfp(tmp_path, monkeypatch, records):
+    """records: (hg19 position, hg38 ref, hg38 alt). hg38 positions are made up."""
+    rows = []
+    for hg19pos, ref, alt in records:
+        r = {c: "." for c in EXTRACT_COLUMNS}
+        r.update({"#chr": "1", "pos(1-based)": str(int(hg19pos) + 5_000_000),
+                  "ref": ref, "alt": alt, "hg19_chr": "1", "hg19_pos(1-based)": hg19pos,
+                  "Ensembl_transcriptid": "ENST1", "VEP_canonical": "YES"})
+        rows.append(r)
+    path = tmp_path / "chr1.gz"
+    with gzip.open(path, "wt") as f:
+        pd.DataFrame(rows, columns=EXTRACT_COLUMNS).to_csv(f, sep="\t", index=False)
+    monkeypatch.setattr(dbnsfp, "dbnsfp_chromosome_file", lambda chrom: str(path))
+    # transcript resolution has its own tests; this one is about the join and the record
+    monkeypatch.setattr(dbnsfp, "choose_canonical", lambda raw, name: raw)
+    monkeypatch.setattr(dbnsfp, "output_path",
+                        lambda kind, name=None: str(tmp_path / kind / name))
+    (tmp_path / "unmatched").mkdir()
+
+
+def test_annotate_dataset_decodes_joins_and_records_the_misses(tmp_path, monkeypatch):
+    """A study-4 shaped hg19 list, end to end except the transcript hierarchy."""
+    _hg19_dbnsfp(tmp_path, monkeypatch, [("90", "A", "G"), ("91", "G", "A")])
+    lst = _write(tmp_path / "in.txt",
+                 "1 90 A G\n"     # plain base, has a record
+                 "1 91 G R\n"     # R = A/G, reference G, so the alternate is A: has a record
+                 "1 93 C T\n"     # no record
+                 "1 94 G R\n"     # decodes to A, but no record
+                 "1 95 C R\n")    # C is not in A/G: left as R, no record
+    out = tmp_path / "out.csv"
+    with redirect_stdout(io.StringIO()):
+        result = dbnsfp.annotate_dataset(lst, str(out), "hg19", "ds")
+
+    assert len(result) == 2 and len(pd.read_csv(out)) == 2
+    assert (tmp_path / "unmatched" / "ds.txt").read_text().splitlines() == [
+        "1 93 C T", "1 94 G A", "1 95 C R"]
+    log = pd.read_csv(tmp_path / "unmatched" / "match_rates.csv")
+    assert log[["n_input", "n_matched", "n_unmatched"]].values.tolist() == [[5, 2, 3]]
+
+
+def test_a_dataset_with_no_match_is_still_recorded(tmp_path, monkeypatch):
+    """The dataset where the record matters most is the one that matched nothing."""
+    _hg19_dbnsfp(tmp_path, monkeypatch, [("90", "A", "G")])
+    lst = _write(tmp_path / "in.txt", "1 999 A G\n1 998 C T\n")
+    out = tmp_path / "out.csv"
+    with redirect_stdout(io.StringIO()):
+        result = dbnsfp.annotate_dataset(lst, str(out), "hg19", "ds")
+
+    assert result is None and not out.exists()
+    assert (tmp_path / "unmatched" / "ds.txt").read_text().splitlines() == [
+        "1 999 A G", "1 998 C T"]
+    log = pd.read_csv(tmp_path / "unmatched" / "match_rates.csv")
+    assert log["n_matched"].tolist() == [0] and log["match_rate"].tolist() == [0.0]
