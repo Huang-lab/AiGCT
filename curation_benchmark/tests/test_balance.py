@@ -22,6 +22,10 @@ from curation.balance import balance_by_gene  # noqa: E402
 
 GENE = "Ensembl_geneid"
 SCORE = "AlphaMissense_rankscore"
+GOLDEN = [
+    "G1_1_13", "G1_1_4", "G1_1_12", "G1_1_9", "G1_1_7", "G1_1_6", "G1_1_0", "G1_1_11",
+    "G1_0_4", "G1_0_5", "G1_0_6", "G1_0_7", "G1_0_1", "G1_0_0", "G1_0_3", "G1_0_2",
+]
 
 
 def _variants(gene, n_pos, n_neg, scored=None):
@@ -31,6 +35,7 @@ def _variants(gene, n_pos, n_neg, scored=None):
     for label, total in ((1, n_pos), (0, n_neg)):
         for i in range(total):
             rows.append({
+                "vid": f"{gene}_{label}_{i}",
                 GENE: gene,
                 "BINARY_LABEL": label,
                 "clinvar_review": 2,
@@ -80,21 +85,40 @@ def test_the_sample_is_reproducible(tmp_path):
     pd.testing.assert_frame_equal(first, second)
 
 
-def test_the_draw_ignores_score_columns(tmp_path):
-    """Whether a variant carries a score, or a ".", must not change what is drawn."""
-    base = pd.DataFrame(_variants("G1", 12, 12))
-    with_scores = base.copy()
-    with_scores[SCORE] = "0.5"
-    without_scores = base.copy()
-    without_scores[SCORE] = "."
+def test_the_draw_ignores_which_variants_carry_a_score(tmp_path):
+    """Scores on some variants and "." on others must not steer the draw.
 
-    a, _ = _run(with_scores, tmp_path)
-    b, _ = _run(without_scores, tmp_path)
+    14 pathogenic against 8 benign draws the pathogenic class down to 8, so
+    which 8 depends on how the draw is made. A priority-first draw takes the
+    scored ones first and returns a different 8 than a blind draw does. (A
+    check that scores every variant, or none, cannot tell the two apart.)"""
+    frame = pd.DataFrame(_variants("G1", 14, 8, scored=5))
+    mixed, _ = _run(frame.copy(), tmp_path)
+    blind, _ = _run(frame.assign(**{SCORE: "."}), tmp_path)
 
-    pd.testing.assert_frame_equal(
-        a.drop(columns=SCORE).reset_index(drop=True),
-        b.drop(columns=SCORE).reset_index(drop=True),
-    )
+    assert mixed["vid"].tolist() == blind["vid"].tolist()
+
+
+def test_each_class_is_a_seeded_uniform_sample(tmp_path):
+    """The draw is `DataFrame.sample(n, random_state=18)` on each class, nothing more."""
+    frame = pd.DataFrame(_variants("G1", 14, 8, scored=5))
+    result, _ = _run(frame, tmp_path)
+
+    pos = frame[frame["BINARY_LABEL"] == 1].sample(8, random_state=18)
+    neg = frame[frame["BINARY_LABEL"] == 0].sample(8, random_state=18)
+    assert result["vid"].tolist() == pos["vid"].tolist() + neg["vid"].tolist()
+
+
+def test_the_released_seed_still_selects_the_same_variants(tmp_path):
+    """Pins random_state 18 and the per-class draw to literal ids.
+
+    The balanced ClinVar set in the released database was drawn this way; if
+    this fails, re-running the module no longer reproduces it. The ids were
+    identical on pandas 2.3.3 and 3.0.6."""
+    frame = pd.DataFrame(_variants("G1", 14, 8, scored=5))
+    result, _ = _run(frame, tmp_path)
+
+    assert result["vid"].tolist() == GOLDEN
 
 
 def test_gene_stats_and_exclusions_are_written(tmp_path):
