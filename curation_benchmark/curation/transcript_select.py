@@ -162,8 +162,13 @@ def choose_canonical(file, dataset_name):
     for col in MULTI_TRANSCRIPT_COLUMNS:
         file[col] = file.apply(lambda row: _element_at(row[col], row["num"]), axis=1)
 
-    grouped = file.groupby(VARIANT_KEY, as_index=False)
-    result = grouped.apply(_resolve_group).reset_index(drop=True)
+    # Iterate the groups instead of calling DataFrameGroupBy.apply. apply handed
+    # the grouping columns to `_resolve_group` up to pandas 2.x (a FutureWarning
+    # from 2.2) and withholds them from pandas 3, which leaves the
+    # drop_duplicates below without the variant key and raises KeyError. Iterating
+    # yields whole sub-frames on every version, in the same sorted-key order.
+    resolved = [_resolve_group(group) for _, group in file.groupby(VARIANT_KEY)]
+    result = pd.concat(resolved, ignore_index=True) if resolved else file.iloc[0:0]
     result = result.drop_duplicates(subset=VARIANT_KEY + ["Ensembl_transcriptid"])
 
     unresolved = result[result.duplicated(subset=VARIANT_KEY, keep=False)]
@@ -182,7 +187,6 @@ def choose_canonical(file, dataset_name):
             "VEP_canonical",
             "num",
         ],
-        axis=1,
         errors="ignore",
     )
     print("initial len:", len(file), "\nfinal len:", len(result), "\n")
