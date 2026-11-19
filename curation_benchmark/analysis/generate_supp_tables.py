@@ -12,9 +12,12 @@ Output:
                              the four ClinVar strata (10 combinations x 2);
                              see the MWU block below for why
   supp_table_PR_AUC.xlsx   — auPRC companion table, same layout as S3
-  supp_table_dataset_counts.xlsx — per task: database totals, the counts that
-                             survive the coverage/retention filters, and how
-                             many VEPs passed the threshold
+  supp_table_dataset_counts.xlsx — sheet "dataset_counts": per task, database
+                             totals, the counts that survive the
+                             coverage/retention filters, and how many VEPs
+                             passed the threshold; sheet "dbnsfp_match": per
+                             coordinate list, how many of its variants have a
+                             dbNSFP record (the loss upstream of everything)
 
 Covers Figures 2, 3 and 4. The hereditary cancer predisposition analysis
 (Figure 5) uses AUBPRC on controlled-access UK Biobank data and is not
@@ -22,6 +25,7 @@ generated here.
 """
 import pandas as pd
 import os
+import yaml
 from aigct.container import VEBenchmarkContainer
 from aigct.model import VEQueryCriteria
 
@@ -179,8 +183,38 @@ with pd.ExcelWriter(pr_path, engine="openpyxl") as writer:
 
 print(f"\nSaved: {roc_path}")
 print(f"Saved: {mwu_path}")
+# ── dbNSFP match rate per coordinate list ────────────────────────────────────
+# The one provenance number upstream of every count above: of the variants in
+# each committed coordinate list, how many found a dbNSFP record. Derived from
+# the list's line count and the size of the filter it became in the database,
+# so it needs neither dbNSFP nor the curation output.
+spec = yaml.safe_load(open(os.path.join(REPO_ROOT, "datasets.yaml"), encoding="utf-8"))
+filter_sizes = {}
+for task in container.query_mgr.get_tasks()["CODE"]:
+    fv = container._variant_filter_repo.get_by_task(task)["filter_variant_df"]
+    filter_sizes.update(fv["FILTER_CODE"].value_counts().to_dict())
+
+match_rows = []
+for name, entry in spec["datasets"].items():
+    if "annotation" not in entry or "filter_code" not in entry:
+        continue
+    with open(os.path.join(REPO_ROOT, "data", "annotation", entry["annotation"]),
+              encoding="utf-8", errors="replace") as f:
+        n_in = sum(1 for line in f if line.strip())
+    codes = entry["filter_code"] if isinstance(entry["filter_code"], list) else [entry["filter_code"]]
+    n_db = next((filter_sizes[c] for c in codes if c in filter_sizes), None)
+    match_rows.append({
+        "dataset": name,
+        "assembly": entry["assembly"],
+        "coordinate_list": entry["annotation"],
+        "n_in_list": n_in,
+        "n_in_database": n_db,
+        "match_rate": round(n_db / n_in, 4) if n_db else None,
+    })
+
 with pd.ExcelWriter(cnt_path, engine="openpyxl") as writer:
     pd.DataFrame(count_rows).to_excel(writer, sheet_name="dataset_counts", index=False)
+    pd.DataFrame(match_rows).to_excel(writer, sheet_name="dbnsfp_match", index=False)
 
 print(f"Saved: {pr_path}")
 print(f"Saved: {cnt_path}")

@@ -35,14 +35,23 @@ pipeline then:
 
 1. **Annotates** each variant against dbNSFP v5.0a, pulling the rank scores of
    all 37 evaluated VEPs (Supplementary Table S2) plus transcript, protein and
-   gnomAD frequency fields (`curation/dbnsfp.py`).
+   gnomAD frequency fields (`curation/dbnsfp.py`). Alternate alleles written
+   as IUPAC ambiguity codes are resolved against the reference base first
+   (`curation/iupac.py`). Variants that find no dbNSFP record are written to
+   `output/unmatched/<dataset>.txt` in the input format, and the per-dataset
+   match count to `output/unmatched/match_rates.csv`, so the loss at this stage
+   is on record. See "dbNSFP match rates" below for the numbers behind the
+   released database.
 2. **Resolves duplicate transcripts.** dbNSFP reports one record per
    transcript, so a variant in several transcripts appears several times.
    `curation/transcript_select.py` collapses each set to one representative
    transcript: the dbNSFP canonical transcript where there is exactly one;
    otherwise the Ensembl canonical transcript, else the CCDS transcript with
    the longest CDS (ties broken by overall transcript length), else the longest
-   transcript overall. This is the protocol in Supplementary Figure S6.
+   transcript overall. This is the protocol in Supplementary Figure S6. Where a
+   single dbNSFP record lists more than one canonical transcript (`YES;YES`,
+   6 of 1.7 million records on chr22), the first is taken; this is a tie-break,
+   not a lookup.
 3. **Removes overlaps** between the positive and negative set of each task, so
    that a de novo variant seen in both a case cohort and the shared control set
    is dropped from both (`curation/overlap.py`).
@@ -51,9 +60,14 @@ The ClinVar task is different: it has no coordinate list. `curation/clinvar.py`
 scans the whole dbNSFP release and keeps every record carrying a ClinVar
 classification, using dbNSFP's own `clinvar_clnsig` and `clinvar_review`
 fields — so **dbNSFP fixes which ClinVar release the benchmark reflects**.
-`curation/balance.py` then samples an equal number of pathogenic and benign
-variants per gene to produce the class-balanced benchmark (21,840 + 21,840
-variants across 3,062 genes).
+`curation/balance.py` then samples, uniformly at random under a fixed seed, an
+equal number of pathogenic and benign variants per gene to produce the
+class-balanced benchmark (21,840 + 21,840 variants across 3,062 genes). The
+draw does not look at any VEP score. An earlier form of the module tried to
+draw AlphaMissense-scored variants first; that preference never took effect
+(dbNSFP writes a missing score as `"."`, which the check counted as present),
+the released set was built without it, and the current module reproduces the
+released `balanced_clinvar.csv` exactly.
 
 ### VEP versions are fixed by the dbNSFP release
 
@@ -83,6 +97,18 @@ and drops the two MAVEN sources, leaving exactly the **37 VEPs of
 Supplementary Table S2** in every task. Dropping MAVEN changes no reported
 number: it was excluded from every analysis in 1.0.0 as well, and the
 supplementary tables regenerate bit for bit from either release.
+
+Both releases were built before the transcript-hierarchy fix in
+`transcript_select.py` (`_keep_max`: a tiebreak whose CDS-length column is
+missing for every candidate used to empty the group and delete the variant).
+Re-running the hierarchy on the same dbNSFP extractions recovers exactly
+**7 ClinVar variants** — six in the mitochondrial MT-ATP6/MT-ATP8 overlap
+(M:8528, 8531, 8537, 8552, 8557, 8567) and one in ENSG00000289766
+(12:13089234) — and **none** in the other five tasks (all 48,118 variants
+across their 23 coordinate lists survive under either version). None of the
+seven reaches a reported figure: mitochondrial variants are scored by at most
+15 of the 37 VEPs and so never pass the 80% coverage threshold, and the chr12
+variant's gene has no pathogenic record and is excluded from the balanced set.
 
 ## From curated CSVs to the benchmark database
 
@@ -160,7 +186,12 @@ manuscript's numbers depend on them:
   In the cancer task the 862 `ALPHA_POS` variants overlap the 826
   `MSK_HOTSPOT` variants by 675, so only 187 of them are labelled
   `ALPHAMISSENSE_POS`; the union is the 1,013 positives quoted in the
-  Methods (826 + 862 − 675).
+  Methods (826 + 862 − 675). On the negative side the overlaps are small:
+  `ALPHA_NEG` ∩ `MSK_PASSENGER` = 20, `ALPHA_NEG` ∩ `TCGA_PASSENGER` = 2,
+  `MSK_PASSENGER` ∩ `TCGA_PASSENGER` = 17, so `ALPHAMISSENSE_NEG` labels
+  1,733 of the 12,928 pooled negatives (13.4%). `ALPHA_POS`/`ALPHA_NEG` enter
+  only the AlphaMissense-benchmark panels (Figures 3A and S5B); the MSK and
+  TCGA panels (Figures 3B, 3C) do not include them.
 
 **Note on the loader.** `aigct.etl.repo_loader` in the published package
 provides `init_variant_task`, `init_variant_effect_source` and
@@ -217,12 +248,14 @@ manuscript can be traced back through it.
 pytest curation_benchmark/tests
 ```
 
-Unit tests for the two stages where a defect is silent rather than loud: the
-transcript hierarchy, which must never return an empty group (a variant deleted
-there leaves no message and no duplicates entry), and the gene balancing, whose
-printed coverage count is the only readout of how well priority-first sampling
-worked. They need neither dbNSFP nor the reference tables, so they run in
-seconds on a bare checkout.
+Unit tests for the stages where a defect is silent rather than loud: reading
+the coordinate lists (two committed lists carry a trailing space that a naive
+split turns into a missing allele), the dbNSFP join and its record of what did
+not match, the IUPAC decode (which must never invent an allele), the transcript
+hierarchy (which must never return an empty group), and the gene balancing
+(which must not depend on any score column). They need
+neither dbNSFP nor the reference tables, so they run in seconds on a bare
+checkout.
 
 The repository root's `pytest.ini` sets `testpaths=tests`, which is the `aigct`
 package's own suite and needs a downloaded benchmark database; these are kept
@@ -263,9 +296,59 @@ python analysis/make_figures.py           # all panels of Figures 2–4, S2–S5
 
 ## Notes on the data files
 
-**Assemblies.** Source studies report on hg18, hg19 or hg38. The assembly of
-each coordinate list is recorded in `datasets.yaml` and used to pick which
-dbNSFP coordinate columns to join against.
+**Assemblies.** Coordinate lists are on hg19 or hg38, recorded per list in
+`datasets.yaml`; hg18 is not supported (`extract` refuses it). An hg19 list is
+joined on dbNSFP's hg19 chromosome and position but on its **hg38** ref/alt
+alleles, because dbNSFP carries no hg19 alleles; a locus whose reference base
+changed between builds therefore fails to match. The match rates below show
+this costs nothing measurable: hg19 lists match at the same rate as hg38 ones.
+
+**dbNSFP match rates.** For each committed coordinate list, the share of its
+variants that found a dbNSFP record, derived from the list's line count and
+the size of the filter it became in the released database (sheet
+`dbnsfp_match` of `results/supp_tables/supp_table_dataset_counts.xlsx`,
+produced by `generate_supp_tables.py`):
+
+| Assembly | Lists | Variants matched | Range per list |
+|---|---|---|---|
+| hg19 | 16 | 96.5% | 94.4% – 100% |
+| hg38 | 5 | 96.1% | 81.0% – 100% |
+
+`MSK_hotspot` (81.0%) is the one list well below the rest: it is the
+driver-gene-filtered hotspot list, whose TransVar-derived genomic coordinates
+include some that are not missense records in dbNSFP. Every other list is
+above 94%.
+
+**IUPAC ambiguity codes in the study-4 lists.** `ASD_case4` and `control4`
+record 19 and 17 of their alternate alleles as IUPAC ambiguity codes (`R`, `Y`,
+`S`, `M`, `K`, `W`) — the pair of bases at a heterozygous site rather than the
+alternate alone. An exact-allele join cannot match those, which is why both
+lists once sat at 84.0% and 79.3% while every other list was above 94%.
+
+The variants themselves were never missing from the benchmark. Study 4 draws
+from the same sample collection as studies 2 and 3, whose lists record all 36
+of those sites with ordinary single bases, so they entered the database through
+those lists; 34 of the 36 have a dbNSFP record and all 34 are in the released
+tables. What was incomplete was the per-study named filters, which tag variants
+by the list they came from: `ASD_CASE4` held 105 of 125 and the `*_CONTROL4`
+filters 65 of 82.
+
+`curation/iupac.py` now resolves each code against the reference base (ref `G`,
+alt `R` = A/G, so the alternate is A) before the join, and the released filters
+have been completed to match: `ASD_CASE4` 124/125, `ASD_CONTROL4` and
+`CHD_CONTROL4` 80/82, `DDD_CONTROL4` 79/82 (one further variant removed by
+overlap with the DDD case set). The remaining three have no dbNSFP record. A
+code the reference base does not belong to is left alone rather than guessed,
+and reported as unresolved. No label, score or variant was added, so no figure
+or table in the manuscript changes — the affected filters are not used by any
+reported analysis, which evaluates each task as a whole.
+
+**Source of `alphamissense_cancer_{pos,neg}.txt`.** These are the cancer
+hotspot benchmark of the AlphaMissense study (Cheng et al. 2023,
+Supplementary Table S6), taken as published: 868 driver and 1,733 passenger
+variants on hg38. They are the external benchmark against which Figure S5B
+compares AIGCT; the labels are the original study's, not derived from
+AlphaMissense scores.
 
 **DDD gene lists.** The PrimateAI and AlphaMissense gene lists associated with
 the DDD task ship with the benchmark database as
@@ -297,3 +380,8 @@ were found in dbNSFP — rather than the 6,246 the filename refers to. The seven
 missing variants had no dbNSFP record and so never reached the released
 database; the curated output, and every benchmark result derived from it, is
 unaffected.
+
+That reconstructed list, and `ASD_study2_case_hg19_annotation.txt`, carry a
+trailing space on every line. `read_annotation` splits on runs of whitespace
+so that this is harmless; a single-space split would read the alternate
+allele as missing and match nothing.
